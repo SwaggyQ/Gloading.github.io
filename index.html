@@ -484,7 +484,7 @@
                 
               
 
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:47:53" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:49:48" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
             </span>
           
 
@@ -578,153 +578,6 @@
 <h4 id="和独占模式的区别只是在因为共享模式允许多个线程同时占有资源，所以当一个线程竞争到资源时，其他线程仍可以被唤醒去竞争。接下来看看共享模式怎么去释放资源"><a href="#和独占模式的区别只是在因为共享模式允许多个线程同时占有资源，所以当一个线程竞争到资源时，其他线程仍可以被唤醒去竞争。接下来看看共享模式怎么去释放资源" class="headerlink" title="和独占模式的区别只是在因为共享模式允许多个线程同时占有资源，所以当一个线程竞争到资源时，其他线程仍可以被唤醒去竞争。接下来看看共享模式怎么去释放资源"></a>和独占模式的区别只是在因为共享模式允许多个线程同时占有资源，所以当一个线程竞争到资源时，其他线程仍可以被唤醒去竞争。接下来看看共享模式怎么去释放资源</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">private void doReleaseShared() &#123;</span><br><span class="line">    for (;;) &#123;</span><br><span class="line">        Node h = head;</span><br><span class="line">        if (h != null &amp;&amp; h != tail) &#123;</span><br><span class="line">            int ws = h.waitStatus;</span><br><span class="line">            if (ws == Node.SIGNAL) &#123;</span><br><span class="line">                if (!compareAndSetWaitStatus(h, Node.SIGNAL, 0))</span><br><span class="line">                    continue;            // loop to recheck cases</span><br><span class="line">                unparkSuccessor(h);</span><br><span class="line">            &#125;</span><br><span class="line">            else if (ws == 0 &amp;&amp;</span><br><span class="line">                     !compareAndSetWaitStatus(h, 0, Node.PROPAGATE))</span><br><span class="line">                continue;                // loop on failed CAS</span><br><span class="line">        &#125;</span><br><span class="line">        if (h == head)                   // loop if head changed</span><br><span class="line">            break;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <h4 id="具体的逻辑也和独占模式差不多，依旧是倒序的查找后继结点去唤醒。但是注意共享模式多了一个叫PROPAGATE的模式，表示在队列中的节点都可以依次被唤醒去竞争资源"><a href="#具体的逻辑也和独占模式差不多，依旧是倒序的查找后继结点去唤醒。但是注意共享模式多了一个叫PROPAGATE的模式，表示在队列中的节点都可以依次被唤醒去竞争资源" class="headerlink" title="具体的逻辑也和独占模式差不多，依旧是倒序的查找后继结点去唤醒。但是注意共享模式多了一个叫PROPAGATE的模式，表示在队列中的节点都可以依次被唤醒去竞争资源"></a>具体的逻辑也和独占模式差不多，依旧是倒序的查找后继结点去唤醒。但是注意共享模式多了一个叫PROPAGATE的模式，表示在队列中的节点都可以依次被唤醒去竞争资源</h4><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h4 id="综上，用大篇幅详解了AQS的主要两个模式的竞争和释放资源的过程。"><a href="#综上，用大篇幅详解了AQS的主要两个模式的竞争和释放资源的过程。" class="headerlink" title="综上，用大篇幅详解了AQS的主要两个模式的竞争和释放资源的过程。"></a>综上，用大篇幅详解了AQS的主要两个模式的竞争和释放资源的过程。</h4><h2 id="超链接："><a href="#超链接：" class="headerlink" title="超链接："></a>超链接：</h2><p><a href="http://www.ideabuffer.cn/2017/03/15/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3AbstractQueuedSynchronizer%EF%BC%88%E4%B8%80%EF%BC%89/" target="_blank" rel="noopener">关于为何倒序查找的Cancel方法论证</a></p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/ArrayBlockingQueue/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Swaggy Q">
-      <meta itemprop="description" content="拉塞尔FMVP了吗">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Dloading...">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/07/08/ArrayBlockingQueue/" class="post-title-link" itemprop="url">ArrayBlockQueue源码详解</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-
-          
-          
-          
-
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:05:17" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
-            </span>
-          
-
-          
-            
-
-            
-          
-
-          
-
-          
-            
-            
-          
-
-          
-          
-
-          
-
-          <br>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="ArrayBlockingQueue"><a href="#ArrayBlockingQueue" class="headerlink" title="ArrayBlockingQueue"></a>ArrayBlockingQueue</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h4 id="本文讲一下ArrayBlockingQueue-下文简称ABQ-的一些原理，整理一下之前有点混乱的几个方法，具体ABQ是什么我就不详细说了。"><a href="#本文讲一下ArrayBlockingQueue-下文简称ABQ-的一些原理，整理一下之前有点混乱的几个方法，具体ABQ是什么我就不详细说了。" class="headerlink" title="本文讲一下ArrayBlockingQueue(下文简称ABQ)的一些原理，整理一下之前有点混乱的几个方法，具体ABQ是什么我就不详细说了。"></a>本文讲一下ArrayBlockingQueue(下文简称ABQ)的一些原理，整理一下之前有点混乱的几个方法，具体ABQ是什么我就不详细说了。</h4><h2 id="构造"><a href="#构造" class="headerlink" title="构造"></a>构造</h2><h4 id="照例先看看怎么创建这个我们需要的这个数据结构。有三个构造函数，简单看一下可以看到重点的是ArrayBlockingQueue-int-boolean-方法。其他两个都是之后调用这个方法。所以直接看看这个方法"><a href="#照例先看看怎么创建这个我们需要的这个数据结构。有三个构造函数，简单看一下可以看到重点的是ArrayBlockingQueue-int-boolean-方法。其他两个都是之后调用这个方法。所以直接看看这个方法" class="headerlink" title="照例先看看怎么创建这个我们需要的这个数据结构。有三个构造函数，简单看一下可以看到重点的是ArrayBlockingQueue(int , boolean)方法。其他两个都是之后调用这个方法。所以直接看看这个方法"></a>照例先看看怎么创建这个我们需要的这个数据结构。有三个构造函数，简单看一下可以看到重点的是ArrayBlockingQueue(int , boolean)方法。其他两个都是之后调用这个方法。所以直接看看这个方法</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public ArrayBlockingQueue(int capacity, boolean fair) &#123;</span><br><span class="line">	// 校验容量不能是负数</span><br><span class="line">    if (capacity &lt;= 0)</span><br><span class="line">        throw new IllegalArgumentException();</span><br><span class="line">    //</span><br><span class="line">    this.items = new Object[capacity];</span><br><span class="line">    lock = new ReentrantLock(fair);</span><br><span class="line">    notEmpty = lock.newCondition();</span><br><span class="line">    notFull =  lock.newCondition();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 
           
         
@@ -938,7 +791,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/HashTable,HashMap,ConcurrentHashMap 横向对比/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/ConcurrentHashmap 的transfer方法/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Swaggy Q">
@@ -958,7 +811,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/07/08/HashTable,HashMap,ConcurrentHashMap 横向对比/" class="post-title-link" itemprop="url">HashTable，HashMap，CocurrentHashMap横向对比</a>
+                <a href="/2019/07/08/ConcurrentHashmap 的transfer方法/" class="post-title-link" itemprop="url">ConcurrentHashMap的transfer方法</a>
               
             
           </h1>
@@ -983,7 +836,7 @@
                 
               
 
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:07:07" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:07:56" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
             </span>
           
 
@@ -1027,16 +880,209 @@
       
         
           
-            <h1 id="HashTable-HashMap-ConcurrentHashMap-横向对比"><a href="#HashTable-HashMap-ConcurrentHashMap-横向对比" class="headerlink" title="HashTable,HashMap,ConcurrentHashMap 横向对比"></a>HashTable,HashMap,ConcurrentHashMap 横向对比</h1><h2 id="hash算法"><a href="#hash算法" class="headerlink" title="hash算法"></a>hash算法</h2><h3 id="HashTable"><a href="#HashTable" class="headerlink" title="HashTable"></a>HashTable</h3><pre><code>int index = (key.hashcode &amp; 0x7fffffff) % tab.length</code></pre><h3 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h3><pre><code>int index = (key == null) ? 0 : (h = key.hashCode()) ^ (h &gt;&gt;&gt; 16);
-最终的桶位值还需要 index &amp; (tab.length -1)</code></pre><h3 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h3><pre><code>int index = (key.hashCode() ^ (key.hashCode() &gt;&gt;&gt; 16)) &amp; 0x7fffffff;
-最终的桶位值还需要 index &amp; (tab.length -1)</code></pre><h2 id="k，v能否为null"><a href="#k，v能否为null" class="headerlink" title="k，v能否为null"></a>k，v能否为null</h2><h3 id="HashTable-1"><a href="#HashTable-1" class="headerlink" title="HashTable"></a>HashTable</h3><pre><code>k，v均不能为null，v是因为在代码中判断，k是因为null.hashcode()会报错</code></pre><h3 id="HashMap-1"><a href="#HashMap-1" class="headerlink" title="HashMap"></a>HashMap</h3><pre><code>k,v均可以为null。 且k为null时，会自动分配其为0号桶位</code></pre><h3 id="ConcurrentHashMap-1"><a href="#ConcurrentHashMap-1" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h3><pre><code>k，v均不能为null，强行校验</code></pre><h2 id="扩容机制"><a href="#扩容机制" class="headerlink" title="扩容机制"></a>扩容机制</h2><h3 id="HashTable-2"><a href="#HashTable-2" class="headerlink" title="HashTable"></a>HashTable</h3><pre><code>在put值到底层tab前，会先进行一次count&gt;=threshold的判断，若是，则先直接进行rehash(),再将k,v放到扩容后的tab中
-扩容后的newsize = (oldsize * 2) +1
-倒序遍历oldtab中的每一个桶位，并用首插法的方式，将元素插入到newtab中
-整个过程由synchronized强加锁，避免并发问题</code></pre><h3 id="HashMap-2"><a href="#HashMap-2" class="headerlink" title="HashMap"></a>HashMap</h3><pre><code>在put值到tab之后，才会进行容量检查，若(++size &gt; threshold)，则进行扩容
-扩容后的newsize = (oldsize * 2)，保持每次底层tab的容量都为2的幂次方
-顺序遍历oldtab，然后将元素放置在相应的位置，改为尾插法
-且根据bit直接计算对应所在的位置
-整个过程，不做并发控制，所以会有并发问题</code></pre><h3 id="ConcurrentHashMap-2"><a href="#ConcurrentHashMap-2" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h3>
+            <h1 id="ConcurrentHashmap-的transfer方法"><a href="#ConcurrentHashmap-的transfer方法" class="headerlink" title="ConcurrentHashmap 的transfer方法"></a>ConcurrentHashmap 的transfer方法</h1><h2 id="前文"><a href="#前文" class="headerlink" title="前文"></a>前文</h2><p>####<br>多线程之间，以volatile的方式读取sizeCtl属性，来判断ConcurrentHashMap当前所处的状态。通过cas设置sizeCtl属性，告知其他线程ConcurrentHashMap的状态变更。<br>不同状态，sizeCtl所代表的含义也有所不同。</p>
+<p>未初始化：</p>
+<p>sizeCtl=0：表示没有指定初始容量。<br>sizeCtl&gt;0：表示初始容量。</p>
+<p>初始化中：</p>
+<p>sizeCtl=-1,标记作用，告知其他线程，正在初始化</p>
+<p>正常状态：</p>
+<p>sizeCtl=0.75n ,扩容阈值</p>
+<p>扩容中:</p>
+<p>sizeCtl &lt; 0 : 表示有其他线程正在执行扩容<br>sizeCtl = (resizeStamp(n) &lt;&lt; RESIZE_STAMP_SHIFT) + 2    :表示此时只有一个线程在执行扩容</p>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="本文会解释一下在jdk-1-8中的ConcurrentHashMap是怎么并发的进行扩容的。为了描述这一过程，我们会先看到put方法中，因为当put过程中，发现元素大小超过了阈值的时候，线程才会去对底层数组进行扩容。直接看到putVal方法中，为了节省篇幅，会省去一些不必要的代码"><a href="#本文会解释一下在jdk-1-8中的ConcurrentHashMap是怎么并发的进行扩容的。为了描述这一过程，我们会先看到put方法中，因为当put过程中，发现元素大小超过了阈值的时候，线程才会去对底层数组进行扩容。直接看到putVal方法中，为了节省篇幅，会省去一些不必要的代码" class="headerlink" title="本文会解释一下在jdk 1.8中的ConcurrentHashMap是怎么并发的进行扩容的。为了描述这一过程，我们会先看到put方法中，因为当put过程中，发现元素大小超过了阈值的时候，线程才会去对底层数组进行扩容。直接看到putVal方法中，为了节省篇幅，会省去一些不必要的代码"></a>本文会解释一下在jdk 1.8中的ConcurrentHashMap是怎么并发的进行扩容的。为了描述这一过程，我们会先看到put方法中，因为当put过程中，发现元素大小超过了阈值的时候，线程才会去对底层数组进行扩容。直接看到putVal方法中，为了节省篇幅，会省去一些不必要的代码</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">final V putVal(K key, V value, boolean onlyIfAbsent) &#123;</span><br><span class="line">        ... </span><br><span class="line">        for (Node&lt;K,V&gt;[] tab = table;;) &#123;</span><br><span class="line">            Node&lt;K,V&gt; f; int n, i, fh;</span><br><span class="line">            if (tab == null || (n = tab.length) == 0)</span><br><span class="line">                ...</span><br><span class="line">            else if ((f = tabAt(tab, i = (n - 1) &amp; hash)) == null) &#123;</span><br><span class="line">    			...            </span><br><span class="line">            &#125;</span><br><span class="line">            else if ((fh = f.hash) == MOVED)</span><br><span class="line">                tab = helpTransfer(tab, f);</span><br><span class="line">            else &#123;</span><br><span class="line">            	// 在链表后面添加节点，先省略了</span><br><span class="line">                ...</span><br><span class="line">            &#125;</span><br><span class="line">                if (binCount != 0) &#123;</span><br><span class="line">                    if (binCount &gt;= TREEIFY_THRESHOLD)</span><br><span class="line">                        treeifyBin(tab, i);</span><br><span class="line">                    if (oldVal != null)</span><br><span class="line">                        return oldVal;</span><br><span class="line">                    break;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        addCount(1L, binCount);</span><br><span class="line">        return null;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="注意上面代码中我留下的几块方法。我们一个个解释。先看到helpTransfer方法。可以看到，要进入到方法的条件是要将值put到的对应的桶位的节点存在，而且hash值为MOVED，也就是-1。全局搜索之后，可以发现只有一个地方会创建这种节点"><a href="#注意上面代码中我留下的几块方法。我们一个个解释。先看到helpTransfer方法。可以看到，要进入到方法的条件是要将值put到的对应的桶位的节点存在，而且hash值为MOVED，也就是-1。全局搜索之后，可以发现只有一个地方会创建这种节点" class="headerlink" title="注意上面代码中我留下的几块方法。我们一个个解释。先看到helpTransfer方法。可以看到，要进入到方法的条件是要将值put到的对应的桶位的节点存在，而且hash值为MOVED，也就是-1。全局搜索之后，可以发现只有一个地方会创建这种节点"></a>注意上面代码中我留下的几块方法。我们一个个解释。先看到helpTransfer方法。可以看到，要进入到方法的条件是要将值put到的对应的桶位的节点存在，而且hash值为MOVED，也就是-1。全局搜索之后，可以发现只有一个地方会创建这种节点</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">static final class ForwardingNode&lt;K,V&gt; extends Node&lt;K,V&gt; &#123;</span><br><span class="line">       final Node&lt;K,V&gt;[] nextTable;</span><br><span class="line">       ForwardingNode(Node&lt;K,V&gt;[] tab) &#123;</span><br><span class="line">           super(MOVED, null, null, null);</span><br><span class="line">           this.nextTable = tab;</span><br><span class="line">       &#125;</span><br><span class="line">       </span><br><span class="line">       Node&lt;K,V&gt; find(int h, Object k) &#123;</span><br><span class="line">  			... </span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="可以看到，这一块是将对应的桶变成了一个ForwardingNode-以下简称fwn-，这边先剧透以下，变成这个节点就代表当前桶位正在进行扩容迁移。所以我们回到刚才那个语句"><a href="#可以看到，这一块是将对应的桶变成了一个ForwardingNode-以下简称fwn-，这边先剧透以下，变成这个节点就代表当前桶位正在进行扩容迁移。所以我们回到刚才那个语句" class="headerlink" title="可以看到，这一块是将对应的桶变成了一个ForwardingNode (以下简称fwn)，这边先剧透以下，变成这个节点就代表当前桶位正在进行扩容迁移。所以我们回到刚才那个语句"></a>可以看到，这一块是将对应的桶变成了一个ForwardingNode (以下简称fwn)，这边先剧透以下，变成这个节点就代表当前桶位正在进行扩容迁移。所以我们回到刚才那个语句</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">else if ((fh = f.hash) == MOVED)</span><br><span class="line">       tab = helpTransfer(tab, f);</span><br></pre></td></tr></table></figure>
+
+<h4 id="可以看到如果一个线程在put的时候，发现当前正在进行扩容，他甚至是可以帮忙一起扩容的-跟进去会看到会调用到transfer方法。这也是Cmap一个非常高效的理由。"><a href="#可以看到如果一个线程在put的时候，发现当前正在进行扩容，他甚至是可以帮忙一起扩容的-跟进去会看到会调用到transfer方法。这也是Cmap一个非常高效的理由。" class="headerlink" title="可以看到如果一个线程在put的时候，发现当前正在进行扩容，他甚至是可以帮忙一起扩容的,跟进去会看到会调用到transfer方法。这也是Cmap一个非常高效的理由。"></a>可以看到如果一个线程在put的时候，发现当前正在进行扩容，他甚至是可以帮忙一起扩容的,跟进去会看到会调用到transfer方法。这也是Cmap一个非常高效的理由。</h4><h4 id="再往下看到第二处留下的代码块，这段和HashMap中非常相似，也是如果某个桶位的链表长度大于等于了8，就会尝试进行树化，同样的，在里面也会进行判断，如果此时底层数组的大小还没大于64，则会先进行扩容。"><a href="#再往下看到第二处留下的代码块，这段和HashMap中非常相似，也是如果某个桶位的链表长度大于等于了8，就会尝试进行树化，同样的，在里面也会进行判断，如果此时底层数组的大小还没大于64，则会先进行扩容。" class="headerlink" title="再往下看到第二处留下的代码块，这段和HashMap中非常相似，也是如果某个桶位的链表长度大于等于了8，就会尝试进行树化，同样的，在里面也会进行判断，如果此时底层数组的大小还没大于64，则会先进行扩容。"></a>再往下看到第二处留下的代码块，这段和HashMap中非常相似，也是如果某个桶位的链表长度大于等于了8，就会尝试进行树化，同样的，在里面也会进行判断，如果此时底层数组的大小还没大于64，则会先进行扩容。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">private final void treeifyBin(Node&lt;K,V&gt;[] tab, int index) &#123;</span><br><span class="line">       Node&lt;K,V&gt; b; int n, sc;</span><br><span class="line">       if (tab != null) &#123;</span><br><span class="line">           if ((n = tab.length) &lt; MIN_TREEIFY_CAPACITY)</span><br><span class="line">               tryPresize(n &lt;&lt; 1);</span><br><span class="line">           else if ((b = tabAt(tab, index)) != null &amp;&amp; b.hash &gt;= 0) &#123;</span><br><span class="line">  				... </span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="如果你跟进去tryPresize方法，你会看到里面实际起作用的地方也是transfer方法"><a href="#如果你跟进去tryPresize方法，你会看到里面实际起作用的地方也是transfer方法" class="headerlink" title="如果你跟进去tryPresize方法，你会看到里面实际起作用的地方也是transfer方法"></a>如果你跟进去tryPresize方法，你会看到里面实际起作用的地方也是transfer方法</h4><h4 id="再直接看到上面留下的最后一段代码-addCount-1L-binCount-，跟进去可以看到"><a href="#再直接看到上面留下的最后一段代码-addCount-1L-binCount-，跟进去可以看到" class="headerlink" title="再直接看到上面留下的最后一段代码 addCount(1L, binCount);，跟进去可以看到"></a>再直接看到上面留下的最后一段代码 addCount(1L, binCount);，跟进去可以看到</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">private final void addCount(long x, int check) &#123;</span><br><span class="line">        ...</span><br><span class="line">       if (check &gt;= 0) &#123;</span><br><span class="line">            Node&lt;K,V&gt;[] tab, nt; int n, sc;</span><br><span class="line">            while (s &gt;= (long)(sc = sizeCtl) &amp;&amp; (tab = table) != null &amp;&amp;</span><br><span class="line">                   (n = tab.length) &lt; MAXIMUM_CAPACITY) &#123;</span><br><span class="line">                int rs = resizeStamp(n);</span><br><span class="line">                if (sc &lt; 0) &#123;</span><br><span class="line">                    if ((sc &gt;&gt;&gt; RESIZE_STAMP_SHIFT) != rs || sc == rs + 1 ||</span><br><span class="line">                        sc == rs + MAX_RESIZERS || (nt = nextTable) == null ||</span><br><span class="line">                        // 重点</span><br><span class="line">                        transferIndex &lt;= 0)</span><br><span class="line">                        break;</span><br><span class="line">                    if (U.compareAndSwapInt(this, SIZECTL, sc, sc + 1))</span><br><span class="line">                        transfer(tab, nt);</span><br><span class="line">                &#125;</span><br><span class="line">                else if (U.compareAndSwapInt(this, SIZECTL, sc,</span><br><span class="line">                                             (rs &lt;&lt; RESIZE_STAMP_SHIFT) + 2))</span><br><span class="line">                    transfer(tab, null);</span><br><span class="line">                s = sumCount();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="也就是说，如果节点数大于了阈值，就会进行transfer方法，也就是扩容。"><a href="#也就是说，如果节点数大于了阈值，就会进行transfer方法，也就是扩容。" class="headerlink" title="也就是说，如果节点数大于了阈值，就会进行transfer方法，也就是扩容。"></a>也就是说，如果节点数大于了阈值，就会进行transfer方法，也就是扩容。</h4><h4 id="好了以上三段逻辑，最后都回到了transfer方法，也就是我们今天想要讲到的地方。"><a href="#好了以上三段逻辑，最后都回到了transfer方法，也就是我们今天想要讲到的地方。" class="headerlink" title="好了以上三段逻辑，最后都回到了transfer方法，也就是我们今天想要讲到的地方。"></a>好了以上三段逻辑，最后都回到了transfer方法，也就是我们今天想要讲到的地方。</h4><h4 id="我们开始进入到transfer方法的世界"><a href="#我们开始进入到transfer方法的世界" class="headerlink" title="我们开始进入到transfer方法的世界"></a>我们开始进入到transfer方法的世界</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">int n = tab.length, stride;</span><br><span class="line">if ((stride = (NCPU &gt; 1) ? (n &gt;&gt;&gt; 3) / NCPU : n) &lt; MIN_TRANSFER_STRIDE)</span><br><span class="line">    stride = MIN_TRANSFER_STRIDE; // subdivide range</span><br></pre></td></tr></table></figure>
+
+<h4 id="在方法开始的时候，会得到一个叫做stride的参数。这个参数是指定每个线程可以负责多少个桶。从代码中也可以知道，若当前机器的cpu核数大于1的时候，每个线程负责-n-8-核数-。其中每个线程最小也需要负责16个桶。接下去看"><a href="#在方法开始的时候，会得到一个叫做stride的参数。这个参数是指定每个线程可以负责多少个桶。从代码中也可以知道，若当前机器的cpu核数大于1的时候，每个线程负责-n-8-核数-。其中每个线程最小也需要负责16个桶。接下去看" class="headerlink" title="在方法开始的时候，会得到一个叫做stride的参数。这个参数是指定每个线程可以负责多少个桶。从代码中也可以知道，若当前机器的cpu核数大于1的时候，每个线程负责 n/(8 * 核数)。其中每个线程最小也需要负责16个桶。接下去看"></a>在方法开始的时候，会得到一个叫做stride的参数。这个参数是指定每个线程可以负责多少个桶。从代码中也可以知道，若当前机器的cpu核数大于1的时候，每个线程负责 n/(8 * 核数)。其中每个线程最小也需要负责16个桶。接下去看</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">if (nextTab == null) &#123;            // initiating</span><br><span class="line">       try &#123;</span><br><span class="line">           @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">           Node&lt;K,V&gt;[] nt = (Node&lt;K,V&gt;[])new Node&lt;?,?&gt;[n &lt;&lt; 1];</span><br><span class="line">           nextTab = nt;</span><br><span class="line">       &#125; catch (Throwable ex) &#123;      // try to cope with OOME</span><br><span class="line">           sizeCtl = Integer.MAX_VALUE;</span><br><span class="line">           return;</span><br><span class="line">       &#125;</span><br><span class="line">       nextTable = nextTab;</span><br><span class="line">       transferIndex = n;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="如果新的数组还未初始化，则需要先初始化一下。新数组大小是旧数组的2倍。"><a href="#如果新的数组还未初始化，则需要先初始化一下。新数组大小是旧数组的2倍。" class="headerlink" title="如果新的数组还未初始化，则需要先初始化一下。新数组大小是旧数组的2倍。"></a>如果新的数组还未初始化，则需要先初始化一下。新数组大小是旧数组的2倍。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">int nextn = nextTab.length;</span><br><span class="line">ForwardingNode&lt;K,V&gt; fwd = new ForwardingNode&lt;K,V&gt;(nextTab);</span><br><span class="line">boolean advance = true;</span><br><span class="line">boolean finishing = false; // to ensure sweep before committing nextTab</span><br></pre></td></tr></table></figure>
+
+<h4 id="规定一些参数。继续往下，会看到一个for循环"><a href="#规定一些参数。继续往下，会看到一个for循环" class="headerlink" title="规定一些参数。继续往下，会看到一个for循环"></a>规定一些参数。继续往下，会看到一个for循环</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">for (int i = 0, bound = 0;;) &#123;</span><br><span class="line">    Node&lt;K,V&gt; f; int fh;</span><br><span class="line">    while (advance) &#123;</span><br><span class="line">        int nextIndex, nextBound;</span><br><span class="line">        if (--i &gt;= bound || finishing)</span><br><span class="line">            advance = false;</span><br><span class="line">        else if ((nextIndex = transferIndex) &lt;= 0) &#123;</span><br><span class="line">            i = -1;</span><br><span class="line">            advance = false;</span><br><span class="line">        &#125;</span><br><span class="line">        else if (U.compareAndSwapInt</span><br><span class="line">                 (this, TRANSFERINDEX, nextIndex,</span><br><span class="line">                  nextBound = (nextIndex &gt; stride ?</span><br><span class="line">                               nextIndex - stride : 0))) &#123;</span><br><span class="line">            bound = nextBound;</span><br><span class="line">            i = nextIndex - 1;</span><br><span class="line">            advance = false;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ... </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="这一块注意几个关键的属性transferIndex，nextIndex，nextBound。具体逻辑可以看到这个链接的内容，讲的非常好。"><a href="#这一块注意几个关键的属性transferIndex，nextIndex，nextBound。具体逻辑可以看到这个链接的内容，讲的非常好。" class="headerlink" title="这一块注意几个关键的属性transferIndex，nextIndex，nextBound。具体逻辑可以看到这个链接的内容，讲的非常好。"></a>这一块注意几个关键的属性transferIndex，nextIndex，nextBound。具体逻辑可以看到这个链接的内容，讲的非常好。</h4><p><a href="https://www.jianshu.com/p/487d00afe6ca" target="_blank" rel="noopener">扩容方法的属性</a></p>
+<h4 id="通过上面的for循环之后，我们就可以继续我们接下来的实际迁移过程了。借用上面链接里的几幅图进行理解"><a href="#通过上面的for循环之后，我们就可以继续我们接下来的实际迁移过程了。借用上面链接里的几幅图进行理解" class="headerlink" title="通过上面的for循环之后，我们就可以继续我们接下来的实际迁移过程了。借用上面链接里的几幅图进行理解"></a>通过上面的for循环之后，我们就可以继续我们接下来的实际迁移过程了。借用上面链接里的几幅图进行理解</h4><p><img src="img/transfer-1.png" alt="transfer-1"><br><img src="img/transfer-2.png" alt="transfer-2"></p>
+<h4 id="可以得到现在"><a href="#可以得到现在" class="headerlink" title="可以得到现在"></a>可以得到现在</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nextBound = 16,</span><br><span class="line">nextIndex = 32,</span><br><span class="line">i = nextIndex -1 = 31</span><br></pre></td></tr></table></figure>
+
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/G1回收器/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Swaggy Q">
+      <meta itemprop="description" content="拉塞尔FMVP了吗">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dloading...">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/07/08/G1回收器/" class="post-title-link" itemprop="url">G1回收器</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:42:12" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+            </span>
+          
+
+          
+            
+
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="G1回收器"><a href="#G1回收器" class="headerlink" title="G1回收器"></a>G1回收器</h1><p>CSet：一系列分区的集合，也是在垃圾收集过程中被回收的目标</p>
+<p>年轻代收集（young gc）：CSet里全部都是年轻代分区的收集</p>
+<p>混合收集（mixed gc）：CSet里包括年轻代分区和一部分老年代分区的收集</p>
+<p>-XX:InitiatingHeapOccupancyPercent：在G1中，IHOP的值是老年代空间占Java堆总空间的比例<br>-XX:G1MixedGCCountTarget：一个混合收集周期中包含多少次混合收集<br>-XX:G1HeapWastePercent：堆浪费百分比，当G1发现可被回收的空间小于5%时，就不会再进行混合收集，也就是会结束当前的混合收集周期</p>
+<p>常规的垃圾收集器（串行，并行，CMS）都将堆结构分为三个部分：年轻代，老年代和固定大小的永久代。</p>
+<p>G1整个颠覆了之前的的新生代和老年代的紧凑分布，将内存分为了不同的区</p>
+<p>被G1标识成熟的区域是通过转移的方式收集。G1将对象从堆的一个或多个区域复制到堆上的单个区域，并且在此过程中，同时压缩和释放内存。这种转移方法在并行运行在多处理器上，以减少暂停时间并提高吞吐量</p>
+<p>CMS垃圾收集器不执行内存压缩，ParallelOld垃圾收集器执行全堆压缩，这将导致很大的暂停时间。</p>
+<p>Remembered Sets (RSets)跟踪对象引用到给定的区域。堆中每个区域有一个RSet。 RSet使GC能并行和独立地收集一个区域。 RSets的整体性能影响小于5％<br>Collection Sets (CSets)是GC中将要被收集的一组区域。GC中的所有存活数据在GC期间转移（复制/移动）。这些集合可能是eden区，survivor区或者老年代，CSets对JVM的大小影响不到1％。</p>
+<p>G1的推荐用例<br>G1的第一个重要特点是为用户的应用程序的提供一个低GC延时和大内存GC的解决方案。这意味着堆大小6GB或更大，稳定和可预测的暂停时间将低于0.5秒。</p>
+<p>如果应用程序使用CMS或ParallelOld垃圾回收器具有一个或多个以下特征，将有利于切换到G1：</p>
+<p>Full GC持续时间太长或太频繁<br>对象分配率或年轻代升级老年代很频繁<br>不期望的很长的垃圾收集时间或压缩暂停（超过0.5至1秒）</p>
+<p>存活对象从Eden区和一个survivor区拷贝到另一个survivor区，任何一个“年龄”达到阈值的对象会被晋升到老年代。</p>
+<p>主要困惑点： 何时并发何时并行何时stw，和cms的区别，Rset Cset CardTable重点怎么用着三个</p>
+<blockquote>
+<p>CMS和G1算法都涉及对可达对象的并发标记。并发标记的主要问题是collector在标记对象的过程中mutator可能正在改变对象引用关系图，从而造成漏标和错标。错标不会影响程序的正确性，只是造成所谓的浮动垃圾。但漏标则会导致可达对象被当做垃圾收集掉，从而影响程序的正确性。<br>为解决漏标问题，GC Handbook一书首先将对象分为三类，即所谓的black对象，grey对象和white对象。white对象是那些还没有被collector标记到的对象；grey对象是那些自身已经被标记到，但其所有引用字段还没有处理的对象；而black对象则是自身已经被标记到，且其引用的所有对象也已经被标记的对象。 </p>
+</blockquote>
+<p>基于上述分类，一个white对象在并发标记阶段会被漏标的充分必要条件是：<br>1、mutator插入了一个从black对象到该white对象的新引用<br>2、mutator删除了所有从grey对象到该white对象的直接或者间接引用。<br>因此，要避免对象的漏标，只需要打破上述2个条件中的任何一个即可。 </p>
+<p>Incremental update关注的是第一个条件的打破，即引用关系的插入。Incremental update利用write barrier将所有新插入的引用关系都记录下来，最后以这些引用关系的src为根STW地重新扫描一遍即避免了漏标问题。<br>SATB关注的是第二个条件的打破，即引用关系的删除。SATB利用pre write barrier将所有即将被删除的引用关系的旧引用记录下来，最后以这些旧引用为根STW地重新扫描一遍即可避免漏标问题。 </p>
+<h2 id="三色标记法"><a href="#三色标记法" class="headerlink" title="三色标记法"></a>三色标记法</h2><h4 id="一种标记的算法，黑灰白"><a href="#一种标记的算法，黑灰白" class="headerlink" title="一种标记的算法，黑灰白"></a>一种标记的算法，黑灰白</h4><h4 id="G1和CMS都是并发是收集器，所以需要处理在标记的时候，程序改动造成的对象的漏标。"><a href="#G1和CMS都是并发是收集器，所以需要处理在标记的时候，程序改动造成的对象的漏标。" class="headerlink" title="G1和CMS都是并发是收集器，所以需要处理在标记的时候，程序改动造成的对象的漏标。"></a>G1和CMS都是并发是收集器，所以需要处理在标记的时候，程序改动造成的对象的漏标。</h4><p>很显然，此时C是白色，被认为是垃圾需要清理掉，显然这是不合理的。那么我们如何保证应用程序在运行的时候，GC标记的对象不丢失呢？有如下2中可行的方式：</p>
+<p>在插入的时候记录对象<br>在删除的时候记录对象<br>刚好这对应CMS和G1的2种不同实现方式：<br>刚好这对应CMS和G1的2种不同实现方式：</p>
+<p>在CMS采用的是增量更新（Incremental update），只要在写屏障（write barrier）里发现要有一个白对象的引用被赋值到一个黑对象 的字段里，那就把这个白对象变成灰色的。即插入的时候记录下来。</p>
+<p>在G1中，使用的是STAB（snapshot-at-the-beginning）的方式，删除的时候记录所有的对象，它有3个步骤：</p>
+<p>1，在开始标记的时候生成一个快照图标记存活对象</p>
+<p>2，在并发标记的时候所有被改变的对象入队（在write barrier里把所有旧的引用所指向的对象都变成非白的）</p>
+<p>3，可能存在游离的垃圾，将在下次被收集<br></p>
+
           
         
       
@@ -1241,7 +1287,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/G1回收器/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/HashTable,HashMap,ConcurrentHashMap 横向对比/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Swaggy Q">
@@ -1261,7 +1307,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/07/08/G1回收器/" class="post-title-link" itemprop="url">G1回收器</a>
+                <a href="/2019/07/08/HashTable,HashMap,ConcurrentHashMap 横向对比/" class="post-title-link" itemprop="url">HashTable，HashMap，CocurrentHashMap横向对比</a>
               
             
           </h1>
@@ -1286,7 +1332,7 @@
                 
               
 
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:42:12" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:07:07" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
             </span>
           
 
@@ -1330,33 +1376,16 @@
       
         
           
-            <h1 id="G1回收器"><a href="#G1回收器" class="headerlink" title="G1回收器"></a>G1回收器</h1><p>CSet：一系列分区的集合，也是在垃圾收集过程中被回收的目标</p>
-<p>年轻代收集（young gc）：CSet里全部都是年轻代分区的收集</p>
-<p>混合收集（mixed gc）：CSet里包括年轻代分区和一部分老年代分区的收集</p>
-<p>-XX:InitiatingHeapOccupancyPercent：在G1中，IHOP的值是老年代空间占Java堆总空间的比例<br>-XX:G1MixedGCCountTarget：一个混合收集周期中包含多少次混合收集<br>-XX:G1HeapWastePercent：堆浪费百分比，当G1发现可被回收的空间小于5%时，就不会再进行混合收集，也就是会结束当前的混合收集周期</p>
-<p>常规的垃圾收集器（串行，并行，CMS）都将堆结构分为三个部分：年轻代，老年代和固定大小的永久代。</p>
-<p>G1整个颠覆了之前的的新生代和老年代的紧凑分布，将内存分为了不同的区</p>
-<p>被G1标识成熟的区域是通过转移的方式收集。G1将对象从堆的一个或多个区域复制到堆上的单个区域，并且在此过程中，同时压缩和释放内存。这种转移方法在并行运行在多处理器上，以减少暂停时间并提高吞吐量</p>
-<p>CMS垃圾收集器不执行内存压缩，ParallelOld垃圾收集器执行全堆压缩，这将导致很大的暂停时间。</p>
-<p>Remembered Sets (RSets)跟踪对象引用到给定的区域。堆中每个区域有一个RSet。 RSet使GC能并行和独立地收集一个区域。 RSets的整体性能影响小于5％<br>Collection Sets (CSets)是GC中将要被收集的一组区域。GC中的所有存活数据在GC期间转移（复制/移动）。这些集合可能是eden区，survivor区或者老年代，CSets对JVM的大小影响不到1％。</p>
-<p>G1的推荐用例<br>G1的第一个重要特点是为用户的应用程序的提供一个低GC延时和大内存GC的解决方案。这意味着堆大小6GB或更大，稳定和可预测的暂停时间将低于0.5秒。</p>
-<p>如果应用程序使用CMS或ParallelOld垃圾回收器具有一个或多个以下特征，将有利于切换到G1：</p>
-<p>Full GC持续时间太长或太频繁<br>对象分配率或年轻代升级老年代很频繁<br>不期望的很长的垃圾收集时间或压缩暂停（超过0.5至1秒）</p>
-<p>存活对象从Eden区和一个survivor区拷贝到另一个survivor区，任何一个“年龄”达到阈值的对象会被晋升到老年代。</p>
-<p>主要困惑点： 何时并发何时并行何时stw，和cms的区别，Rset Cset CardTable重点怎么用着三个</p>
-<blockquote>
-<p>CMS和G1算法都涉及对可达对象的并发标记。并发标记的主要问题是collector在标记对象的过程中mutator可能正在改变对象引用关系图，从而造成漏标和错标。错标不会影响程序的正确性，只是造成所谓的浮动垃圾。但漏标则会导致可达对象被当做垃圾收集掉，从而影响程序的正确性。<br>为解决漏标问题，GC Handbook一书首先将对象分为三类，即所谓的black对象，grey对象和white对象。white对象是那些还没有被collector标记到的对象；grey对象是那些自身已经被标记到，但其所有引用字段还没有处理的对象；而black对象则是自身已经被标记到，且其引用的所有对象也已经被标记的对象。 </p>
-</blockquote>
-<p>基于上述分类，一个white对象在并发标记阶段会被漏标的充分必要条件是：<br>1、mutator插入了一个从black对象到该white对象的新引用<br>2、mutator删除了所有从grey对象到该white对象的直接或者间接引用。<br>因此，要避免对象的漏标，只需要打破上述2个条件中的任何一个即可。 </p>
-<p>Incremental update关注的是第一个条件的打破，即引用关系的插入。Incremental update利用write barrier将所有新插入的引用关系都记录下来，最后以这些引用关系的src为根STW地重新扫描一遍即避免了漏标问题。<br>SATB关注的是第二个条件的打破，即引用关系的删除。SATB利用pre write barrier将所有即将被删除的引用关系的旧引用记录下来，最后以这些旧引用为根STW地重新扫描一遍即可避免漏标问题。 </p>
-<h2 id="三色标记法"><a href="#三色标记法" class="headerlink" title="三色标记法"></a>三色标记法</h2><h4 id="一种标记的算法，黑灰白"><a href="#一种标记的算法，黑灰白" class="headerlink" title="一种标记的算法，黑灰白"></a>一种标记的算法，黑灰白</h4><h4 id="G1和CMS都是并发是收集器，所以需要处理在标记的时候，程序改动造成的对象的漏标。"><a href="#G1和CMS都是并发是收集器，所以需要处理在标记的时候，程序改动造成的对象的漏标。" class="headerlink" title="G1和CMS都是并发是收集器，所以需要处理在标记的时候，程序改动造成的对象的漏标。"></a>G1和CMS都是并发是收集器，所以需要处理在标记的时候，程序改动造成的对象的漏标。</h4><p>很显然，此时C是白色，被认为是垃圾需要清理掉，显然这是不合理的。那么我们如何保证应用程序在运行的时候，GC标记的对象不丢失呢？有如下2中可行的方式：</p>
-<p>在插入的时候记录对象<br>在删除的时候记录对象<br>刚好这对应CMS和G1的2种不同实现方式：<br>刚好这对应CMS和G1的2种不同实现方式：</p>
-<p>在CMS采用的是增量更新（Incremental update），只要在写屏障（write barrier）里发现要有一个白对象的引用被赋值到一个黑对象 的字段里，那就把这个白对象变成灰色的。即插入的时候记录下来。</p>
-<p>在G1中，使用的是STAB（snapshot-at-the-beginning）的方式，删除的时候记录所有的对象，它有3个步骤：</p>
-<p>1，在开始标记的时候生成一个快照图标记存活对象</p>
-<p>2，在并发标记的时候所有被改变的对象入队（在write barrier里把所有旧的引用所指向的对象都变成非白的）</p>
-<p>3，可能存在游离的垃圾，将在下次被收集<br></p>
-
+            <h1 id="HashTable-HashMap-ConcurrentHashMap-横向对比"><a href="#HashTable-HashMap-ConcurrentHashMap-横向对比" class="headerlink" title="HashTable,HashMap,ConcurrentHashMap 横向对比"></a>HashTable,HashMap,ConcurrentHashMap 横向对比</h1><h2 id="hash算法"><a href="#hash算法" class="headerlink" title="hash算法"></a>hash算法</h2><h3 id="HashTable"><a href="#HashTable" class="headerlink" title="HashTable"></a>HashTable</h3><pre><code>int index = (key.hashcode &amp; 0x7fffffff) % tab.length</code></pre><h3 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h3><pre><code>int index = (key == null) ? 0 : (h = key.hashCode()) ^ (h &gt;&gt;&gt; 16);
+最终的桶位值还需要 index &amp; (tab.length -1)</code></pre><h3 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h3><pre><code>int index = (key.hashCode() ^ (key.hashCode() &gt;&gt;&gt; 16)) &amp; 0x7fffffff;
+最终的桶位值还需要 index &amp; (tab.length -1)</code></pre><h2 id="k，v能否为null"><a href="#k，v能否为null" class="headerlink" title="k，v能否为null"></a>k，v能否为null</h2><h3 id="HashTable-1"><a href="#HashTable-1" class="headerlink" title="HashTable"></a>HashTable</h3><pre><code>k，v均不能为null，v是因为在代码中判断，k是因为null.hashcode()会报错</code></pre><h3 id="HashMap-1"><a href="#HashMap-1" class="headerlink" title="HashMap"></a>HashMap</h3><pre><code>k,v均可以为null。 且k为null时，会自动分配其为0号桶位</code></pre><h3 id="ConcurrentHashMap-1"><a href="#ConcurrentHashMap-1" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h3><pre><code>k，v均不能为null，强行校验</code></pre><h2 id="扩容机制"><a href="#扩容机制" class="headerlink" title="扩容机制"></a>扩容机制</h2><h3 id="HashTable-2"><a href="#HashTable-2" class="headerlink" title="HashTable"></a>HashTable</h3><pre><code>在put值到底层tab前，会先进行一次count&gt;=threshold的判断，若是，则先直接进行rehash(),再将k,v放到扩容后的tab中
+扩容后的newsize = (oldsize * 2) +1
+倒序遍历oldtab中的每一个桶位，并用首插法的方式，将元素插入到newtab中
+整个过程由synchronized强加锁，避免并发问题</code></pre><h3 id="HashMap-2"><a href="#HashMap-2" class="headerlink" title="HashMap"></a>HashMap</h3><pre><code>在put值到tab之后，才会进行容量检查，若(++size &gt; threshold)，则进行扩容
+扩容后的newsize = (oldsize * 2)，保持每次底层tab的容量都为2的幂次方
+顺序遍历oldtab，然后将元素放置在相应的位置，改为尾插法
+且根据bit直接计算对应所在的位置
+整个过程，不做并发控制，所以会有并发问题</code></pre><h3 id="ConcurrentHashMap-2"><a href="#ConcurrentHashMap-2" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h3>
           
         
       
