@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+<link rel="stylesheet" href="/css/main.css?v=7.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.2.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.2.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="聊一聊HashTable前言关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下正文大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？这边用一个小例子作为入口，我们可以进去一探究竟123456789">
+<meta name="keywords" content="Dloading...">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Dloading...">
+<meta property="og:url" content="http://yoursite.com/2019/02/14/jdk/HashTable/index.html">
+<meta property="og:site_name" content="Dloading...">
+<meta property="og:description" content="聊一聊HashTable前言关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下正文大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？这边用一个小例子作为入口，我们可以进去一探究竟123456789">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-02-18T05:31:13.846Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Dloading...">
+<meta name="twitter:description" content="聊一聊HashTable前言关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下正文大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？这边用一个小例子作为入口，我们可以进去一探究竟123456789">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://yoursite.com/2019/02/14/jdk/HashTable/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title> | Dloading...</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Dloading...</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">努力成为优秀程序员</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/02/14/jdk/HashTable/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Swaggy Q">
+      <meta itemprop="description" content="拉塞尔FMVP了吗">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dloading...">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-02-14 14:59:57" itemprop="dateCreated datePublished" datetime="2019-02-14T14:59:57+08:00">2019-02-14</time>
+            </span>
+          
+
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-02-18 13:31:13" itemprop="dateModified" datetime="2019-02-18T13:31:13+08:00">2019-02-18</time>
+              </span>
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="聊一聊HashTable"><a href="#聊一聊HashTable" class="headerlink" title="聊一聊HashTable"></a>聊一聊HashTable</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h4 id="关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下"><a href="#关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下" class="headerlink" title="关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下"></a>关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下</h4><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？"><a href="#大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？" class="headerlink" title="大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？"></a>大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？</h4><h4 id="这边用一个小例子作为入口，我们可以进去一探究竟"><a href="#这边用一个小例子作为入口，我们可以进去一探究竟" class="headerlink" title="这边用一个小例子作为入口，我们可以进去一探究竟"></a>这边用一个小例子作为入口，我们可以进去一探究竟</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">    // 初始化</span><br><span class="line">    Hashtable hb = new Hashtable();</span><br><span class="line">    // 存储</span><br><span class="line">    hb.put(&quot;1&quot;,new Integer(1));</span><br><span class="line">    hb.put(&quot;2&quot;,new Integer(2));</span><br><span class="line">    hb.put(&quot;3&quot;,new Integer(3));</span><br><span class="line">    // 取值</span><br><span class="line">    System.out.println(hb.get(&quot;1&quot;));</span><br><span class="line">    System.out.println(hb.get(&quot;2&quot;));</span><br><span class="line">    System.out.println(hb.get(&quot;3&quot;));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="这边写了一个最简单的例子。例子包括三部分，在注释中也有指出。"><a href="#这边写了一个最简单的例子。例子包括三部分，在注释中也有指出。" class="headerlink" title="这边写了一个最简单的例子。例子包括三部分，在注释中也有指出。"></a>这边写了一个最简单的例子。例子包括三部分，在注释中也有指出。</h4><ul>
+<li>初始化 </li>
+<li>存储</li>
+<li>取值</li>
+</ul>
+<h4 id="这三个步骤也是我们平时用到的流程，本文就会根据这三个小块来探究一下内部的实现"><a href="#这三个步骤也是我们平时用到的流程，本文就会根据这三个小块来探究一下内部的实现" class="headerlink" title="这三个步骤也是我们平时用到的流程，本文就会根据这三个小块来探究一下内部的实现"></a>这三个步骤也是我们平时用到的流程，本文就会根据这三个小块来探究一下内部的实现</h4><h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><h4 id="当我们想要使用一个HashTable的时候，最显而易见的就是我们会先new一个实例化对象出来。这样我们才会有对象可操作，那么就先看看这个构造函数。"><a href="#当我们想要使用一个HashTable的时候，最显而易见的就是我们会先new一个实例化对象出来。这样我们才会有对象可操作，那么就先看看这个构造函数。" class="headerlink" title="当我们想要使用一个HashTable的时候，最显而易见的就是我们会先new一个实例化对象出来。这样我们才会有对象可操作，那么就先看看这个构造函数。"></a>当我们想要使用一个HashTable的时候，最显而易见的就是我们会先new一个实例化对象出来。这样我们才会有对象可操作，那么就先看看这个构造函数。</h4><h1 id="TODO-构造函数截图"><a href="#TODO-构造函数截图" class="headerlink" title="TODO 构造函数截图"></a>TODO 构造函数截图</h1><h4 id="从这个图中也可以看到，总共提供了四种不同的构造函数。其实当我们看过实现之后我们可以发现，其实四个不同的方法最终都是调用了Hashtable-int-float-这个方法，其他构造方法只是提供了一些默认参数而已。所以我们直接先看到这个方法。"><a href="#从这个图中也可以看到，总共提供了四种不同的构造函数。其实当我们看过实现之后我们可以发现，其实四个不同的方法最终都是调用了Hashtable-int-float-这个方法，其他构造方法只是提供了一些默认参数而已。所以我们直接先看到这个方法。" class="headerlink" title="从这个图中也可以看到，总共提供了四种不同的构造函数。其实当我们看过实现之后我们可以发现，其实四个不同的方法最终都是调用了Hashtable(int, float) 这个方法，其他构造方法只是提供了一些默认参数而已。所以我们直接先看到这个方法。"></a>从这个图中也可以看到，总共提供了四种不同的构造函数。其实当我们看过实现之后我们可以发现，其实四个不同的方法最终都是调用了Hashtable(int, float) 这个方法，其他构造方法只是提供了一些默认参数而已。所以我们直接先看到这个方法。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">public Hashtable(int initialCapacity, float loadFactor) &#123;</span><br><span class="line">    if (initialCapacity &lt; 0)</span><br><span class="line">        throw new IllegalArgumentException(&quot;Illegal Capacity: &quot;+</span><br><span class="line">                                           initialCapacity);</span><br><span class="line">    if (loadFactor &lt;= 0 || Float.isNaN(loadFactor))</span><br><span class="line">        throw new IllegalArgumentException(&quot;Illegal Load: &quot;+loadFactor);</span><br><span class="line"></span><br><span class="line">    if (initialCapacity==0)</span><br><span class="line">        initialCapacity = 1;</span><br><span class="line">    this.loadFactor = loadFactor;</span><br><span class="line">    // 上面的代码主要对参数的格式做了一些检验，例如initialCapacity不能为负数，而且最小也必须是1，</span><br><span class="line">    // loadFactor 必须是大于零的浮点数</span><br><span class="line">    </span><br><span class="line">    // 再根据initialCapacity参数创建一个Entry数组</span><br><span class="line">    table = new Entry&lt;?,?&gt;[initialCapacity];</span><br><span class="line">    // 初始化threshold，(两个参数的乘积)和(Int最大值-8)中的较小值</span><br><span class="line">    threshold = (int)Math.min(initialCapacity * loadFactor, MAX_ARRAY_SIZE + 1);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="这样我们就完成了HashTable的部分参数初始化的工作。可以看到主要是创建了一个Entry的数组。另外如果我们使用的是无参数的构造函数，那么这两个的参数的默认值为11-0-75f。"><a href="#这样我们就完成了HashTable的部分参数初始化的工作。可以看到主要是创建了一个Entry的数组。另外如果我们使用的是无参数的构造函数，那么这两个的参数的默认值为11-0-75f。" class="headerlink" title="这样我们就完成了HashTable的部分参数初始化的工作。可以看到主要是创建了一个Entry的数组。另外如果我们使用的是无参数的构造函数，那么这两个的参数的默认值为11, 0.75f。"></a>这样我们就完成了HashTable的部分参数初始化的工作。可以看到主要是创建了一个Entry的数组。另外如果我们使用的是无参数的构造函数，那么这两个的参数的默认值为11, 0.75f。</h4><h2 id="存储"><a href="#存储" class="headerlink" title="存储"></a>存储</h2><h4 id="现在我们看一下当我们put的时候，内部发生了什么"><a href="#现在我们看一下当我们put的时候，内部发生了什么" class="headerlink" title="现在我们看一下当我们put的时候，内部发生了什么"></a>现在我们看一下当我们put的时候，内部发生了什么</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">// 可以看到这个方法名上加了synchronized，这和在HashMap上是有不一样的地方</span><br><span class="line">   public synchronized V put(K key, V value) &#123;</span><br><span class="line">       // Make sure the value is not null</span><br><span class="line">       if (value == null) &#123;</span><br><span class="line">           throw new NullPointerException();</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       // Makes sure the key is not already in the hashtable.</span><br><span class="line">       Entry&lt;?,?&gt; tab[] = table;</span><br><span class="line">       // 会取传入的键的Hashcode，所以每个字符串的Hashcode都是一样的</span><br><span class="line">       int hash = key.hashCode();</span><br><span class="line">       // 通过计算得到当前键在Entry数组中的下标</span><br><span class="line">       int index = (hash &amp; 0x7FFFFFFF) % tab.length;</span><br><span class="line">       @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">       // 取出在数组中指定下标已存在的值，指定下标取出来可能是一个链表，在Entry中存有链表后继结点的引用</span><br><span class="line">       Entry&lt;K,V&gt; entry = (Entry&lt;K,V&gt;)tab[index];</span><br><span class="line">       for(; entry != null ; entry = entry.next) &#123;</span><br><span class="line">       	// 必须双重判断hash值一样，而且键值内容一样，才能说明传入的key已存在</span><br><span class="line">           if ((entry.hash == hash) &amp;&amp; entry.key.equals(key)) &#123;</span><br><span class="line">           	// 若已存在，则替换新传入的值，并返回旧值</span><br><span class="line">               V old = entry.value;</span><br><span class="line">               entry.value = value;</span><br><span class="line">               return old;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">	// 若key在原结构中不存在，则需要新增</span><br><span class="line">       addEntry(hash, key, value, index);</span><br><span class="line">       return null;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="继续看看往存储结构中新增一个key的时候做了什么操作"><a href="#继续看看往存储结构中新增一个key的时候做了什么操作" class="headerlink" title="继续看看往存储结构中新增一个key的时候做了什么操作"></a>继续看看往存储结构中新增一个key的时候做了什么操作</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">private void addEntry(int hash, K key, V value, int index) &#123;</span><br><span class="line">	// 这个字段作为修改的一个version值做后续的版本控制</span><br><span class="line">    modCount++;</span><br><span class="line"></span><br><span class="line">    Entry&lt;?,?&gt; tab[] = table;</span><br><span class="line">	// count是当前数组中已有的Entry的数目</span><br><span class="line">	// 如果比原定的threshold要大，则需要重新进行一次hash重分配</span><br><span class="line">    if (count &gt;= threshold) &#123;</span><br><span class="line">        // Rehash the table if the threshold is exceeded</span><br><span class="line">        rehash();</span><br><span class="line"></span><br><span class="line">        tab = table;</span><br><span class="line">        hash = key.hashCode();</span><br><span class="line">        index = (hash &amp; 0x7FFFFFFF) % tab.length;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // Creates the new entry.</span><br><span class="line">    @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">    // 在Entry数组对应的index的位置创建一个值，并把可能原有的值作为新增节点在链表中的后继结点存储，所以在链表中是新的节点排在链表前面</span><br><span class="line">    Entry&lt;K,V&gt; e = (Entry&lt;K,V&gt;) tab[index];</span><br><span class="line">    tab[index] = new Entry&lt;&gt;(hash, key, value, e);</span><br><span class="line">    count++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="新增部分也容易理解，主要还是数组-链表的格式。可以看到在过程中已经限定了k，v都不能为空。这边留了一个概念没讲，就是这个rehash-的过程。在初始化的时候，我们定义了threshold这个int类型的参数。这个的概念就是，假设我们数组的最大可容纳数目为11个，loadFactor为0-75，那么当数目达到了8个的时候，我们就要进行一次rehash，避免数目过大影响性能。现在具体看看rehash过程。以下过程内容，都按照默认值11，0-75为前提。"><a href="#新增部分也容易理解，主要还是数组-链表的格式。可以看到在过程中已经限定了k，v都不能为空。这边留了一个概念没讲，就是这个rehash-的过程。在初始化的时候，我们定义了threshold这个int类型的参数。这个的概念就是，假设我们数组的最大可容纳数目为11个，loadFactor为0-75，那么当数目达到了8个的时候，我们就要进行一次rehash，避免数目过大影响性能。现在具体看看rehash过程。以下过程内容，都按照默认值11，0-75为前提。" class="headerlink" title="新增部分也容易理解，主要还是数组+链表的格式。可以看到在过程中已经限定了k，v都不能为空。这边留了一个概念没讲，就是这个rehash()的过程。在初始化的时候，我们定义了threshold这个int类型的参数。这个的概念就是，假设我们数组的最大可容纳数目为11个，loadFactor为0.75，那么当数目达到了8个的时候，我们就要进行一次rehash，避免数目过大影响性能。现在具体看看rehash过程。以下过程内容，都按照默认值11，0.75为前提。"></a>新增部分也容易理解，主要还是数组+链表的格式。可以看到在过程中已经限定了k，v都不能为空。这边留了一个概念没讲，就是这个rehash()的过程。在初始化的时候，我们定义了threshold这个int类型的参数。这个的概念就是，假设我们数组的最大可容纳数目为11个，loadFactor为0.75，那么当数目达到了8个的时候，我们就要进行一次rehash，避免数目过大影响性能。现在具体看看rehash过程。以下过程内容，都按照默认值11，0.75为前提。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">protected void rehash() &#123;</span><br><span class="line">	// old容量 默认为11</span><br><span class="line">       int oldCapacity = table.length;</span><br><span class="line">       Entry&lt;?,?&gt;[] oldMap = table;</span><br><span class="line"></span><br><span class="line">       // overflow-conscious code</span><br><span class="line">       // new容量 = (11 &lt;&lt; 1) + 1 = 23 </span><br><span class="line">       int newCapacity = (oldCapacity &lt;&lt; 1) + 1;</span><br><span class="line">       // MAX_ARRAY_SIZE 是Int.max - 8， 如果新的容量比这个数值还要大的话，要进行进一步的考量</span><br><span class="line">       if (newCapacity - MAX_ARRAY_SIZE &gt; 0) &#123;</span><br><span class="line">           if (oldCapacity == MAX_ARRAY_SIZE)</span><br><span class="line">               // Keep running with MAX_ARRAY_SIZE buckets</span><br><span class="line">               return;</span><br><span class="line">           newCapacity = MAX_ARRAY_SIZE;</span><br><span class="line">       &#125;</span><br><span class="line">       // 用新的容量创建一个新的数组</span><br><span class="line">       Entry&lt;?,?&gt;[] newMap = new Entry&lt;?,?&gt;[newCapacity];</span><br><span class="line"></span><br><span class="line">       modCount++;</span><br><span class="line">       // 重新计算threshold</span><br><span class="line">       threshold = (int)Math.min(newCapacity * loadFactor, MAX_ARRAY_SIZE + 1);</span><br><span class="line">       table = newMap;</span><br><span class="line">	// 从原有数组的末尾，从后往前扫描每一个节点，按照新的容量计算新的index。</span><br><span class="line">       for (int i = oldCapacity ; i-- &gt; 0 ;) &#123;</span><br><span class="line">           for (Entry&lt;K,V&gt; old = (Entry&lt;K,V&gt;)oldMap[i] ; old != null ; ) &#123;</span><br><span class="line">               Entry&lt;K,V&gt; e = old;</span><br><span class="line">               old = old.next;</span><br><span class="line"></span><br><span class="line">               int index = (e.hash &amp; 0x7FFFFFFF) % newCapacity;</span><br><span class="line">               e.next = (Entry&lt;K,V&gt;)newMap[index];</span><br><span class="line">               newMap[index] = e;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="好的，现在也大概吧put梳理了一下。整体大概就是用一种数组-链表的方式存储我们的节点，并在必要时刻进行重新整理，接下来我们看看取值的过程"><a href="#好的，现在也大概吧put梳理了一下。整体大概就是用一种数组-链表的方式存储我们的节点，并在必要时刻进行重新整理，接下来我们看看取值的过程" class="headerlink" title="好的，现在也大概吧put梳理了一下。整体大概就是用一种数组+链表的方式存储我们的节点，并在必要时刻进行重新整理，接下来我们看看取值的过程"></a>好的，现在也大概吧put梳理了一下。整体大概就是用一种数组+链表的方式存储我们的节点，并在必要时刻进行重新整理，接下来我们看看取值的过程</h4><h2 id="取值"><a href="#取值" class="headerlink" title="取值"></a>取值</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 同样是一个同步的方法</span><br><span class="line">   public synchronized V get(Object key) &#123;</span><br><span class="line">   	// 整个方法是不是似曾相识？在我们第二步的存储的代码中，已经包含了这一部分代码。当时是为了确定存入的值是否已经存在。所以这边也不赘述了</span><br><span class="line">       Entry&lt;?,?&gt; tab[] = table;</span><br><span class="line">       int hash = key.hashCode();</span><br><span class="line">       int index = (hash &amp; 0x7FFFFFFF) % tab.length;</span><br><span class="line">       for (Entry&lt;?,?&gt; e = tab[index] ; e != null ; e = e.next) &#123;</span><br><span class="line">           if ((e.hash == hash) &amp;&amp; e.key.equals(key)) &#123;</span><br><span class="line">               return (V)e.value;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       return null;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h4 id="大致梳理了一下HashTable的几个关键流程，有一些细节还没有讲到。之后会再写一篇关于HashMap的文章，在那边可以横向对比一下这两者之间的区别。"><a href="#大致梳理了一下HashTable的几个关键流程，有一些细节还没有讲到。之后会再写一篇关于HashMap的文章，在那边可以横向对比一下这两者之间的区别。" class="headerlink" title="大致梳理了一下HashTable的几个关键流程，有一些细节还没有讲到。之后会再写一篇关于HashMap的文章，在那边可以横向对比一下这两者之间的区别。"></a>大致梳理了一下HashTable的几个关键流程，有一些细节还没有讲到。之后会再写一篇关于HashMap的文章，在那边可以横向对比一下这两者之间的区别。</h4>
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/14/设计模式/门面模式/" rel="next" title>
+                <i class="fa fa-chevron-left"></i> 
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/02/15/jdk/聊一聊HashMap/" rel="prev" title>
+                 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Swaggy Q</p>
+              <div class="site-description motion-element" itemprop="description">拉塞尔FMVP了吗</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">19</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#聊一聊HashTable"><span class="nav-number">1.</span> <span class="nav-text">聊一聊HashTable</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下"><span class="nav-number">1.1.0.1.</span> <span class="nav-text">关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#正文"><span class="nav-number">1.2.</span> <span class="nav-text">正文</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？"><span class="nav-number">1.2.0.1.</span> <span class="nav-text">大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#这边用一个小例子作为入口，我们可以进去一探究竟"><span class="nav-number">1.2.0.2.</span> <span class="nav-text">这边用一个小例子作为入口，我们可以进去一探究竟</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#这边写了一个最简单的例子。例子包括三部分，在注释中也有指出。"><span class="nav-number">1.2.0.3.</span> <span class="nav-text">这边写了一个最简单的例子。例子包括三部分，在注释中也有指出。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#这三个步骤也是我们平时用到的流程，本文就会根据这三个小块来探究一下内部的实现"><span class="nav-number">1.2.0.4.</span> <span class="nav-text">这三个步骤也是我们平时用到的流程，本文就会根据这三个小块来探究一下内部的实现</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#初始化"><span class="nav-number">1.3.</span> <span class="nav-text">初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#当我们想要使用一个HashTable的时候，最显而易见的就是我们会先new一个实例化对象出来。这样我们才会有对象可操作，那么就先看看这个构造函数。"><span class="nav-number">1.3.0.1.</span> <span class="nav-text">当我们想要使用一个HashTable的时候，最显而易见的就是我们会先new一个实例化对象出来。这样我们才会有对象可操作，那么就先看看这个构造函数。</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TODO-构造函数截图"><span class="nav-number">2.</span> <span class="nav-text">TODO 构造函数截图</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#从这个图中也可以看到，总共提供了四种不同的构造函数。其实当我们看过实现之后我们可以发现，其实四个不同的方法最终都是调用了Hashtable-int-float-这个方法，其他构造方法只是提供了一些默认参数而已。所以我们直接先看到这个方法。"><span class="nav-number">2.0.0.1.</span> <span class="nav-text">从这个图中也可以看到，总共提供了四种不同的构造函数。其实当我们看过实现之后我们可以发现，其实四个不同的方法最终都是调用了Hashtable(int, float) 这个方法，其他构造方法只是提供了一些默认参数而已。所以我们直接先看到这个方法。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#这样我们就完成了HashTable的部分参数初始化的工作。可以看到主要是创建了一个Entry的数组。另外如果我们使用的是无参数的构造函数，那么这两个的参数的默认值为11-0-75f。"><span class="nav-number">2.0.0.2.</span> <span class="nav-text">这样我们就完成了HashTable的部分参数初始化的工作。可以看到主要是创建了一个Entry的数组。另外如果我们使用的是无参数的构造函数，那么这两个的参数的默认值为11, 0.75f。</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#存储"><span class="nav-number">2.1.</span> <span class="nav-text">存储</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#现在我们看一下当我们put的时候，内部发生了什么"><span class="nav-number">2.1.0.1.</span> <span class="nav-text">现在我们看一下当我们put的时候，内部发生了什么</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#继续看看往存储结构中新增一个key的时候做了什么操作"><span class="nav-number">2.1.0.2.</span> <span class="nav-text">继续看看往存储结构中新增一个key的时候做了什么操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#新增部分也容易理解，主要还是数组-链表的格式。可以看到在过程中已经限定了k，v都不能为空。这边留了一个概念没讲，就是这个rehash-的过程。在初始化的时候，我们定义了threshold这个int类型的参数。这个的概念就是，假设我们数组的最大可容纳数目为11个，loadFactor为0-75，那么当数目达到了8个的时候，我们就要进行一次rehash，避免数目过大影响性能。现在具体看看rehash过程。以下过程内容，都按照默认值11，0-75为前提。"><span class="nav-number">2.1.0.3.</span> <span class="nav-text">新增部分也容易理解，主要还是数组+链表的格式。可以看到在过程中已经限定了k，v都不能为空。这边留了一个概念没讲，就是这个rehash()的过程。在初始化的时候，我们定义了threshold这个int类型的参数。这个的概念就是，假设我们数组的最大可容纳数目为11个，loadFactor为0.75，那么当数目达到了8个的时候，我们就要进行一次rehash，避免数目过大影响性能。现在具体看看rehash过程。以下过程内容，都按照默认值11，0.75为前提。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#好的，现在也大概吧put梳理了一下。整体大概就是用一种数组-链表的方式存储我们的节点，并在必要时刻进行重新整理，接下来我们看看取值的过程"><span class="nav-number">2.1.0.4.</span> <span class="nav-text">好的，现在也大概吧put梳理了一下。整体大概就是用一种数组+链表的方式存储我们的节点，并在必要时刻进行重新整理，接下来我们看看取值的过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#取值"><span class="nav-number">2.2.</span> <span class="nav-text">取值</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">2.3.</span> <span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#大致梳理了一下HashTable的几个关键流程，有一些细节还没有讲到。之后会再写一篇关于HashMap的文章，在那边可以横向对比一下这两者之间的区别。"><span class="nav-number">2.3.0.1.</span> <span class="nav-text">大致梳理了一下HashTable的几个关键流程，有一些细节还没有讲到。之后会再写一篇关于HashMap的文章，在那边可以横向对比一下这两者之间的区别。</span></a></li></ol></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Swaggy Q</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=3.4.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.2.0"></script>
+
+  <script src="/js/motion.js?v=7.2.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.2.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.2.0"></script>
+<script src="/js/post-details.js?v=7.2.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.2.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

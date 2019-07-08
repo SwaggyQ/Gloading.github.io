@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+<link rel="stylesheet" href="/css/main.css?v=7.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.2.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.2.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="AQS的详解前言java的JUC包我断断续续看了零星的几个实现类，一直想写一些文章记录一下，但是由于种种原因，一是由于自己的懒惰，也因为作为一个新手，这种东西我实在没太好的文笔能表达清楚，今天我再次想冲击一下这个疑难杂症。首先说一下，AQS是一个java的java.util.concurrent包中的一个名为AbstractQueuedSynchronizer的类，简称AQS。那这个类为什么这么重">
+<meta name="keywords" content="Dloading...">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Dloading...">
+<meta property="og:url" content="http://yoursite.com/2019/02/11/jdk/AQS的详解/index.html">
+<meta property="og:site_name" content="Dloading...">
+<meta property="og:description" content="AQS的详解前言java的JUC包我断断续续看了零星的几个实现类，一直想写一些文章记录一下，但是由于种种原因，一是由于自己的懒惰，也因为作为一个新手，这种东西我实在没太好的文笔能表达清楚，今天我再次想冲击一下这个疑难杂症。首先说一下，AQS是一个java的java.util.concurrent包中的一个名为AbstractQueuedSynchronizer的类，简称AQS。那这个类为什么这么重">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-03-05T08:21:05.369Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Dloading...">
+<meta name="twitter:description" content="AQS的详解前言java的JUC包我断断续续看了零星的几个实现类，一直想写一些文章记录一下，但是由于种种原因，一是由于自己的懒惰，也因为作为一个新手，这种东西我实在没太好的文笔能表达清楚，今天我再次想冲击一下这个疑难杂症。首先说一下，AQS是一个java的java.util.concurrent包中的一个名为AbstractQueuedSynchronizer的类，简称AQS。那这个类为什么这么重">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://yoursite.com/2019/02/11/jdk/AQS的详解/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title> | Dloading...</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Dloading...</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">努力成为优秀程序员</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/02/11/jdk/AQS的详解/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Swaggy Q">
+      <meta itemprop="description" content="拉塞尔FMVP了吗">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dloading...">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-02-11 14:44:16" itemprop="dateCreated datePublished" datetime="2019-02-11T14:44:16+08:00">2019-02-11</time>
+            </span>
+          
+
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-03-05 16:21:05" itemprop="dateModified" datetime="2019-03-05T16:21:05+08:00">2019-03-05</time>
+              </span>
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="AQS的详解"><a href="#AQS的详解" class="headerlink" title="AQS的详解"></a>AQS的详解</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h4 id="java的JUC包我断断续续看了零星的几个实现类，一直想写一些文章记录一下，但是由于种种原因，一是由于自己的懒惰，也因为作为一个新手，这种东西我实在没太好的文笔能表达清楚，今天我再次想冲击一下这个疑难杂症。首先说一下，AQS是一个java的java-util-concurrent包中的一个名为AbstractQueuedSynchronizer的类，简称AQS。那这个类为什么这么重要呢？因为这个JUC包中包含了几乎所有我们平时会用于控制并发的锁和并发控制类，而这个AQS更是基本所有锁的核心控制框架，所以这个类是我们学习并发的重中之重。"><a href="#java的JUC包我断断续续看了零星的几个实现类，一直想写一些文章记录一下，但是由于种种原因，一是由于自己的懒惰，也因为作为一个新手，这种东西我实在没太好的文笔能表达清楚，今天我再次想冲击一下这个疑难杂症。首先说一下，AQS是一个java的java-util-concurrent包中的一个名为AbstractQueuedSynchronizer的类，简称AQS。那这个类为什么这么重要呢？因为这个JUC包中包含了几乎所有我们平时会用于控制并发的锁和并发控制类，而这个AQS更是基本所有锁的核心控制框架，所以这个类是我们学习并发的重中之重。" class="headerlink" title="java的JUC包我断断续续看了零星的几个实现类，一直想写一些文章记录一下，但是由于种种原因，一是由于自己的懒惰，也因为作为一个新手，这种东西我实在没太好的文笔能表达清楚，今天我再次想冲击一下这个疑难杂症。首先说一下，AQS是一个java的java.util.concurrent包中的一个名为AbstractQueuedSynchronizer的类，简称AQS。那这个类为什么这么重要呢？因为这个JUC包中包含了几乎所有我们平时会用于控制并发的锁和并发控制类，而这个AQS更是基本所有锁的核心控制框架，所以这个类是我们学习并发的重中之重。"></a>java的JUC包我断断续续看了零星的几个实现类，一直想写一些文章记录一下，但是由于种种原因，一是由于自己的懒惰，也因为作为一个新手，这种东西我实在没太好的文笔能表达清楚，今天我再次想冲击一下这个疑难杂症。首先说一下，AQS是一个java的java.util.concurrent包中的一个名为AbstractQueuedSynchronizer的类，简称AQS。那这个类为什么这么重要呢？因为这个JUC包中包含了几乎所有我们平时会用于控制并发的锁和并发控制类，而这个AQS更是基本所有锁的核心控制框架，所以这个类是我们学习并发的重中之重。</h4><h2 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h2><h4 id="在本系列的后面的文章中，我们会讲到，当多个线程抢占较少的资源的时候，AQS内部所做的一些关于分配资源的策略方法。在这之前我建议大家先想一下，如果由自己设计一个最简单的抢占模型，我们会怎么设计？我这边设想了一下，肯定会有下面几个步骤"><a href="#在本系列的后面的文章中，我们会讲到，当多个线程抢占较少的资源的时候，AQS内部所做的一些关于分配资源的策略方法。在这之前我建议大家先想一下，如果由自己设计一个最简单的抢占模型，我们会怎么设计？我这边设想了一下，肯定会有下面几个步骤" class="headerlink" title="在本系列的后面的文章中，我们会讲到，当多个线程抢占较少的资源的时候，AQS内部所做的一些关于分配资源的策略方法。在这之前我建议大家先想一下，如果由自己设计一个最简单的抢占模型，我们会怎么设计？我这边设想了一下，肯定会有下面几个步骤"></a>在本系列的后面的文章中，我们会讲到，当多个线程抢占较少的资源的时候，AQS内部所做的一些关于分配资源的策略方法。在这之前我建议大家先想一下，如果由自己设计一个最简单的抢占模型，我们会怎么设计？我这边设想了一下，肯定会有下面几个步骤</h4><pre><code>1: 提供一个资源供大家抢占，假设初始状态为1，被占用后设置为0.所以假设有多个线程去获取这个资源的时候，肯定会只有一个线程能抢占成功，那么其他的线程必须按序排好。同时也要考虑到多个节点往队伍中排会出现的并发问题
+2: 当上一个节点消费完成后，要将资源释放出来，然后要通知排在队伍中的第一个节点，通知他可以开始竞争资源了。</code></pre><h4 id="所以我们可以带着这种思路来看AQS内部的实现，看是不是按照我们的设计思路来编写框架的。"><a href="#所以我们可以带着这种思路来看AQS内部的实现，看是不是按照我们的设计思路来编写框架的。" class="headerlink" title="所以我们可以带着这种思路来看AQS内部的实现，看是不是按照我们的设计思路来编写框架的。"></a>所以我们可以带着这种思路来看AQS内部的实现，看是不是按照我们的设计思路来编写框架的。</h4><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="接下来我们直接看到AQS的内部，大致浏览一下类的内部结构。"><a href="#接下来我们直接看到AQS的内部，大致浏览一下类的内部结构。" class="headerlink" title="接下来我们直接看到AQS的内部，大致浏览一下类的内部结构。"></a>接下来我们直接看到AQS的内部，大致浏览一下类的内部结构。</h4><h4 id="首先可以看到，内部有一个叫做Node的内部类实现。这个类就是用于我们之前的设计中，当线程抢占资源失败时，排在队列中的每个单元。在Node的构造函数我们可以看到除了传入了当时的线程，还传入了一个叫mode的参数。"><a href="#首先可以看到，内部有一个叫做Node的内部类实现。这个类就是用于我们之前的设计中，当线程抢占资源失败时，排在队列中的每个单元。在Node的构造函数我们可以看到除了传入了当时的线程，还传入了一个叫mode的参数。" class="headerlink" title="首先可以看到，内部有一个叫做Node的内部类实现。这个类就是用于我们之前的设计中，当线程抢占资源失败时，排在队列中的每个单元。在Node的构造函数我们可以看到除了传入了当时的线程，还传入了一个叫mode的参数。"></a>首先可以看到，内部有一个叫做Node的内部类实现。这个类就是用于我们之前的设计中，当线程抢占资源失败时，排在队列中的每个单元。在Node的构造函数我们可以看到除了传入了当时的线程，还传入了一个叫mode的参数。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Node(Thread thread, Node mode) &#123;     // Used by addWaiter</span><br><span class="line">	this.nextWaiter = mode;</span><br><span class="line"> 			this.thread = thread;</span><br><span class="line">  	&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="结合了一些这个构造函数的调用链，可以看到这个mode有两种情况"><a href="#结合了一些这个构造函数的调用链，可以看到这个mode有两种情况" class="headerlink" title="结合了一些这个构造函数的调用链，可以看到这个mode有两种情况"></a>结合了一些这个构造函数的调用链，可以看到这个mode有两种情况</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/** Marker to indicate a node is waiting in shared mode */</span><br><span class="line">static final Node SHARED = new Node();</span><br><span class="line">/** Marker to indicate a node is waiting in exclusive mode */</span><br><span class="line">static final Node EXCLUSIVE = null;</span><br></pre></td></tr></table></figure>
+
+<h4 id="这代表抢占资源的两种模式，一种是独占式，一种是共享式。"><a href="#这代表抢占资源的两种模式，一种是独占式，一种是共享式。" class="headerlink" title="这代表抢占资源的两种模式，一种是独占式，一种是共享式。"></a>这代表抢占资源的两种模式，一种是独占式，一种是共享式。</h4><blockquote>
+<p>独占模式和共享模式。处于独占模式下时，其他线程试图获取该锁将无法取得成功。在共享模式下，多个线程获取某个锁可能（但不是一定）会获得成功</p>
+</blockquote>
+<h4 id="这边引入了一个Node模式的概念。我们浏览过整个AQS的代码结构就可以发现，整份代码里就是有两种模式的不同入口，分别处理不同的模式。从名字也可以看出，比如下面的四个预留的抽象方法。"><a href="#这边引入了一个Node模式的概念。我们浏览过整个AQS的代码结构就可以发现，整份代码里就是有两种模式的不同入口，分别处理不同的模式。从名字也可以看出，比如下面的四个预留的抽象方法。" class="headerlink" title="这边引入了一个Node模式的概念。我们浏览过整个AQS的代码结构就可以发现，整份代码里就是有两种模式的不同入口，分别处理不同的模式。从名字也可以看出，比如下面的四个预留的抽象方法。"></a>这边引入了一个Node模式的概念。我们浏览过整个AQS的代码结构就可以发现，整份代码里就是有两种模式的不同入口，分别处理不同的模式。从名字也可以看出，比如下面的四个预留的抽象方法。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">protected boolean tryAcquire(int arg)</span><br><span class="line">protected boolean tryRelease(int arg)</span><br><span class="line">protected int tryAcquireShared(int arg)</span><br><span class="line">protected boolean tryReleaseShared(int arg)</span><br></pre></td></tr></table></figure>
+
+<h4 id="因为之前我们也说过AQS是一个核心的并发基础框架类，内部处理了很多关于抢占资源的调度方法，同时预留了一些可以处理实际逻辑的方法，供子类处理。以上四个方法就是预留的方法。从方法名字我们也可以知道，这四个方法里面属于两个不同的模式。在单个模式的两个方法中，也分别处理了试图去获取资源和试图去释放资源的实际方法。"><a href="#因为之前我们也说过AQS是一个核心的并发基础框架类，内部处理了很多关于抢占资源的调度方法，同时预留了一些可以处理实际逻辑的方法，供子类处理。以上四个方法就是预留的方法。从方法名字我们也可以知道，这四个方法里面属于两个不同的模式。在单个模式的两个方法中，也分别处理了试图去获取资源和试图去释放资源的实际方法。" class="headerlink" title="因为之前我们也说过AQS是一个核心的并发基础框架类，内部处理了很多关于抢占资源的调度方法，同时预留了一些可以处理实际逻辑的方法，供子类处理。以上四个方法就是预留的方法。从方法名字我们也可以知道，这四个方法里面属于两个不同的模式。在单个模式的两个方法中，也分别处理了试图去获取资源和试图去释放资源的实际方法。"></a>因为之前我们也说过AQS是一个核心的并发基础框架类，内部处理了很多关于抢占资源的调度方法，同时预留了一些可以处理实际逻辑的方法，供子类处理。以上四个方法就是预留的方法。从方法名字我们也可以知道，这四个方法里面属于两个不同的模式。在单个模式的两个方法中，也分别处理了试图去获取资源和试图去释放资源的实际方法。</h4><h4 id="接下来我会尽量用图的方式将这两种模式给讲清楚。好了，先讲一下独占式的模式-这个模式的获取资源和释放资源的入口方法分别的Acquire和Release"><a href="#接下来我会尽量用图的方式将这两种模式给讲清楚。好了，先讲一下独占式的模式-这个模式的获取资源和释放资源的入口方法分别的Acquire和Release" class="headerlink" title="接下来我会尽量用图的方式将这两种模式给讲清楚。好了，先讲一下独占式的模式,这个模式的获取资源和释放资源的入口方法分别的Acquire和Release"></a>接下来我会尽量用图的方式将这两种模式给讲清楚。好了，先讲一下独占式的模式,这个模式的获取资源和释放资源的入口方法分别的Acquire和Release</h4><h2 id="EXCLUSIVE模式"><a href="#EXCLUSIVE模式" class="headerlink" title="EXCLUSIVE模式"></a>EXCLUSIVE模式</h2><h3 id="首先我们看一下独占模式的acquire方法"><a href="#首先我们看一下独占模式的acquire方法" class="headerlink" title="首先我们看一下独占模式的acquire方法"></a>首先我们看一下独占模式的acquire方法</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public final void acquire(int arg) &#123;</span><br><span class="line">	// 直接调用子类复写的方法，尝试去获取资源，</span><br><span class="line">	// 若成功，则直接返回</span><br><span class="line">	// 若失败，则加入内部维护的FIFO队列中</span><br><span class="line">    if (!tryAcquire(arg) &amp;&amp;</span><br><span class="line">        acquireQueued(addWaiter(Node.EXCLUSIVE), arg))</span><br><span class="line">        selfInterrupt();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="简单看一下addWaiter方法内部"><a href="#简单看一下addWaiter方法内部" class="headerlink" title="简单看一下addWaiter方法内部"></a>简单看一下addWaiter方法内部</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">private Node addWaiter(Node mode) &#123;</span><br><span class="line">    Node node = new Node(Thread.currentThread(), mode);</span><br><span class="line">    // Try the fast path of enq; backup to full enq on failure</span><br><span class="line">    Node pred = tail;</span><br><span class="line">    // 若当前队列中已经初始化了尾节点，则会先尝试一种快速入队的方式，即</span><br><span class="line">    // 1：先获得当前队列中的尾节点，假设名字为t</span><br><span class="line">    // 2: 将当前节点的先驱节点设置为t，即将节点排在了队列的最尾端</span><br><span class="line">    // 3: 将队列的尾指针用CAS的方式，安全的指向当前节点。此处用CAS保证了线程安全</span><br><span class="line">    // 4: 之后将原尾节点的后继指针指向了当前节点，从而完成了双向确认</span><br><span class="line">    // 注意: 三个指针的操作中，之后尾指针的指向时用了CAS，其余两个都是普通的赋值操作，这边先埋个点，在之后会再讲到这个地方</span><br><span class="line">    if (pred != null) &#123;</span><br><span class="line">        node.prev = pred;</span><br><span class="line">        if (compareAndSetTail(pred, node)) &#123;</span><br><span class="line">            pred.next = node;</span><br><span class="line">            return node;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    // 若之前的方法成功，则直接返回</span><br><span class="line">    // 否则就要进行比较复杂的方式</span><br><span class="line">    enq(node);</span><br><span class="line">    return node;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private Node enq(final Node node) &#123;</span><br><span class="line">	// 整段代码由一个永真循环包围</span><br><span class="line">    for (;;) &#123;</span><br><span class="line">        Node t = tail;</span><br><span class="line">        // 若第一次调用，则要初始化队列的头尾指针</span><br><span class="line">        if (t == null) &#123; // Must initialize</span><br><span class="line">            if (compareAndSetHead(new Node()))</span><br><span class="line">                tail = head;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">        	// 调用上段的逻辑，不断重试</span><br><span class="line">            node.prev = t;</span><br><span class="line">            if (compareAndSetTail(t, node)) &#123;</span><br><span class="line">                t.next = node;</span><br><span class="line">                return t;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>####可以看到内部就是维护了一个FIFO的队列，队列中每个节点都维护了线程，和当前等待状态以及前驱和后继节点。新节点到来时，会用CAS+自旋的方法去将节点放在等待队列中。然后在acquireQueued方法中，我们也可以看到，每个在队列中的节点，都会不断根据前驱节点的状态的改变，不断的去尝试获取资源。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">  final boolean acquireQueued(final Node node, int arg) &#123;</span><br><span class="line">      boolean failed = true;</span><br><span class="line">      try &#123;</span><br><span class="line">      	// 标识线程是否中断</span><br><span class="line">          boolean interrupted = false;</span><br><span class="line">          for (;;) &#123;</span><br><span class="line">              final Node p = node.predecessor();</span><br><span class="line">              // 判断先驱节点是否为队列首节点</span><br><span class="line">              // 若是，则尝试去获取资源</span><br><span class="line">              if (p == head &amp;&amp; tryAcquire(arg)) &#123;</span><br><span class="line">              	//	若资源获取成功了，则将当前节点设为队列首节点</span><br><span class="line">                  setHead(node);</span><br><span class="line">                  p.next = null; // help GC</span><br><span class="line">                  failed = false;</span><br><span class="line">                  return interrupted;</span><br><span class="line">              &#125;</span><br><span class="line">              // 若还没轮到竞争资源，或者竞争资源失败</span><br><span class="line">              // 每个节点都会判断自己以及前驱节点的状态是否满足当前节点是否可以park，这句话可能比较绕，可以直接先看看shouldParkAfterFailedAcquire这个方法里面做了什么</span><br><span class="line">              if (shouldParkAfterFailedAcquire(p, node) &amp;&amp;</span><br><span class="line">                  parkAndCheckInterrupt())</span><br><span class="line">                  interrupted = true;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125; finally &#123;</span><br><span class="line">          if (failed)</span><br><span class="line">              cancelAcquire(node);</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line">	// 首先看到这个方法的返回值是一个布尔值，为true则标志当前节点可以park，会有其他节点在合适的时候将其唤醒</span><br><span class="line">  private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) &#123;</span><br><span class="line">  	// 先驱节点的状态</span><br><span class="line">      int ws = pred.waitStatus;</span><br><span class="line">// 若前驱节点的状态是SIGNAL，也就是标志着当前节点在park前已经通知了前驱节点</span><br><span class="line">// 换句话说就是，前驱节点知道排在他后面的节点是park状态，那么在竞争完资源或者退出竞争之后，都会将其唤醒</span><br><span class="line">      if (ws == Node.SIGNAL)</span><br><span class="line">          /*</span><br><span class="line">           * This node has already set status asking a release</span><br><span class="line">           * to signal it, so it can safely park.</span><br><span class="line">           */</span><br><span class="line">          return true;</span><br><span class="line">      // 若前驱节点的状态已经是取消状态，则应该跳过这个节点，向前找到未取消的节点作为新的前驱节点</span><br><span class="line">      if (ws &gt; 0) &#123;</span><br><span class="line">          /*</span><br><span class="line">           * Predecessor was cancelled. Skip over predecessors and</span><br><span class="line">           * indicate retry.</span><br><span class="line">           */</span><br><span class="line">           // 如果先驱节点已经取消竞争了，则直接跳过他，查找队列前面最近的没取消的作为新的先驱节点</span><br><span class="line">          do &#123;</span><br><span class="line">              node.prev = pred = pred.prev;</span><br><span class="line">          &#125; while (pred.waitStatus &gt; 0);</span><br><span class="line">          pred.next = node;</span><br><span class="line">      &#125; else &#123;</span><br><span class="line">          /*</span><br><span class="line">           * waitStatus must be 0 or PROPAGATE.  Indicate that we</span><br><span class="line">           * need a signal, but don&apos;t park yet.  Caller will need to</span><br><span class="line">           * retry to make sure it cannot acquire before parking.</span><br><span class="line">           */</span><br><span class="line">           // 若先驱节点即没取消，又没Signal，则手动将其设置为Signal，表示当前节点已经安心park，等前驱节点资源释放后，需要将其唤醒</span><br><span class="line">          compareAndSetWaitStatus(pred, ws, Node.SIGNAL);</span><br><span class="line">      &#125;</span><br><span class="line">      // 仅当先驱节点的状态是Signal的时候返回true，其他都为false</span><br><span class="line">      return false;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="整体逻辑就是在队列中等待的节点，会不断去尝试获得资源。因为是先入先出队列，所以节点都会根据排在前面的节点的状态，来判断是不是轮到自己了。shouldParkAfterFailedAcquire方法就是用于根据前驱节点的状态来确定自己是否可以park"><a href="#整体逻辑就是在队列中等待的节点，会不断去尝试获得资源。因为是先入先出队列，所以节点都会根据排在前面的节点的状态，来判断是不是轮到自己了。shouldParkAfterFailedAcquire方法就是用于根据前驱节点的状态来确定自己是否可以park" class="headerlink" title="整体逻辑就是在队列中等待的节点，会不断去尝试获得资源。因为是先入先出队列，所以节点都会根据排在前面的节点的状态，来判断是不是轮到自己了。shouldParkAfterFailedAcquire方法就是用于根据前驱节点的状态来确定自己是否可以park"></a>整体逻辑就是在队列中等待的节点，会不断去尝试获得资源。因为是先入先出队列，所以节点都会根据排在前面的节点的状态，来判断是不是轮到自己了。shouldParkAfterFailedAcquire方法就是用于根据前驱节点的状态来确定自己是否可以park</h4><h4 id="若shouldParkAfterFailedAcquire方法返回了true，就是需要去park当前线程，等待先驱节点完成之后唤醒。park部分的代码就是直接调用了LockSupport的park方法，等待唤醒。唤醒可能是被前驱节点唤醒，也有可能是线程中断，所以唤醒后要检查一下线程状态"><a href="#若shouldParkAfterFailedAcquire方法返回了true，就是需要去park当前线程，等待先驱节点完成之后唤醒。park部分的代码就是直接调用了LockSupport的park方法，等待唤醒。唤醒可能是被前驱节点唤醒，也有可能是线程中断，所以唤醒后要检查一下线程状态" class="headerlink" title="若shouldParkAfterFailedAcquire方法返回了true，就是需要去park当前线程，等待先驱节点完成之后唤醒。park部分的代码就是直接调用了LockSupport的park方法，等待唤醒。唤醒可能是被前驱节点唤醒，也有可能是线程中断，所以唤醒后要检查一下线程状态"></a>若shouldParkAfterFailedAcquire方法返回了true，就是需要去park当前线程，等待先驱节点完成之后唤醒。park部分的代码就是直接调用了LockSupport的park方法，等待唤醒。唤醒可能是被前驱节点唤醒，也有可能是线程中断，所以唤醒后要检查一下线程状态</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">private final boolean parkAndCheckInterrupt() &#123;</span><br><span class="line">    LockSupport.park(this);</span><br><span class="line">    return Thread.interrupted();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="简单总结一下acquireQueued方法的内部逻辑。就是排在队列中的每个节点，内部都有一个永真循环去不断判断是否可以去竞争资源，或者排在前面的节点是不是放弃竞争了，如果是，则向前找到最近的没放弃的节点作为先驱节点。当先驱节点的状态已经是Signal的时候，则park当前线程，等待唤醒。"><a href="#简单总结一下acquireQueued方法的内部逻辑。就是排在队列中的每个节点，内部都有一个永真循环去不断判断是否可以去竞争资源，或者排在前面的节点是不是放弃竞争了，如果是，则向前找到最近的没放弃的节点作为先驱节点。当先驱节点的状态已经是Signal的时候，则park当前线程，等待唤醒。" class="headerlink" title="简单总结一下acquireQueued方法的内部逻辑。就是排在队列中的每个节点，内部都有一个永真循环去不断判断是否可以去竞争资源，或者排在前面的节点是不是放弃竞争了，如果是，则向前找到最近的没放弃的节点作为先驱节点。当先驱节点的状态已经是Signal的时候，则park当前线程，等待唤醒。"></a>简单总结一下acquireQueued方法的内部逻辑。就是排在队列中的每个节点，内部都有一个永真循环去不断判断是否可以去竞争资源，或者排在前面的节点是不是放弃竞争了，如果是，则向前找到最近的没放弃的节点作为先驱节点。当先驱节点的状态已经是Signal的时候，则park当前线程，等待唤醒。</h4><h3 id="再看一下独占模式的release方法"><a href="#再看一下独占模式的release方法" class="headerlink" title="再看一下独占模式的release方法"></a>再看一下独占模式的release方法</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public final boolean release(int arg) &#123;</span><br><span class="line">	// 同样的，开始就去尝试释放资源，这个方法也是由子类去覆写的</span><br><span class="line">    if (tryRelease(arg)) &#123;</span><br><span class="line">    	//	若释放成功，则得到等待队列中的头节点，如果节点存在，则唤醒头节点后的等待者，唤醒他开始竞争资源</span><br><span class="line">        Node h = head;</span><br><span class="line">        if (h != null &amp;&amp; h.waitStatus != 0)</span><br><span class="line">        	// 唤醒后继节点开始竞争资源</span><br><span class="line">            unparkSuccessor(h);</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="和acquire方法一样，里面具体的try…-方法都是抽象方法，由继承的子类来覆写逻辑。当前节点释放资源成功后，要去主动提醒后续节点。这部分的逻辑在unparkSuccessor方法中实现"><a href="#和acquire方法一样，里面具体的try…-方法都是抽象方法，由继承的子类来覆写逻辑。当前节点释放资源成功后，要去主动提醒后续节点。这部分的逻辑在unparkSuccessor方法中实现" class="headerlink" title="和acquire方法一样，里面具体的try…()方法都是抽象方法，由继承的子类来覆写逻辑。当前节点释放资源成功后，要去主动提醒后续节点。这部分的逻辑在unparkSuccessor方法中实现"></a>和acquire方法一样，里面具体的try…()方法都是抽象方法，由继承的子类来覆写逻辑。当前节点释放资源成功后，要去主动提醒后续节点。这部分的逻辑在unparkSuccessor方法中实现</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">private void unparkSuccessor(Node node) &#123;</span><br><span class="line">    /*</span><br><span class="line">     * If status is negative (i.e., possibly needing signal) try</span><br><span class="line">     * to clear in anticipation of signalling.  It is OK if this</span><br><span class="line">     * fails or if status is changed by waiting thread.</span><br><span class="line">     */</span><br><span class="line">    int ws = node.waitStatus;</span><br><span class="line">    if (ws &lt; 0)</span><br><span class="line">        compareAndSetWaitStatus(node, ws, 0);</span><br><span class="line"></span><br><span class="line">    /*</span><br><span class="line">     * Thread to unpark is held in successor, which is normally</span><br><span class="line">     * just the next node.  But if cancelled or apparently null,</span><br><span class="line">     * traverse backwards from tail to find the actual</span><br><span class="line">     * non-cancelled successor.</span><br><span class="line">     */</span><br><span class="line">     // 从队列的末尾向前找到后继节点中，没有取消的节点，去唤醒。</span><br><span class="line">    Node s = node.next;</span><br><span class="line">    if (s == null || s.waitStatus &gt; 0) &#123;</span><br><span class="line">        s = null;</span><br><span class="line">        for (Node t = tail; t != null &amp;&amp; t != node; t = t.prev)</span><br><span class="line">            if (t.waitStatus &lt;= 0)</span><br><span class="line">                s = t;</span><br><span class="line">    &#125;</span><br><span class="line">    // 找到有效的后继节点，尝试去唤醒</span><br><span class="line">    if (s != null)</span><br><span class="line">        LockSupport.unpark(s.thread);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="这边逻辑大部分都是易懂的，无非就是释放资源后，通知队列中排在后面的节点开始竞争。但是为什么倒序？"><a href="#这边逻辑大部分都是易懂的，无非就是释放资源后，通知队列中排在后面的节点开始竞争。但是为什么倒序？" class="headerlink" title="这边逻辑大部分都是易懂的，无非就是释放资源后，通知队列中排在后面的节点开始竞争。但是为什么倒序？"></a>这边逻辑大部分都是易懂的，无非就是释放资源后，通知队列中排在后面的节点开始竞争。但是为什么倒序？</h4><h4 id="因为考虑enq方法的时候，后继节点可能为null。也就是我们之前说的入队的时候，埋下的坑"><a href="#因为考虑enq方法的时候，后继节点可能为null。也就是我们之前说的入队的时候，埋下的坑" class="headerlink" title="因为考虑enq方法的时候，后继节点可能为null。也就是我们之前说的入队的时候，埋下的坑"></a>因为考虑enq方法的时候，后继节点可能为null。也就是我们之前说的入队的时候，埋下的坑</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">if (pred != null) &#123;</span><br><span class="line">    node.prev = pred;                    1</span><br><span class="line">    if (compareAndSetTail(pred, node)) &#123; 2</span><br><span class="line">        pred.next = node;                3</span><br><span class="line">        return node;                     4</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="观察这段代码，其中只有在2的时候，是用CAS，保证尾指针指向了新加入的节点。而且在CAS之前，已经将当前节点的前驱节点设置为了原来的尾指针。CAS完成后，进行3。这边是一个简单的赋值语句。所以考虑这么一种情况"><a href="#观察这段代码，其中只有在2的时候，是用CAS，保证尾指针指向了新加入的节点。而且在CAS之前，已经将当前节点的前驱节点设置为了原来的尾指针。CAS完成后，进行3。这边是一个简单的赋值语句。所以考虑这么一种情况" class="headerlink" title="观察这段代码，其中只有在2的时候，是用CAS，保证尾指针指向了新加入的节点。而且在CAS之前，已经将当前节点的前驱节点设置为了原来的尾指针。CAS完成后，进行3。这边是一个简单的赋值语句。所以考虑这么一种情况"></a>观察这段代码，其中只有在2的时候，是用CAS，保证尾指针指向了新加入的节点。而且在CAS之前，已经将当前节点的前驱节点设置为了原来的尾指针。CAS完成后，进行3。这边是一个简单的赋值语句。所以考虑这么一种情况</h4><ul>
+<li><p>当2步骤完成时，由于是多线程。此时如果调度到了别的线程的release方法。若按照正常的正序查找后继结点。可以发现由于3步骤还没执行，原尾节点是没有后继节点的。那么就会认为队列已经空了，这显然是不对的。</p>
+</li>
+<li><p>但是由于尾指针的指向时CAS操作的，所以由尾指针作为入口，肯定是没问题的</p>
+</li>
+<li><p>倒序查找还跟CANCEL操作的时候有关，这部分可以直接看我文章下面的链接。写的非常好，我写不出那么好，就不班门弄斧了</p>
+<h4 id="这里注意几点细节。"><a href="#这里注意几点细节。" class="headerlink" title="这里注意几点细节。"></a>这里注意几点细节。</h4></li>
+<li><p>当前节点释放资源成功后，要去唤醒队伍中排在后面的人去消费。按常理来说，应该就是排在后面的那个节点，但是由于每个节点都有可能取消竞争状态，所以要跳过这种节点，以及跳过为空的节点</p>
+</li>
+<li><p>查找的时候要从队伍的末尾往前查找</p>
+</li>
+</ul>
+<h4 id="唤醒成功后，就完成了释放资源的过程。之前park住的线程会被唤醒，继续他的竞争资源的过程"><a href="#唤醒成功后，就完成了释放资源的过程。之前park住的线程会被唤醒，继续他的竞争资源的过程" class="headerlink" title="唤醒成功后，就完成了释放资源的过程。之前park住的线程会被唤醒，继续他的竞争资源的过程"></a>唤醒成功后，就完成了释放资源的过程。之前park住的线程会被唤醒，继续他的竞争资源的过程</h4><h3 id="共享模式的acquire方法"><a href="#共享模式的acquire方法" class="headerlink" title="共享模式的acquire方法"></a>共享模式的acquire方法</h3><h4 id="上面说完了独占模式下，资源竞争的问题，现在我们再看看另一种共享模式下有什么不一样。"><a href="#上面说完了独占模式下，资源竞争的问题，现在我们再看看另一种共享模式下有什么不一样。" class="headerlink" title="上面说完了独占模式下，资源竞争的问题，现在我们再看看另一种共享模式下有什么不一样。"></a>上面说完了独占模式下，资源竞争的问题，现在我们再看看另一种共享模式下有什么不一样。</h4><h4 id="之前也说过，共享模式就是允许多个线程同时占有资源的情形。那这个acquireShared方法是怎么实现的呢？"><a href="#之前也说过，共享模式就是允许多个线程同时占有资源的情形。那这个acquireShared方法是怎么实现的呢？" class="headerlink" title="之前也说过，共享模式就是允许多个线程同时占有资源的情形。那这个acquireShared方法是怎么实现的呢？"></a>之前也说过，共享模式就是允许多个线程同时占有资源的情形。那这个acquireShared方法是怎么实现的呢？</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public final void acquireShared(int arg) &#123;</span><br><span class="line">    if (tryAcquireShared(arg) &lt; 0)</span><br><span class="line">        doAcquireShared(arg);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="回想一下之前说的独占模式的acquire方法。可以很明显的看到几点不同"><a href="#回想一下之前说的独占模式的acquire方法。可以很明显的看到几点不同" class="headerlink" title="回想一下之前说的独占模式的acquire方法。可以很明显的看到几点不同"></a>回想一下之前说的独占模式的acquire方法。可以很明显的看到几点不同</h4><ul>
+<li>独占模式下try…()方法返回的是一个布尔值，直接确定是否抢占到了资源。而在共享模式下，返回的是一个int值，为负数的时候则表明抢占失败</li>
+<li>共享模式这边少了一句 selfInterrupt()</li>
+</ul>
+<h4 id="和独占模式一样，如果尝试获取失败，会在队列中新建一个节点，持续等待机会去抢占"><a href="#和独占模式一样，如果尝试获取失败，会在队列中新建一个节点，持续等待机会去抢占" class="headerlink" title="和独占模式一样，如果尝试获取失败，会在队列中新建一个节点，持续等待机会去抢占"></a>和独占模式一样，如果尝试获取失败，会在队列中新建一个节点，持续等待机会去抢占</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">private void doAcquireShared(int arg) &#123;</span><br><span class="line">	// 注意这里的Node的模式已经是SHARED了</span><br><span class="line">       final Node node = addWaiter(Node.SHARED);</span><br><span class="line">       boolean failed = true;</span><br><span class="line">       try &#123;</span><br><span class="line">           boolean interrupted = false;</span><br><span class="line">           for (;;) &#123;</span><br><span class="line">               final Node p = node.predecessor();</span><br><span class="line">               if (p == head) &#123;</span><br><span class="line">               	// 同样的，注意这个返回是一个int值</span><br><span class="line">                   int r = tryAcquireShared(arg);</span><br><span class="line">                  // 返回值是正数，代表获取成功</span><br><span class="line">                   if (r &gt;= 0) &#123;</span><br><span class="line">                   	// 这是共享模式独有的Node状态</span><br><span class="line">                       setHeadAndPropagate(node, r);</span><br><span class="line">                       p.next = null; // help GC</span><br><span class="line">                       if (interrupted)</span><br><span class="line">                           selfInterrupt();</span><br><span class="line">                       failed = false;</span><br><span class="line">                       return;</span><br><span class="line">                   &#125;</span><br><span class="line">               &#125;</span><br><span class="line">               if (shouldParkAfterFailedAcquire(p, node) &amp;&amp;</span><br><span class="line">                   parkAndCheckInterrupt())</span><br><span class="line">                   interrupted = true;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125; finally &#123;</span><br><span class="line">           if (failed)</span><br><span class="line">               cancelAcquire(node);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="大部分逻辑和独占模式的时候差不多，独有的代码部分就是返回值为int以及setHeadAndPropagate这个方法，我们再看看这个方法里面做了什么"><a href="#大部分逻辑和独占模式的时候差不多，独有的代码部分就是返回值为int以及setHeadAndPropagate这个方法，我们再看看这个方法里面做了什么" class="headerlink" title="大部分逻辑和独占模式的时候差不多，独有的代码部分就是返回值为int以及setHeadAndPropagate这个方法，我们再看看这个方法里面做了什么"></a>大部分逻辑和独占模式的时候差不多，独有的代码部分就是返回值为int以及setHeadAndPropagate这个方法，我们再看看这个方法里面做了什么</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"> private void setHeadAndPropagate(Node node, int propagate) &#123;</span><br><span class="line">     Node h = head; // Record old head for check below</span><br><span class="line">     setHead(node);</span><br><span class="line">     // 这是和独占模式有区别的地方，在共享模式中，当设置完头节点之后，还要考虑是否还有唤醒后面的节点继续抢占</span><br><span class="line">     // 1:当prop参数大于0,即表示资源还要剩余</span><br><span class="line">     // 2:当原头节点为null或者已被标注为SIGNAL模式，就表示后继节点待被唤醒</span><br><span class="line">// 3:当现头节点为null或者已被标注为SIGNAL模式，就表示后继节点待被唤醒</span><br><span class="line"></span><br><span class="line">     if (propagate &gt; 0 || h == null || h.waitStatus &lt; 0 ||</span><br><span class="line">         (h = head) == null || h.waitStatus &lt; 0) &#123;</span><br><span class="line">         Node s = node.next;</span><br><span class="line">         if (s == null || s.isShared())</span><br><span class="line">             doReleaseShared();</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="和独占模式的区别只是在因为共享模式允许多个线程同时占有资源，所以当一个线程竞争到资源时，其他线程仍可以被唤醒去竞争。接下来看看共享模式怎么去释放资源"><a href="#和独占模式的区别只是在因为共享模式允许多个线程同时占有资源，所以当一个线程竞争到资源时，其他线程仍可以被唤醒去竞争。接下来看看共享模式怎么去释放资源" class="headerlink" title="和独占模式的区别只是在因为共享模式允许多个线程同时占有资源，所以当一个线程竞争到资源时，其他线程仍可以被唤醒去竞争。接下来看看共享模式怎么去释放资源"></a>和独占模式的区别只是在因为共享模式允许多个线程同时占有资源，所以当一个线程竞争到资源时，其他线程仍可以被唤醒去竞争。接下来看看共享模式怎么去释放资源</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">private void doReleaseShared() &#123;</span><br><span class="line">    for (;;) &#123;</span><br><span class="line">        Node h = head;</span><br><span class="line">        if (h != null &amp;&amp; h != tail) &#123;</span><br><span class="line">            int ws = h.waitStatus;</span><br><span class="line">            if (ws == Node.SIGNAL) &#123;</span><br><span class="line">                if (!compareAndSetWaitStatus(h, Node.SIGNAL, 0))</span><br><span class="line">                    continue;            // loop to recheck cases</span><br><span class="line">                unparkSuccessor(h);</span><br><span class="line">            &#125;</span><br><span class="line">            else if (ws == 0 &amp;&amp;</span><br><span class="line">                     !compareAndSetWaitStatus(h, 0, Node.PROPAGATE))</span><br><span class="line">                continue;                // loop on failed CAS</span><br><span class="line">        &#125;</span><br><span class="line">        if (h == head)                   // loop if head changed</span><br><span class="line">            break;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="具体的逻辑也和独占模式差不多，依旧是倒序的查找后继结点去唤醒。但是注意共享模式多了一个叫PROPAGATE的模式，表示在队列中的节点都可以依次被唤醒去竞争资源"><a href="#具体的逻辑也和独占模式差不多，依旧是倒序的查找后继结点去唤醒。但是注意共享模式多了一个叫PROPAGATE的模式，表示在队列中的节点都可以依次被唤醒去竞争资源" class="headerlink" title="具体的逻辑也和独占模式差不多，依旧是倒序的查找后继结点去唤醒。但是注意共享模式多了一个叫PROPAGATE的模式，表示在队列中的节点都可以依次被唤醒去竞争资源"></a>具体的逻辑也和独占模式差不多，依旧是倒序的查找后继结点去唤醒。但是注意共享模式多了一个叫PROPAGATE的模式，表示在队列中的节点都可以依次被唤醒去竞争资源</h4><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h4 id="综上，用大篇幅详解了AQS的主要两个模式的竞争和释放资源的过程。"><a href="#综上，用大篇幅详解了AQS的主要两个模式的竞争和释放资源的过程。" class="headerlink" title="综上，用大篇幅详解了AQS的主要两个模式的竞争和释放资源的过程。"></a>综上，用大篇幅详解了AQS的主要两个模式的竞争和释放资源的过程。</h4><h2 id="超链接："><a href="#超链接：" class="headerlink" title="超链接："></a>超链接：</h2><p><a href="http://www.ideabuffer.cn/2017/03/15/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3AbstractQueuedSynchronizer%EF%BC%88%E4%B8%80%EF%BC%89/" target="_blank" rel="noopener">关于为何倒序查找的Cancel方法论证</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/01/26/canal/canal源码分析 (三) 内嵌服务器启动/" rel="next" title>
+                <i class="fa fa-chevron-left"></i> 
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/02/13/设计模式/设计模式(一) 单例模式/" rel="prev" title>
+                 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Swaggy Q</p>
+              <div class="site-description motion-element" itemprop="description">拉塞尔FMVP了吗</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">19</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#AQS的详解"><span class="nav-number">1.</span> <span class="nav-text">AQS的详解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#java的JUC包我断断续续看了零星的几个实现类，一直想写一些文章记录一下，但是由于种种原因，一是由于自己的懒惰，也因为作为一个新手，这种东西我实在没太好的文笔能表达清楚，今天我再次想冲击一下这个疑难杂症。首先说一下，AQS是一个java的java-util-concurrent包中的一个名为AbstractQueuedSynchronizer的类，简称AQS。那这个类为什么这么重要呢？因为这个JUC包中包含了几乎所有我们平时会用于控制并发的锁和并发控制类，而这个AQS更是基本所有锁的核心控制框架，所以这个类是我们学习并发的重中之重。"><span class="nav-number">1.1.0.1.</span> <span class="nav-text">java的JUC包我断断续续看了零星的几个实现类，一直想写一些文章记录一下，但是由于种种原因，一是由于自己的懒惰，也因为作为一个新手，这种东西我实在没太好的文笔能表达清楚，今天我再次想冲击一下这个疑难杂症。首先说一下，AQS是一个java的java.util.concurrent包中的一个名为AbstractQueuedSynchronizer的类，简称AQS。那这个类为什么这么重要呢？因为这个JUC包中包含了几乎所有我们平时会用于控制并发的锁和并发控制类，而这个AQS更是基本所有锁的核心控制框架，所以这个类是我们学习并发的重中之重。</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#写在前面"><span class="nav-number">1.2.</span> <span class="nav-text">写在前面</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#在本系列的后面的文章中，我们会讲到，当多个线程抢占较少的资源的时候，AQS内部所做的一些关于分配资源的策略方法。在这之前我建议大家先想一下，如果由自己设计一个最简单的抢占模型，我们会怎么设计？我这边设想了一下，肯定会有下面几个步骤"><span class="nav-number">1.2.0.1.</span> <span class="nav-text">在本系列的后面的文章中，我们会讲到，当多个线程抢占较少的资源的时候，AQS内部所做的一些关于分配资源的策略方法。在这之前我建议大家先想一下，如果由自己设计一个最简单的抢占模型，我们会怎么设计？我这边设想了一下，肯定会有下面几个步骤</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#所以我们可以带着这种思路来看AQS内部的实现，看是不是按照我们的设计思路来编写框架的。"><span class="nav-number">1.2.0.2.</span> <span class="nav-text">所以我们可以带着这种思路来看AQS内部的实现，看是不是按照我们的设计思路来编写框架的。</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#正文"><span class="nav-number">1.3.</span> <span class="nav-text">正文</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#接下来我们直接看到AQS的内部，大致浏览一下类的内部结构。"><span class="nav-number">1.3.0.1.</span> <span class="nav-text">接下来我们直接看到AQS的内部，大致浏览一下类的内部结构。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#首先可以看到，内部有一个叫做Node的内部类实现。这个类就是用于我们之前的设计中，当线程抢占资源失败时，排在队列中的每个单元。在Node的构造函数我们可以看到除了传入了当时的线程，还传入了一个叫mode的参数。"><span class="nav-number">1.3.0.2.</span> <span class="nav-text">首先可以看到，内部有一个叫做Node的内部类实现。这个类就是用于我们之前的设计中，当线程抢占资源失败时，排在队列中的每个单元。在Node的构造函数我们可以看到除了传入了当时的线程，还传入了一个叫mode的参数。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#结合了一些这个构造函数的调用链，可以看到这个mode有两种情况"><span class="nav-number">1.3.0.3.</span> <span class="nav-text">结合了一些这个构造函数的调用链，可以看到这个mode有两种情况</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#这代表抢占资源的两种模式，一种是独占式，一种是共享式。"><span class="nav-number">1.3.0.4.</span> <span class="nav-text">这代表抢占资源的两种模式，一种是独占式，一种是共享式。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#这边引入了一个Node模式的概念。我们浏览过整个AQS的代码结构就可以发现，整份代码里就是有两种模式的不同入口，分别处理不同的模式。从名字也可以看出，比如下面的四个预留的抽象方法。"><span class="nav-number">1.3.0.5.</span> <span class="nav-text">这边引入了一个Node模式的概念。我们浏览过整个AQS的代码结构就可以发现，整份代码里就是有两种模式的不同入口，分别处理不同的模式。从名字也可以看出，比如下面的四个预留的抽象方法。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#因为之前我们也说过AQS是一个核心的并发基础框架类，内部处理了很多关于抢占资源的调度方法，同时预留了一些可以处理实际逻辑的方法，供子类处理。以上四个方法就是预留的方法。从方法名字我们也可以知道，这四个方法里面属于两个不同的模式。在单个模式的两个方法中，也分别处理了试图去获取资源和试图去释放资源的实际方法。"><span class="nav-number">1.3.0.6.</span> <span class="nav-text">因为之前我们也说过AQS是一个核心的并发基础框架类，内部处理了很多关于抢占资源的调度方法，同时预留了一些可以处理实际逻辑的方法，供子类处理。以上四个方法就是预留的方法。从方法名字我们也可以知道，这四个方法里面属于两个不同的模式。在单个模式的两个方法中，也分别处理了试图去获取资源和试图去释放资源的实际方法。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#接下来我会尽量用图的方式将这两种模式给讲清楚。好了，先讲一下独占式的模式-这个模式的获取资源和释放资源的入口方法分别的Acquire和Release"><span class="nav-number">1.3.0.7.</span> <span class="nav-text">接下来我会尽量用图的方式将这两种模式给讲清楚。好了，先讲一下独占式的模式,这个模式的获取资源和释放资源的入口方法分别的Acquire和Release</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EXCLUSIVE模式"><span class="nav-number">1.4.</span> <span class="nav-text">EXCLUSIVE模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#首先我们看一下独占模式的acquire方法"><span class="nav-number">1.4.1.</span> <span class="nav-text">首先我们看一下独占模式的acquire方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#简单看一下addWaiter方法内部"><span class="nav-number">1.4.1.1.</span> <span class="nav-text">简单看一下addWaiter方法内部</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#整体逻辑就是在队列中等待的节点，会不断去尝试获得资源。因为是先入先出队列，所以节点都会根据排在前面的节点的状态，来判断是不是轮到自己了。shouldParkAfterFailedAcquire方法就是用于根据前驱节点的状态来确定自己是否可以park"><span class="nav-number">1.4.1.2.</span> <span class="nav-text">整体逻辑就是在队列中等待的节点，会不断去尝试获得资源。因为是先入先出队列，所以节点都会根据排在前面的节点的状态，来判断是不是轮到自己了。shouldParkAfterFailedAcquire方法就是用于根据前驱节点的状态来确定自己是否可以park</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#若shouldParkAfterFailedAcquire方法返回了true，就是需要去park当前线程，等待先驱节点完成之后唤醒。park部分的代码就是直接调用了LockSupport的park方法，等待唤醒。唤醒可能是被前驱节点唤醒，也有可能是线程中断，所以唤醒后要检查一下线程状态"><span class="nav-number">1.4.1.3.</span> <span class="nav-text">若shouldParkAfterFailedAcquire方法返回了true，就是需要去park当前线程，等待先驱节点完成之后唤醒。park部分的代码就是直接调用了LockSupport的park方法，等待唤醒。唤醒可能是被前驱节点唤醒，也有可能是线程中断，所以唤醒后要检查一下线程状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#简单总结一下acquireQueued方法的内部逻辑。就是排在队列中的每个节点，内部都有一个永真循环去不断判断是否可以去竞争资源，或者排在前面的节点是不是放弃竞争了，如果是，则向前找到最近的没放弃的节点作为先驱节点。当先驱节点的状态已经是Signal的时候，则park当前线程，等待唤醒。"><span class="nav-number">1.4.1.4.</span> <span class="nav-text">简单总结一下acquireQueued方法的内部逻辑。就是排在队列中的每个节点，内部都有一个永真循环去不断判断是否可以去竞争资源，或者排在前面的节点是不是放弃竞争了，如果是，则向前找到最近的没放弃的节点作为先驱节点。当先驱节点的状态已经是Signal的时候，则park当前线程，等待唤醒。</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#再看一下独占模式的release方法"><span class="nav-number">1.4.2.</span> <span class="nav-text">再看一下独占模式的release方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#和acquire方法一样，里面具体的try…-方法都是抽象方法，由继承的子类来覆写逻辑。当前节点释放资源成功后，要去主动提醒后续节点。这部分的逻辑在unparkSuccessor方法中实现"><span class="nav-number">1.4.2.1.</span> <span class="nav-text">和acquire方法一样，里面具体的try…()方法都是抽象方法，由继承的子类来覆写逻辑。当前节点释放资源成功后，要去主动提醒后续节点。这部分的逻辑在unparkSuccessor方法中实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#这边逻辑大部分都是易懂的，无非就是释放资源后，通知队列中排在后面的节点开始竞争。但是为什么倒序？"><span class="nav-number">1.4.2.2.</span> <span class="nav-text">这边逻辑大部分都是易懂的，无非就是释放资源后，通知队列中排在后面的节点开始竞争。但是为什么倒序？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#因为考虑enq方法的时候，后继节点可能为null。也就是我们之前说的入队的时候，埋下的坑"><span class="nav-number">1.4.2.3.</span> <span class="nav-text">因为考虑enq方法的时候，后继节点可能为null。也就是我们之前说的入队的时候，埋下的坑</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#观察这段代码，其中只有在2的时候，是用CAS，保证尾指针指向了新加入的节点。而且在CAS之前，已经将当前节点的前驱节点设置为了原来的尾指针。CAS完成后，进行3。这边是一个简单的赋值语句。所以考虑这么一种情况"><span class="nav-number">1.4.2.4.</span> <span class="nav-text">观察这段代码，其中只有在2的时候，是用CAS，保证尾指针指向了新加入的节点。而且在CAS之前，已经将当前节点的前驱节点设置为了原来的尾指针。CAS完成后，进行3。这边是一个简单的赋值语句。所以考虑这么一种情况</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#这里注意几点细节。"><span class="nav-number">1.4.2.5.</span> <span class="nav-text">这里注意几点细节。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#唤醒成功后，就完成了释放资源的过程。之前park住的线程会被唤醒，继续他的竞争资源的过程"><span class="nav-number">1.4.2.6.</span> <span class="nav-text">唤醒成功后，就完成了释放资源的过程。之前park住的线程会被唤醒，继续他的竞争资源的过程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#共享模式的acquire方法"><span class="nav-number">1.4.3.</span> <span class="nav-text">共享模式的acquire方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#上面说完了独占模式下，资源竞争的问题，现在我们再看看另一种共享模式下有什么不一样。"><span class="nav-number">1.4.3.1.</span> <span class="nav-text">上面说完了独占模式下，资源竞争的问题，现在我们再看看另一种共享模式下有什么不一样。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#之前也说过，共享模式就是允许多个线程同时占有资源的情形。那这个acquireShared方法是怎么实现的呢？"><span class="nav-number">1.4.3.2.</span> <span class="nav-text">之前也说过，共享模式就是允许多个线程同时占有资源的情形。那这个acquireShared方法是怎么实现的呢？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#回想一下之前说的独占模式的acquire方法。可以很明显的看到几点不同"><span class="nav-number">1.4.3.3.</span> <span class="nav-text">回想一下之前说的独占模式的acquire方法。可以很明显的看到几点不同</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#和独占模式一样，如果尝试获取失败，会在队列中新建一个节点，持续等待机会去抢占"><span class="nav-number">1.4.3.4.</span> <span class="nav-text">和独占模式一样，如果尝试获取失败，会在队列中新建一个节点，持续等待机会去抢占</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#大部分逻辑和独占模式的时候差不多，独有的代码部分就是返回值为int以及setHeadAndPropagate这个方法，我们再看看这个方法里面做了什么"><span class="nav-number">1.4.3.5.</span> <span class="nav-text">大部分逻辑和独占模式的时候差不多，独有的代码部分就是返回值为int以及setHeadAndPropagate这个方法，我们再看看这个方法里面做了什么</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#和独占模式的区别只是在因为共享模式允许多个线程同时占有资源，所以当一个线程竞争到资源时，其他线程仍可以被唤醒去竞争。接下来看看共享模式怎么去释放资源"><span class="nav-number">1.4.3.6.</span> <span class="nav-text">和独占模式的区别只是在因为共享模式允许多个线程同时占有资源，所以当一个线程竞争到资源时，其他线程仍可以被唤醒去竞争。接下来看看共享模式怎么去释放资源</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#具体的逻辑也和独占模式差不多，依旧是倒序的查找后继结点去唤醒。但是注意共享模式多了一个叫PROPAGATE的模式，表示在队列中的节点都可以依次被唤醒去竞争资源"><span class="nav-number">1.4.3.7.</span> <span class="nav-text">具体的逻辑也和独占模式差不多，依旧是倒序的查找后继结点去唤醒。但是注意共享模式多了一个叫PROPAGATE的模式，表示在队列中的节点都可以依次被唤醒去竞争资源</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">1.5.</span> <span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#综上，用大篇幅详解了AQS的主要两个模式的竞争和释放资源的过程。"><span class="nav-number">1.5.0.1.</span> <span class="nav-text">综上，用大篇幅详解了AQS的主要两个模式的竞争和释放资源的过程。</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#超链接："><span class="nav-number">1.6.</span> <span class="nav-text">超链接：</span></a></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Swaggy Q</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=3.4.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.2.0"></script>
+
+  <script src="/js/motion.js?v=7.2.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.2.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.2.0"></script>
+<script src="/js/post-details.js?v=7.2.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.2.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
