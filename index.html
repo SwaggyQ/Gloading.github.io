@@ -290,6 +290,155 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/java动态代理机制/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Swaggy Q">
+      <meta itemprop="description" content="拉塞尔FMVP了吗">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dloading...">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/07/08/java动态代理机制/" class="post-title-link" itemprop="url">java的动态代理机制</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:06:41" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+            </span>
+          
+
+          
+            
+
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="java动态代理机制"><a href="#java动态代理机制" class="headerlink" title="java动态代理机制"></a>java动态代理机制</h1><p>Java中代理的实现一般分为三种：JDK静态代理、JDK动态代理以及CGLIB动态代理。在Spring的AOP实现中，主要应用了JDK动态代理以及CGLIB动态代理</p>
+<p>代理一般实现的模式为JDK静态代理：创建一个接口，然后创建被代理的类实现该接口并且实现该接口中的抽象方法。之后再创建一个代理类，同时使其也实现这个接口。在代理类中持有一个被代理对象的引用，而后在代理类方法中调用该对象的方法。</p>
+<p>静态代理: 实现一个代理类，然后持有被代理类的引用。则可以在调用前后实现附加方法。但是这个方法非常不好，对多个类会很繁琐。</p>
+<p>JDK静态代理是通过直接编码创建的，而JDK动态代理是利用反射机制在运行时创建代理类的。<br>JDK动态代理，注意看到Proxy类。已经提供了测试类，可以断点跟进去。</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/AQS详解/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -335,7 +484,7 @@
                 
               
 
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:00:26" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:02:01" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
             </span>
           
 
@@ -470,9 +619,1266 @@
 
 
     
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/ArrayBlockingQueue/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Swaggy Q">
+      <meta itemprop="description" content="拉塞尔FMVP了吗">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dloading...">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/07/08/ArrayBlockingQueue/" class="post-title-link" itemprop="url">ArrayBlockQueue源码详解</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:05:17" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+            </span>
+          
+
+          
+            
+
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="ArrayBlockingQueue"><a href="#ArrayBlockingQueue" class="headerlink" title="ArrayBlockingQueue"></a>ArrayBlockingQueue</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h4 id="本文讲一下ArrayBlockingQueue-下文简称ABQ-的一些原理，整理一下之前有点混乱的几个方法，具体ABQ是什么我就不详细说了。"><a href="#本文讲一下ArrayBlockingQueue-下文简称ABQ-的一些原理，整理一下之前有点混乱的几个方法，具体ABQ是什么我就不详细说了。" class="headerlink" title="本文讲一下ArrayBlockingQueue(下文简称ABQ)的一些原理，整理一下之前有点混乱的几个方法，具体ABQ是什么我就不详细说了。"></a>本文讲一下ArrayBlockingQueue(下文简称ABQ)的一些原理，整理一下之前有点混乱的几个方法，具体ABQ是什么我就不详细说了。</h4><h2 id="构造"><a href="#构造" class="headerlink" title="构造"></a>构造</h2><h4 id="照例先看看怎么创建这个我们需要的这个数据结构。有三个构造函数，简单看一下可以看到重点的是ArrayBlockingQueue-int-boolean-方法。其他两个都是之后调用这个方法。所以直接看看这个方法"><a href="#照例先看看怎么创建这个我们需要的这个数据结构。有三个构造函数，简单看一下可以看到重点的是ArrayBlockingQueue-int-boolean-方法。其他两个都是之后调用这个方法。所以直接看看这个方法" class="headerlink" title="照例先看看怎么创建这个我们需要的这个数据结构。有三个构造函数，简单看一下可以看到重点的是ArrayBlockingQueue(int , boolean)方法。其他两个都是之后调用这个方法。所以直接看看这个方法"></a>照例先看看怎么创建这个我们需要的这个数据结构。有三个构造函数，简单看一下可以看到重点的是ArrayBlockingQueue(int , boolean)方法。其他两个都是之后调用这个方法。所以直接看看这个方法</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public ArrayBlockingQueue(int capacity, boolean fair) &#123;</span><br><span class="line">	// 校验容量不能是负数</span><br><span class="line">    if (capacity &lt;= 0)</span><br><span class="line">        throw new IllegalArgumentException();</span><br><span class="line">    //</span><br><span class="line">    this.items = new Object[capacity];</span><br><span class="line">    lock = new ReentrantLock(fair);</span><br><span class="line">    notEmpty = lock.newCondition();</span><br><span class="line">    notFull =  lock.newCondition();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/ArrayList与LinkedList的实现和区别/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Swaggy Q">
+      <meta itemprop="description" content="拉塞尔FMVP了吗">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dloading...">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/07/08/ArrayList与LinkedList的实现和区别/" class="post-title-link" itemprop="url">ArrayList与LinkedList的实现和区别</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:04:42" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+            </span>
+          
+
+          
+            
+
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="ArrayList与LinkedList的实现和区别"><a href="#ArrayList与LinkedList的实现和区别" class="headerlink" title="ArrayList与LinkedList的实现和区别"></a>ArrayList与LinkedList的实现和区别</h1><h2 id="LinkedList"><a href="#LinkedList" class="headerlink" title="LinkedList"></a>LinkedList</h2><h4 id="LinkedList实现了Deque的接口，即代表可以在首尾均可进行操作。类中有两个属性，first和last，分别指向链表的首和尾。"><a href="#LinkedList实现了Deque的接口，即代表可以在首尾均可进行操作。类中有两个属性，first和last，分别指向链表的首和尾。" class="headerlink" title="LinkedList实现了Deque的接口，即代表可以在首尾均可进行操作。类中有两个属性，first和last，分别指向链表的首和尾。"></a>LinkedList实现了Deque的接口，即代表可以在首尾均可进行操作。类中有两个属性，first和last，分别指向链表的首和尾。</h4><h4 id="在类内部还实现了一个链表节点Node，存储val，pre，next"><a href="#在类内部还实现了一个链表节点Node，存储val，pre，next" class="headerlink" title="在类内部还实现了一个链表节点Node，存储val，pre，next"></a>在类内部还实现了一个链表节点Node，存储val，pre，next</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">private static class Node&lt;E&gt; &#123;</span><br><span class="line">       E item;</span><br><span class="line">       Node&lt;E&gt; next;</span><br><span class="line">       Node&lt;E&gt; prev;</span><br><span class="line"></span><br><span class="line">       Node(Node&lt;E&gt; prev, E element, Node&lt;E&gt; next) &#123;</span><br><span class="line">           this.item = element;</span><br><span class="line">           this.next = next;</span><br><span class="line">           this.prev = prev;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="linkLast-方法-在最尾端插入节点"><a href="#linkLast-方法-在最尾端插入节点" class="headerlink" title="linkLast() 方法,在最尾端插入节点"></a>linkLast() 方法,在最尾端插入节点</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">void linkLast(E e) &#123;</span><br><span class="line">    final Node&lt;E&gt; l = last;</span><br><span class="line">    final Node&lt;E&gt; newNode = new Node&lt;&gt;(l, e, null);</span><br><span class="line">    last = newNode;</span><br><span class="line">    if (l == null)</span><br><span class="line">        first = newNode;</span><br><span class="line">    else</span><br><span class="line">        l.next = newNode;</span><br><span class="line">    size++;</span><br><span class="line">    modCount++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="linkFirst-方法，在最首端插入节点"><a href="#linkFirst-方法，在最首端插入节点" class="headerlink" title="linkFirst() 方法，在最首端插入节点"></a>linkFirst() 方法，在最首端插入节点</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">void linkBefore(E e, Node&lt;E&gt; succ) &#123;</span><br><span class="line">       // assert succ != null;</span><br><span class="line">       final Node&lt;E&gt; pred = succ.prev;</span><br><span class="line">       final Node&lt;E&gt; newNode = new Node&lt;&gt;(pred, e, succ);</span><br><span class="line">       succ.prev = newNode;</span><br><span class="line">       if (pred == null)</span><br><span class="line">           first = newNode;</span><br><span class="line">       else</span><br><span class="line">           pred.next = newNode;</span><br><span class="line">       size++;</span><br><span class="line">       modCount++;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="linkBefore-方法，在指定位置插入节点"><a href="#linkBefore-方法，在指定位置插入节点" class="headerlink" title="linkBefore() 方法，在指定位置插入节点"></a>linkBefore() 方法，在指定位置插入节点</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">void linkBefore(E e, Node&lt;E&gt; succ) &#123;</span><br><span class="line">       // assert succ != null;</span><br><span class="line">       final Node&lt;E&gt; pred = succ.prev;</span><br><span class="line">       final Node&lt;E&gt; newNode = new Node&lt;&gt;(pred, e, succ);</span><br><span class="line">       succ.prev = newNode;</span><br><span class="line">       if (pred == null)</span><br><span class="line">           first = newNode;</span><br><span class="line">       else</span><br><span class="line">           pred.next = newNode;</span><br><span class="line">       size++;</span><br><span class="line">       modCount++;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="以上三个就是类中的灵魂方法，其他的新增节点的方法均会调用到以上三个，例如"><a href="#以上三个就是类中的灵魂方法，其他的新增节点的方法均会调用到以上三个，例如" class="headerlink" title="以上三个就是类中的灵魂方法，其他的新增节点的方法均会调用到以上三个，例如"></a>以上三个就是类中的灵魂方法，其他的新增节点的方法均会调用到以上三个，例如</h4><h4 id="add-方法，等同于offer方法。直接在尾部插入节点，直接调用linkLast"><a href="#add-方法，等同于offer方法。直接在尾部插入节点，直接调用linkLast" class="headerlink" title="add()方法，等同于offer方法。直接在尾部插入节点，直接调用linkLast"></a>add()方法，等同于offer方法。直接在尾部插入节点，直接调用linkLast</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public boolean add(E e) &#123;</span><br><span class="line">       linkLast(e);</span><br><span class="line">       return true;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="add-int-index-E-element-方法，在指定的位置插入节点，会先判断插入的位置是不是已经大于了链表长度了，再调用linkBefore"><a href="#add-int-index-E-element-方法，在指定的位置插入节点，会先判断插入的位置是不是已经大于了链表长度了，再调用linkBefore" class="headerlink" title="add(int index, E element)方法，在指定的位置插入节点，会先判断插入的位置是不是已经大于了链表长度了，再调用linkBefore"></a>add(int index, E element)方法，在指定的位置插入节点，会先判断插入的位置是不是已经大于了链表长度了，再调用linkBefore</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">public void add(int index, E element) &#123;</span><br><span class="line">       checkPositionIndex(index);</span><br><span class="line"></span><br><span class="line">       if (index == size)</span><br><span class="line">           linkLast(element);</span><br><span class="line">       else</span><br><span class="line">           linkBefore(element, node(index));</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   // 从前向后，或者从后向前</span><br><span class="line">   Node&lt;E&gt; node(int index) &#123;</span><br><span class="line">       // assert isElementIndex(index);</span><br><span class="line"></span><br><span class="line">       if (index &lt; (size &gt;&gt; 1)) &#123;</span><br><span class="line">           Node&lt;E&gt; x = first;</span><br><span class="line">           for (int i = 0; i &lt; index; i++)</span><br><span class="line">               x = x.next;</span><br><span class="line">           return x;</span><br><span class="line">       &#125; else &#123;</span><br><span class="line">           Node&lt;E&gt; x = last;</span><br><span class="line">           for (int i = size - 1; i &gt; index; i--)</span><br><span class="line">               x = x.prev;</span><br><span class="line">           return x;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="再看到对首部进行操作。即push方法，或者offerFirst-最终会调用linkFirst方法"><a href="#再看到对首部进行操作。即push方法，或者offerFirst-最终会调用linkFirst方法" class="headerlink" title="再看到对首部进行操作。即push方法，或者offerFirst,最终会调用linkFirst方法"></a>再看到对首部进行操作。即push方法，或者offerFirst,最终会调用linkFirst方法</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public void push(E e) &#123;</span><br><span class="line">      addFirst(e);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  public void addFirst(E e) &#123;</span><br><span class="line">      linkFirst(e);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/HashMap 1.7 版本的transfer方法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Swaggy Q">
+      <meta itemprop="description" content="拉塞尔FMVP了吗">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dloading...">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/07/08/HashMap 1.7 版本的transfer方法/" class="post-title-link" itemprop="url">HashMap 1.7 版本的transfer方法</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:07:31" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+            </span>
+          
+
+          
+            
+
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="HashMap-1-7-版本的transfer方法"><a href="#HashMap-1-7-版本的transfer方法" class="headerlink" title="HashMap 1.7 版本的transfer方法"></a>HashMap 1.7 版本的transfer方法</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">void transfer(Entry[] newTable) &#123;</span><br><span class="line">     Entry[] src = table; </span><br><span class="line"></span><br><span class="line">     int newCapacity = newTable.length;</span><br><span class="line"></span><br><span class="line">     for (int j = 0; j &lt; src.length; j++) &#123; </span><br><span class="line">         Entry&lt;K,V&gt; e = src[j];           </span><br><span class="line">         if (e != null) &#123;</span><br><span class="line">             src[j] = null; </span><br><span class="line"></span><br><span class="line">             do &#123; </span><br><span class="line">                Entry&lt;K,V&gt; next = e.next; </span><br><span class="line">                int i = indexFor(e.hash, newCapacity); </span><br><span class="line">                e.next = newTable[i]; </span><br><span class="line">                newTable[i] = e;  </span><br><span class="line">                e = next;             </span><br><span class="line">            &#125; while (e != null);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"> static int indexFor(int h, int length) &#123;  </span><br><span class="line">         return h &amp; (length-1); </span><br><span class="line">  	 &#125;</span><br></pre></td></tr></table></figure>
+
+<p>newTable和src<br>遍历src中的所有桶位，如果存在链表节点，则需要遍历所有节点，用首插法的方式，将节点都移动到新的数组中。这边举一个例子，假设初始数组大小是2</p>
+<p><img src="img/HashMapDeadLoop.png" alt="数组死锁"><br>线程1开始后，线程2开始transfer，并已经结束。就会造成死循环<br><img src="img/HashMapDeadLoop2.png" alt="数组死锁"><br>这时候如果调用get方法，则会一直在死循环中</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/ReentrantLock源码解析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Swaggy Q">
+      <meta itemprop="description" content="拉塞尔FMVP了吗">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dloading...">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/07/08/ReentrantLock源码解析/" class="post-title-link" itemprop="url">ReetrantLock源码详解</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:06:24" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+            </span>
+          
+
+          
+            
+
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="ReentrantLock源码详解"><a href="#ReentrantLock源码详解" class="headerlink" title="ReentrantLock源码详解"></a>ReentrantLock源码详解</h1><h2 id="前文"><a href="#前文" class="headerlink" title="前文"></a>前文</h2><h4 id="之前的文章我们分析了AQS这个并发框架的逻辑，本文再对同在JUC包中的一种锁的具体实现进行一下分析。"><a href="#之前的文章我们分析了AQS这个并发框架的逻辑，本文再对同在JUC包中的一种锁的具体实现进行一下分析。" class="headerlink" title="之前的文章我们分析了AQS这个并发框架的逻辑，本文再对同在JUC包中的一种锁的具体实现进行一下分析。"></a>之前的文章我们分析了AQS这个并发框架的逻辑，本文再对同在JUC包中的一种锁的具体实现进行一下分析。</h4><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="ReentrantLock实现了Lock的接口，用于对代码中的并发控制，内部实现了一个AQS的子类实现。有公平和非公平两种模式。模式选择在初始化的时候就已经选定"><a href="#ReentrantLock实现了Lock的接口，用于对代码中的并发控制，内部实现了一个AQS的子类实现。有公平和非公平两种模式。模式选择在初始化的时候就已经选定" class="headerlink" title="ReentrantLock实现了Lock的接口，用于对代码中的并发控制，内部实现了一个AQS的子类实现。有公平和非公平两种模式。模式选择在初始化的时候就已经选定"></a>ReentrantLock实现了Lock的接口，用于对代码中的并发控制，内部实现了一个AQS的子类实现。有公平和非公平两种模式。模式选择在初始化的时候就已经选定</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public ReentrantLock() &#123;</span><br><span class="line">    sync = new NonfairSync();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public ReentrantLock(boolean fair) &#123;</span><br><span class="line">    sync = fair ? new FairSync() : new NonfairSync();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="可以看到默认实现是非公平的。所以源码的重点就是这两个类FairSync和NonfairSync。进一步可以看到，这两个类都是继承自内部类Sync。所以我们先看到这个统一的父类"><a href="#可以看到默认实现是非公平的。所以源码的重点就是这两个类FairSync和NonfairSync。进一步可以看到，这两个类都是继承自内部类Sync。所以我们先看到这个统一的父类" class="headerlink" title="可以看到默认实现是非公平的。所以源码的重点就是这两个类FairSync和NonfairSync。进一步可以看到，这两个类都是继承自内部类Sync。所以我们先看到这个统一的父类"></a>可以看到默认实现是非公平的。所以源码的重点就是这两个类FairSync和NonfairSync。进一步可以看到，这两个类都是继承自内部类Sync。所以我们先看到这个统一的父类</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">// 继承实现了AQS，使用了独占模式</span><br><span class="line">	abstract static class Sync extends AbstractQueuedSynchronizer &#123;</span><br><span class="line">       private static final long serialVersionUID = -5179523762034025860L;</span><br><span class="line"></span><br><span class="line">       abstract void lock();</span><br><span class="line">	// 这是非公平锁独有的抢占方法</span><br><span class="line">       final boolean nonfairTryAcquire(int acquires) &#123;</span><br><span class="line">           final Thread current = Thread.currentThread();</span><br><span class="line">           int c = getState();</span><br><span class="line">           // 如果当前资源为0，则代表可以开始抢占</span><br><span class="line">           if (c == 0) &#123;</span><br><span class="line">           	// 用CAS的方式将资源改成抢占后的值，一般都是+1</span><br><span class="line">               if (compareAndSetState(0, acquires)) &#123;</span><br><span class="line">               	// 表示当前线程已经独占了锁</span><br><span class="line">                   setExclusiveOwnerThread(current);</span><br><span class="line">                   return true;</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">           // 如果当前锁已经被抢占，而且正是被当前线程抢占，则可以直接再次进入锁</span><br><span class="line">           else if (current == getExclusiveOwnerThread()) &#123;</span><br><span class="line">               int nextc = c + acquires;</span><br><span class="line">               if (nextc &lt; 0) // overflow</span><br><span class="line">                   throw new Error(&quot;Maximum lock count exceeded&quot;);</span><br><span class="line">               setState(nextc);</span><br><span class="line">               return true;</span><br><span class="line">           &#125;</span><br><span class="line">           return false;</span><br><span class="line">       &#125;</span><br><span class="line">	// 继承实现了独占模式的释放资源的抽象方法</span><br><span class="line">       protected final boolean tryRelease(int releases) &#123;</span><br><span class="line">       	// 在ReentrantLock中，得到资源之后会将state + 1;释放之后 再 -1</span><br><span class="line">       	// 所以得到的c的值表示是否已经将所有加锁的资源释放</span><br><span class="line">       	// 例如 初始state = 0，此时 线程A第一次得到了锁，则state += 1，同理多次得到会多次+1</span><br><span class="line">       	// 然后依次释放，依次-1</span><br><span class="line">           int c = getState() - releases;</span><br><span class="line">           // 只有当前线程是抢占到资源的线程时才可以释放</span><br><span class="line">           if (Thread.currentThread() != getExclusiveOwnerThread())</span><br><span class="line">               throw new IllegalMonitorStateException();</span><br><span class="line">           // 标志是否完全可以供抢占</span><br><span class="line">           boolean free = false;</span><br><span class="line">           if (c == 0) &#123;</span><br><span class="line">           	// 如上分析，c==0，代表线程完全释放了资源，</span><br><span class="line">               free = true;</span><br><span class="line">             // 表示当前没有线程抢占了资源</span><br><span class="line">               setExclusiveOwnerThread(null);</span><br><span class="line">           &#125;</span><br><span class="line">           setState(c);</span><br><span class="line">           return free;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       protected final boolean isHeldExclusively() &#123;</span><br><span class="line">           // While we must in general read state before owner,</span><br><span class="line">           // we don&apos;t need to do so to check if current thread is owner</span><br><span class="line">           return getExclusiveOwnerThread() == Thread.currentThread();</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="在ReentrantLock的内部类Sync的实现就是如上。接下来看到他的子类，公平锁和非公平锁的实现。先看到非公平锁"><a href="#在ReentrantLock的内部类Sync的实现就是如上。接下来看到他的子类，公平锁和非公平锁的实现。先看到非公平锁" class="headerlink" title="在ReentrantLock的内部类Sync的实现就是如上。接下来看到他的子类，公平锁和非公平锁的实现。先看到非公平锁"></a>在ReentrantLock的内部类Sync的实现就是如上。接下来看到他的子类，公平锁和非公平锁的实现。先看到非公平锁</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">static final class NonfairSync extends Sync &#123;</span><br><span class="line">       private static final long serialVersionUID = 7316153563782823691L;</span><br><span class="line"></span><br><span class="line">       /**</span><br><span class="line">        * Performs lock.  Try immediate barge, backing up to normal</span><br><span class="line">        * acquire on failure.</span><br><span class="line">        */</span><br><span class="line">       // 抢占锁 </span><br><span class="line">       final void lock() &#123;</span><br><span class="line">       	// 直接先尝试用CAS的方式，改变资源的状态</span><br><span class="line">           if (compareAndSetState(0, 1))</span><br><span class="line">           	// 如果CAS成功，则看做已经得到了锁，直接将独占线程改为自己</span><br><span class="line">               setExclusiveOwnerThread(Thread.currentThread());</span><br><span class="line">           else</span><br><span class="line">           	// 如果CAS没有成功，则进入正常的AQS抢占流程</span><br><span class="line">               acquire(1);</span><br><span class="line">       &#125;</span><br><span class="line">	// 抽象方法直接使用了Sync中的非公平抢占实现</span><br><span class="line">       protected final boolean tryAcquire(int acquires) &#123;</span><br><span class="line">           return nonfairTryAcquire(acquires);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="再看看公平锁"><a href="#再看看公平锁" class="headerlink" title="再看看公平锁"></a>再看看公平锁</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">static final class FairSync extends Sync &#123;</span><br><span class="line">       private static final long serialVersionUID = -3000897897090466540L;</span><br><span class="line"></span><br><span class="line">       final void lock() &#123;</span><br><span class="line">       	// 直接进行AQS抢占流程</span><br><span class="line">           acquire(1);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       /**</span><br><span class="line">        * Fair version of tryAcquire.  Don&apos;t grant access unless</span><br><span class="line">        * recursive call or no waiters or is first.</span><br><span class="line">        */</span><br><span class="line">        // 抽象方法的实现，可以看到和非公平的方式基本相同</span><br><span class="line">       protected final boolean tryAcquire(int acquires) &#123;</span><br><span class="line">           final Thread current = Thread.currentThread();</span><br><span class="line">           int c = getState();</span><br><span class="line">           if (c == 0) &#123;</span><br><span class="line">           		// 只有多了一个这个判断</span><br><span class="line">           		// 就是判断在AQS的等待队列中，是否已经有其他节点在等待</span><br><span class="line">           		// 如果没有，则直接调用</span><br><span class="line">           		// 也就是公平锁代表不能插队</span><br><span class="line">               if (!hasQueuedPredecessors() &amp;&amp;</span><br><span class="line">                   compareAndSetState(0, acquires)) &#123;</span><br><span class="line">                   setExclusiveOwnerThread(current);</span><br><span class="line">                   return true;</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">           else if (current == getExclusiveOwnerThread()) &#123;</span><br><span class="line">               int nextc = c + acquires;</span><br><span class="line">               if (nextc &lt; 0)</span><br><span class="line">                   throw new Error(&quot;Maximum lock count exceeded&quot;);</span><br><span class="line">               setState(nextc);</span><br><span class="line">               return true;</span><br><span class="line">           &#125;</span><br><span class="line">           return false;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="所以看到公平锁和非公平锁的区别就体现在，在尝试获取资源的时候，是否可以插队获取。"><a href="#所以看到公平锁和非公平锁的区别就体现在，在尝试获取资源的时候，是否可以插队获取。" class="headerlink" title="所以看到公平锁和非公平锁的区别就体现在，在尝试获取资源的时候，是否可以插队获取。"></a>所以看到公平锁和非公平锁的区别就体现在，在尝试获取资源的时候，是否可以插队获取。</h4><h4 id="进一步看到这个tryAcquire方法，也就是公平锁和非公平锁具体差异的地方。假设此时在AQS内部已经有一个等待者队列吗。head节点释放了资源，应该去唤醒后续的节点开始竞争，假设此时非公平锁开始插队竞争，而且成功的话。那么在等待者队列中的节点将没有资源再Park了，就会一直不停的永真循环去尝试获取资源。"><a href="#进一步看到这个tryAcquire方法，也就是公平锁和非公平锁具体差异的地方。假设此时在AQS内部已经有一个等待者队列吗。head节点释放了资源，应该去唤醒后续的节点开始竞争，假设此时非公平锁开始插队竞争，而且成功的话。那么在等待者队列中的节点将没有资源再Park了，就会一直不停的永真循环去尝试获取资源。" class="headerlink" title="进一步看到这个tryAcquire方法，也就是公平锁和非公平锁具体差异的地方。假设此时在AQS内部已经有一个等待者队列吗。head节点释放了资源，应该去唤醒后续的节点开始竞争，假设此时非公平锁开始插队竞争，而且成功的话。那么在等待者队列中的节点将没有资源再Park了，就会一直不停的永真循环去尝试获取资源。"></a>进一步看到这个tryAcquire方法，也就是公平锁和非公平锁具体差异的地方。假设此时在AQS内部已经有一个等待者队列吗。head节点释放了资源，应该去唤醒后续的节点开始竞争，假设此时非公平锁开始插队竞争，而且成功的话。那么在等待者队列中的节点将没有资源再Park了，就会一直不停的永真循环去尝试获取资源。</h4>
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/HashTable,HashMap,ConcurrentHashMap 横向对比/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Swaggy Q">
+      <meta itemprop="description" content="拉塞尔FMVP了吗">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dloading...">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/07/08/HashTable,HashMap,ConcurrentHashMap 横向对比/" class="post-title-link" itemprop="url">HashTable，HashMap，CocurrentHashMap横向对比</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:07:07" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+            </span>
+          
+
+          
+            
+
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="HashTable-HashMap-ConcurrentHashMap-横向对比"><a href="#HashTable-HashMap-ConcurrentHashMap-横向对比" class="headerlink" title="HashTable,HashMap,ConcurrentHashMap 横向对比"></a>HashTable,HashMap,ConcurrentHashMap 横向对比</h1><h2 id="hash算法"><a href="#hash算法" class="headerlink" title="hash算法"></a>hash算法</h2><h3 id="HashTable"><a href="#HashTable" class="headerlink" title="HashTable"></a>HashTable</h3><pre><code>int index = (key.hashcode &amp; 0x7fffffff) % tab.length</code></pre><h3 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h3><pre><code>int index = (key == null) ? 0 : (h = key.hashCode()) ^ (h &gt;&gt;&gt; 16);
+最终的桶位值还需要 index &amp; (tab.length -1)</code></pre><h3 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h3><pre><code>int index = (key.hashCode() ^ (key.hashCode() &gt;&gt;&gt; 16)) &amp; 0x7fffffff;
+最终的桶位值还需要 index &amp; (tab.length -1)</code></pre><h2 id="k，v能否为null"><a href="#k，v能否为null" class="headerlink" title="k，v能否为null"></a>k，v能否为null</h2><h3 id="HashTable-1"><a href="#HashTable-1" class="headerlink" title="HashTable"></a>HashTable</h3><pre><code>k，v均不能为null，v是因为在代码中判断，k是因为null.hashcode()会报错</code></pre><h3 id="HashMap-1"><a href="#HashMap-1" class="headerlink" title="HashMap"></a>HashMap</h3><pre><code>k,v均可以为null。 且k为null时，会自动分配其为0号桶位</code></pre><h3 id="ConcurrentHashMap-1"><a href="#ConcurrentHashMap-1" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h3><pre><code>k，v均不能为null，强行校验</code></pre><h2 id="扩容机制"><a href="#扩容机制" class="headerlink" title="扩容机制"></a>扩容机制</h2><h3 id="HashTable-2"><a href="#HashTable-2" class="headerlink" title="HashTable"></a>HashTable</h3><pre><code>在put值到底层tab前，会先进行一次count&gt;=threshold的判断，若是，则先直接进行rehash(),再将k,v放到扩容后的tab中
+扩容后的newsize = (oldsize * 2) +1
+倒序遍历oldtab中的每一个桶位，并用首插法的方式，将元素插入到newtab中
+整个过程由synchronized强加锁，避免并发问题</code></pre><h3 id="HashMap-2"><a href="#HashMap-2" class="headerlink" title="HashMap"></a>HashMap</h3><pre><code>在put值到tab之后，才会进行容量检查，若(++size &gt; threshold)，则进行扩容
+扩容后的newsize = (oldsize * 2)，保持每次底层tab的容量都为2的幂次方
+顺序遍历oldtab，然后将元素放置在相应的位置，改为尾插法
+且根据bit直接计算对应所在的位置
+整个过程，不做并发控制，所以会有并发问题</code></pre><h3 id="ConcurrentHashMap-2"><a href="#ConcurrentHashMap-2" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h3>
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/HashTable/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Swaggy Q">
+      <meta itemprop="description" content="拉塞尔FMVP了吗">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dloading...">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/07/08/HashTable/" class="post-title-link" itemprop="url">HashTable源码详解</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:04:30" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+            </span>
+          
+
+          
+            
+
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="聊一聊HashTable"><a href="#聊一聊HashTable" class="headerlink" title="聊一聊HashTable"></a>聊一聊HashTable</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h4 id="关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下"><a href="#关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下" class="headerlink" title="关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下"></a>关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下</h4><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？"><a href="#大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？" class="headerlink" title="大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？"></a>大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？</h4><h4 id="这边用一个小例子作为入口，我们可以进去一探究竟"><a href="#这边用一个小例子作为入口，我们可以进去一探究竟" class="headerlink" title="这边用一个小例子作为入口，我们可以进去一探究竟"></a>这边用一个小例子作为入口，我们可以进去一探究竟</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">    // 初始化</span><br><span class="line">    Hashtable hb = new Hashtable();</span><br><span class="line">    // 存储</span><br><span class="line">    hb.put(&quot;1&quot;,new Integer(1));</span><br><span class="line">    hb.put(&quot;2&quot;,new Integer(2));</span><br><span class="line">    hb.put(&quot;3&quot;,new Integer(3));</span><br><span class="line">    // 取值</span><br><span class="line">    System.out.println(hb.get(&quot;1&quot;));</span><br><span class="line">    System.out.println(hb.get(&quot;2&quot;));</span><br><span class="line">    System.out.println(hb.get(&quot;3&quot;));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="这边写了一个最简单的例子。例子包括三部分，在注释中也有指出。"><a href="#这边写了一个最简单的例子。例子包括三部分，在注释中也有指出。" class="headerlink" title="这边写了一个最简单的例子。例子包括三部分，在注释中也有指出。"></a>这边写了一个最简单的例子。例子包括三部分，在注释中也有指出。</h4><ul>
+<li>初始化 </li>
+<li>存储</li>
+<li>取值</li>
+</ul>
+<h4 id="这三个步骤也是我们平时用到的流程，本文就会根据这三个小块来探究一下内部的实现"><a href="#这三个步骤也是我们平时用到的流程，本文就会根据这三个小块来探究一下内部的实现" class="headerlink" title="这三个步骤也是我们平时用到的流程，本文就会根据这三个小块来探究一下内部的实现"></a>这三个步骤也是我们平时用到的流程，本文就会根据这三个小块来探究一下内部的实现</h4><h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><h4 id="当我们想要使用一个HashTable的时候，最显而易见的就是我们会先new一个实例化对象出来。这样我们才会有对象可操作，那么就先看看这个构造函数。"><a href="#当我们想要使用一个HashTable的时候，最显而易见的就是我们会先new一个实例化对象出来。这样我们才会有对象可操作，那么就先看看这个构造函数。" class="headerlink" title="当我们想要使用一个HashTable的时候，最显而易见的就是我们会先new一个实例化对象出来。这样我们才会有对象可操作，那么就先看看这个构造函数。"></a>当我们想要使用一个HashTable的时候，最显而易见的就是我们会先new一个实例化对象出来。这样我们才会有对象可操作，那么就先看看这个构造函数。</h4><h1 id="TODO-构造函数截图"><a href="#TODO-构造函数截图" class="headerlink" title="TODO 构造函数截图"></a>TODO 构造函数截图</h1><h4 id="从这个图中也可以看到，总共提供了四种不同的构造函数。其实当我们看过实现之后我们可以发现，其实四个不同的方法最终都是调用了Hashtable-int-float-这个方法，其他构造方法只是提供了一些默认参数而已。所以我们直接先看到这个方法。"><a href="#从这个图中也可以看到，总共提供了四种不同的构造函数。其实当我们看过实现之后我们可以发现，其实四个不同的方法最终都是调用了Hashtable-int-float-这个方法，其他构造方法只是提供了一些默认参数而已。所以我们直接先看到这个方法。" class="headerlink" title="从这个图中也可以看到，总共提供了四种不同的构造函数。其实当我们看过实现之后我们可以发现，其实四个不同的方法最终都是调用了Hashtable(int, float) 这个方法，其他构造方法只是提供了一些默认参数而已。所以我们直接先看到这个方法。"></a>从这个图中也可以看到，总共提供了四种不同的构造函数。其实当我们看过实现之后我们可以发现，其实四个不同的方法最终都是调用了Hashtable(int, float) 这个方法，其他构造方法只是提供了一些默认参数而已。所以我们直接先看到这个方法。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">public Hashtable(int initialCapacity, float loadFactor) &#123;</span><br><span class="line">    if (initialCapacity &lt; 0)</span><br><span class="line">        throw new IllegalArgumentException(&quot;Illegal Capacity: &quot;+</span><br><span class="line">                                           initialCapacity);</span><br><span class="line">    if (loadFactor &lt;= 0 || Float.isNaN(loadFactor))</span><br><span class="line">        throw new IllegalArgumentException(&quot;Illegal Load: &quot;+loadFactor);</span><br><span class="line"></span><br><span class="line">    if (initialCapacity==0)</span><br><span class="line">        initialCapacity = 1;</span><br><span class="line">    this.loadFactor = loadFactor;</span><br><span class="line">    // 上面的代码主要对参数的格式做了一些检验，例如initialCapacity不能为负数，而且最小也必须是1，</span><br><span class="line">    // loadFactor 必须是大于零的浮点数</span><br><span class="line">    </span><br><span class="line">    // 再根据initialCapacity参数创建一个Entry数组</span><br><span class="line">    table = new Entry&lt;?,?&gt;[initialCapacity];</span><br><span class="line">    // 初始化threshold，(两个参数的乘积)和(Int最大值-8)中的较小值</span><br><span class="line">    threshold = (int)Math.min(initialCapacity * loadFactor, MAX_ARRAY_SIZE + 1);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="这样我们就完成了HashTable的部分参数初始化的工作。可以看到主要是创建了一个Entry的数组。另外如果我们使用的是无参数的构造函数，那么这两个的参数的默认值为11-0-75f。"><a href="#这样我们就完成了HashTable的部分参数初始化的工作。可以看到主要是创建了一个Entry的数组。另外如果我们使用的是无参数的构造函数，那么这两个的参数的默认值为11-0-75f。" class="headerlink" title="这样我们就完成了HashTable的部分参数初始化的工作。可以看到主要是创建了一个Entry的数组。另外如果我们使用的是无参数的构造函数，那么这两个的参数的默认值为11, 0.75f。"></a>这样我们就完成了HashTable的部分参数初始化的工作。可以看到主要是创建了一个Entry的数组。另外如果我们使用的是无参数的构造函数，那么这两个的参数的默认值为11, 0.75f。</h4><h2 id="存储"><a href="#存储" class="headerlink" title="存储"></a>存储</h2><h4 id="现在我们看一下当我们put的时候，内部发生了什么"><a href="#现在我们看一下当我们put的时候，内部发生了什么" class="headerlink" title="现在我们看一下当我们put的时候，内部发生了什么"></a>现在我们看一下当我们put的时候，内部发生了什么</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">// 可以看到这个方法名上加了synchronized，这和在HashMap上是有不一样的地方</span><br><span class="line">   public synchronized V put(K key, V value) &#123;</span><br><span class="line">       // Make sure the value is not null</span><br><span class="line">       if (value == null) &#123;</span><br><span class="line">           throw new NullPointerException();</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       // Makes sure the key is not already in the hashtable.</span><br><span class="line">       Entry&lt;?,?&gt; tab[] = table;</span><br><span class="line">       // 会取传入的键的Hashcode，所以每个字符串的Hashcode都是一样的</span><br><span class="line">       int hash = key.hashCode();</span><br><span class="line">       // 通过计算得到当前键在Entry数组中的下标</span><br><span class="line">       int index = (hash &amp; 0x7FFFFFFF) % tab.length;</span><br><span class="line">       @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">       // 取出在数组中指定下标已存在的值，指定下标取出来可能是一个链表，在Entry中存有链表后继结点的引用</span><br><span class="line">       Entry&lt;K,V&gt; entry = (Entry&lt;K,V&gt;)tab[index];</span><br><span class="line">       for(; entry != null ; entry = entry.next) &#123;</span><br><span class="line">       	// 必须双重判断hash值一样，而且键值内容一样，才能说明传入的key已存在</span><br><span class="line">           if ((entry.hash == hash) &amp;&amp; entry.key.equals(key)) &#123;</span><br><span class="line">           	// 若已存在，则替换新传入的值，并返回旧值</span><br><span class="line">               V old = entry.value;</span><br><span class="line">               entry.value = value;</span><br><span class="line">               return old;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">	// 若key在原结构中不存在，则需要新增</span><br><span class="line">       addEntry(hash, key, value, index);</span><br><span class="line">       return null;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="继续看看往存储结构中新增一个key的时候做了什么操作"><a href="#继续看看往存储结构中新增一个key的时候做了什么操作" class="headerlink" title="继续看看往存储结构中新增一个key的时候做了什么操作"></a>继续看看往存储结构中新增一个key的时候做了什么操作</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">private void addEntry(int hash, K key, V value, int index) &#123;</span><br><span class="line">	// 这个字段作为修改的一个version值做后续的版本控制</span><br><span class="line">    modCount++;</span><br><span class="line"></span><br><span class="line">    Entry&lt;?,?&gt; tab[] = table;</span><br><span class="line">	// count是当前数组中已有的Entry的数目</span><br><span class="line">	// 如果比原定的threshold要大，则需要重新进行一次hash重分配</span><br><span class="line">    if (count &gt;= threshold) &#123;</span><br><span class="line">        // Rehash the table if the threshold is exceeded</span><br><span class="line">        rehash();</span><br><span class="line"></span><br><span class="line">        tab = table;</span><br><span class="line">        hash = key.hashCode();</span><br><span class="line">        index = (hash &amp; 0x7FFFFFFF) % tab.length;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // Creates the new entry.</span><br><span class="line">    @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">    // 在Entry数组对应的index的位置创建一个值，并把可能原有的值作为新增节点在链表中的后继结点存储，所以在链表中是新的节点排在链表前面</span><br><span class="line">    Entry&lt;K,V&gt; e = (Entry&lt;K,V&gt;) tab[index];</span><br><span class="line">    tab[index] = new Entry&lt;&gt;(hash, key, value, e);</span><br><span class="line">    count++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="新增部分也容易理解，主要还是数组-链表的格式。可以看到在过程中已经限定了k，v都不能为空。这边留了一个概念没讲，就是这个rehash-的过程。在初始化的时候，我们定义了threshold这个int类型的参数。这个的概念就是，假设我们数组的最大可容纳数目为11个，loadFactor为0-75，那么当数目达到了8个的时候，我们就要进行一次rehash，避免数目过大影响性能。现在具体看看rehash过程。以下过程内容，都按照默认值11，0-75为前提。"><a href="#新增部分也容易理解，主要还是数组-链表的格式。可以看到在过程中已经限定了k，v都不能为空。这边留了一个概念没讲，就是这个rehash-的过程。在初始化的时候，我们定义了threshold这个int类型的参数。这个的概念就是，假设我们数组的最大可容纳数目为11个，loadFactor为0-75，那么当数目达到了8个的时候，我们就要进行一次rehash，避免数目过大影响性能。现在具体看看rehash过程。以下过程内容，都按照默认值11，0-75为前提。" class="headerlink" title="新增部分也容易理解，主要还是数组+链表的格式。可以看到在过程中已经限定了k，v都不能为空。这边留了一个概念没讲，就是这个rehash()的过程。在初始化的时候，我们定义了threshold这个int类型的参数。这个的概念就是，假设我们数组的最大可容纳数目为11个，loadFactor为0.75，那么当数目达到了8个的时候，我们就要进行一次rehash，避免数目过大影响性能。现在具体看看rehash过程。以下过程内容，都按照默认值11，0.75为前提。"></a>新增部分也容易理解，主要还是数组+链表的格式。可以看到在过程中已经限定了k，v都不能为空。这边留了一个概念没讲，就是这个rehash()的过程。在初始化的时候，我们定义了threshold这个int类型的参数。这个的概念就是，假设我们数组的最大可容纳数目为11个，loadFactor为0.75，那么当数目达到了8个的时候，我们就要进行一次rehash，避免数目过大影响性能。现在具体看看rehash过程。以下过程内容，都按照默认值11，0.75为前提。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">protected void rehash() &#123;</span><br><span class="line">	// old容量 默认为11</span><br><span class="line">       int oldCapacity = table.length;</span><br><span class="line">       Entry&lt;?,?&gt;[] oldMap = table;</span><br><span class="line"></span><br><span class="line">       // overflow-conscious code</span><br><span class="line">       // new容量 = (11 &lt;&lt; 1) + 1 = 23 </span><br><span class="line">       int newCapacity = (oldCapacity &lt;&lt; 1) + 1;</span><br><span class="line">       // MAX_ARRAY_SIZE 是Int.max - 8， 如果新的容量比这个数值还要大的话，要进行进一步的考量</span><br><span class="line">       if (newCapacity - MAX_ARRAY_SIZE &gt; 0) &#123;</span><br><span class="line">           if (oldCapacity == MAX_ARRAY_SIZE)</span><br><span class="line">               // Keep running with MAX_ARRAY_SIZE buckets</span><br><span class="line">               return;</span><br><span class="line">           newCapacity = MAX_ARRAY_SIZE;</span><br><span class="line">       &#125;</span><br><span class="line">       // 用新的容量创建一个新的数组</span><br><span class="line">       Entry&lt;?,?&gt;[] newMap = new Entry&lt;?,?&gt;[newCapacity];</span><br><span class="line"></span><br><span class="line">       modCount++;</span><br><span class="line">       // 重新计算threshold</span><br><span class="line">       threshold = (int)Math.min(newCapacity * loadFactor, MAX_ARRAY_SIZE + 1);</span><br><span class="line">       table = newMap;</span><br><span class="line">	// 从原有数组的末尾，从后往前扫描每一个节点，按照新的容量计算新的index。</span><br><span class="line">       for (int i = oldCapacity ; i-- &gt; 0 ;) &#123;</span><br><span class="line">           for (Entry&lt;K,V&gt; old = (Entry&lt;K,V&gt;)oldMap[i] ; old != null ; ) &#123;</span><br><span class="line">               Entry&lt;K,V&gt; e = old;</span><br><span class="line">               old = old.next;</span><br><span class="line"></span><br><span class="line">               int index = (e.hash &amp; 0x7FFFFFFF) % newCapacity;</span><br><span class="line">               e.next = (Entry&lt;K,V&gt;)newMap[index];</span><br><span class="line">               newMap[index] = e;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="好的，现在也大概吧put梳理了一下。整体大概就是用一种数组-链表的方式存储我们的节点，并在必要时刻进行重新整理，接下来我们看看取值的过程"><a href="#好的，现在也大概吧put梳理了一下。整体大概就是用一种数组-链表的方式存储我们的节点，并在必要时刻进行重新整理，接下来我们看看取值的过程" class="headerlink" title="好的，现在也大概吧put梳理了一下。整体大概就是用一种数组+链表的方式存储我们的节点，并在必要时刻进行重新整理，接下来我们看看取值的过程"></a>好的，现在也大概吧put梳理了一下。整体大概就是用一种数组+链表的方式存储我们的节点，并在必要时刻进行重新整理，接下来我们看看取值的过程</h4><h2 id="取值"><a href="#取值" class="headerlink" title="取值"></a>取值</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 同样是一个同步的方法</span><br><span class="line">   public synchronized V get(Object key) &#123;</span><br><span class="line">   	// 整个方法是不是似曾相识？在我们第二步的存储的代码中，已经包含了这一部分代码。当时是为了确定存入的值是否已经存在。所以这边也不赘述了</span><br><span class="line">       Entry&lt;?,?&gt; tab[] = table;</span><br><span class="line">       int hash = key.hashCode();</span><br><span class="line">       int index = (hash &amp; 0x7FFFFFFF) % tab.length;</span><br><span class="line">       for (Entry&lt;?,?&gt; e = tab[index] ; e != null ; e = e.next) &#123;</span><br><span class="line">           if ((e.hash == hash) &amp;&amp; e.key.equals(key)) &#123;</span><br><span class="line">               return (V)e.value;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       return null;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h4 id="大致梳理了一下HashTable的几个关键流程，有一些细节还没有讲到。之后会再写一篇关于HashMap的文章，在那边可以横向对比一下这两者之间的区别。"><a href="#大致梳理了一下HashTable的几个关键流程，有一些细节还没有讲到。之后会再写一篇关于HashMap的文章，在那边可以横向对比一下这两者之间的区别。" class="headerlink" title="大致梳理了一下HashTable的几个关键流程，有一些细节还没有讲到。之后会再写一篇关于HashMap的文章，在那边可以横向对比一下这两者之间的区别。"></a>大致梳理了一下HashTable的几个关键流程，有一些细节还没有讲到。之后会再写一篇关于HashMap的文章，在那边可以横向对比一下这两者之间的区别。</h4>
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/Semaphore 详解/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Swaggy Q">
+      <meta itemprop="description" content="拉塞尔FMVP了吗">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dloading...">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/07/08/Semaphore 详解/" class="post-title-link" itemprop="url">Semaphore源码详解</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:06:05" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+            </span>
+          
+
+          
+            
+
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Semaphore-详解"><a href="#Semaphore-详解" class="headerlink" title="Semaphore 详解"></a>Semaphore 详解</h1><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="因为之前详细看过了AQS的代码。所以今天再简单过一下基于AQS的一些子类实现，今天看到这个Semaphore"><a href="#因为之前详细看过了AQS的代码。所以今天再简单过一下基于AQS的一些子类实现，今天看到这个Semaphore" class="headerlink" title="因为之前详细看过了AQS的代码。所以今天再简单过一下基于AQS的一些子类实现，今天看到这个Semaphore"></a>因为之前详细看过了AQS的代码。所以今天再简单过一下基于AQS的一些子类实现，今天看到这个Semaphore</h4><h4 id="先看一下代码结构，可以看到内部实现了一个基于AQS的Sync类，还有两个基于Sync类的公平和非公平的子类实现。那么就先看到这两个子类实现"><a href="#先看一下代码结构，可以看到内部实现了一个基于AQS的Sync类，还有两个基于Sync类的公平和非公平的子类实现。那么就先看到这两个子类实现" class="headerlink" title="先看一下代码结构，可以看到内部实现了一个基于AQS的Sync类，还有两个基于Sync类的公平和非公平的子类实现。那么就先看到这两个子类实现"></a>先看一下代码结构，可以看到内部实现了一个基于AQS的Sync类，还有两个基于Sync类的公平和非公平的子类实现。那么就先看到这两个子类实现</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">static final class NonfairSync extends Sync &#123;</span><br><span class="line">       private static final long serialVersionUID = -2694183684443567898L;</span><br><span class="line"></span><br><span class="line">       NonfairSync(int permits) &#123;</span><br><span class="line">           super(permits);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       protected int tryAcquireShared(int acquires) &#123;</span><br><span class="line">           return nonfairTryAcquireShared(acquires);</span><br><span class="line">       &#125;</span><br><span class="line">       </span><br><span class="line">       final int nonfairTryAcquireShared(int acquires) &#123;</span><br><span class="line">           for (;;) &#123;</span><br><span class="line">               int available = getState();</span><br><span class="line">               int remaining = available - acquires;</span><br><span class="line">               if (remaining &lt; 0 ||</span><br><span class="line">                   compareAndSetState(available, remaining))</span><br><span class="line">                   return remaining;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   /**</span><br><span class="line">    * Fair version</span><br><span class="line">    */</span><br><span class="line">   static final class FairSync extends Sync &#123;</span><br><span class="line">       private static final long serialVersionUID = 2014338818796000944L;</span><br><span class="line"></span><br><span class="line">       FairSync(int permits) &#123;</span><br><span class="line">           super(permits);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       protected int tryAcquireShared(int acquires) &#123;</span><br><span class="line">           for (;;) &#123;</span><br><span class="line">               if (hasQueuedPredecessors())</span><br><span class="line">                   return -1;</span><br><span class="line">               int available = getState();</span><br><span class="line">               int remaining = available - acquires;</span><br><span class="line">               if (remaining &lt; 0 ||</span><br><span class="line">                   compareAndSetState(available, remaining))</span><br><span class="line">                   return remaining;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="很明显看到公平和非公平的实现方式的区别就在tryAcquireShared方法中，公平实现逻辑中，先调用了一下hasQueuedPredecessors方法。这个方法是AQS中自带的方法，逻辑实现如下"><a href="#很明显看到公平和非公平的实现方式的区别就在tryAcquireShared方法中，公平实现逻辑中，先调用了一下hasQueuedPredecessors方法。这个方法是AQS中自带的方法，逻辑实现如下" class="headerlink" title="很明显看到公平和非公平的实现方式的区别就在tryAcquireShared方法中，公平实现逻辑中，先调用了一下hasQueuedPredecessors方法。这个方法是AQS中自带的方法，逻辑实现如下"></a>很明显看到公平和非公平的实现方式的区别就在tryAcquireShared方法中，公平实现逻辑中，先调用了一下hasQueuedPredecessors方法。这个方法是AQS中自带的方法，逻辑实现如下</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public final boolean hasQueuedPredecessors() &#123;</span><br><span class="line">    // The correctness of this depends on head being initialized</span><br><span class="line">    // before tail and on head.next being accurate if the current</span><br><span class="line">    // thread is first in queue.</span><br><span class="line">    Node t = tail; // Read fields in reverse initialization order</span><br><span class="line">    Node h = head;</span><br><span class="line">    Node s;</span><br><span class="line">    return h != t &amp;&amp;</span><br><span class="line">        ((s = h.next) == null || s.thread != Thread.currentThread());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="就是检查在等待者队列中，是不是存在有其他线程已经在队列中，且排在当前线程的前面。所以公平锁的做法是，如果有其他线程排在前面，则返回-1，代表竞争失败，需要排在队列中继续等待。而非公平锁的做法就是，即使有其他线程排在前面了，可以直接插队获取锁。"><a href="#就是检查在等待者队列中，是不是存在有其他线程已经在队列中，且排在当前线程的前面。所以公平锁的做法是，如果有其他线程排在前面，则返回-1，代表竞争失败，需要排在队列中继续等待。而非公平锁的做法就是，即使有其他线程排在前面了，可以直接插队获取锁。" class="headerlink" title="就是检查在等待者队列中，是不是存在有其他线程已经在队列中，且排在当前线程的前面。所以公平锁的做法是，如果有其他线程排在前面，则返回-1，代表竞争失败，需要排在队列中继续等待。而非公平锁的做法就是，即使有其他线程排在前面了，可以直接插队获取锁。"></a>就是检查在等待者队列中，是不是存在有其他线程已经在队列中，且排在当前线程的前面。所以公平锁的做法是，如果有其他线程排在前面，则返回-1，代表竞争失败，需要排在队列中继续等待。而非公平锁的做法就是，即使有其他线程排在前面了，可以直接插队获取锁。</h4><h4 id="现在回到Semaphore类中，从构造方法中我们也可以看出，默认是非公平锁的实现。然后从构造方法中，传入一个permits参数。再看到acquire和release方法中，竞争的资源个数都是1，也就是可以看做是获取资源的线程数了。通过AQS的方式，控制获得资源的线程个数。"><a href="#现在回到Semaphore类中，从构造方法中我们也可以看出，默认是非公平锁的实现。然后从构造方法中，传入一个permits参数。再看到acquire和release方法中，竞争的资源个数都是1，也就是可以看做是获取资源的线程数了。通过AQS的方式，控制获得资源的线程个数。" class="headerlink" title="现在回到Semaphore类中，从构造方法中我们也可以看出，默认是非公平锁的实现。然后从构造方法中，传入一个permits参数。再看到acquire和release方法中，竞争的资源个数都是1，也就是可以看做是获取资源的线程数了。通过AQS的方式，控制获得资源的线程个数。"></a>现在回到Semaphore类中，从构造方法中我们也可以看出，默认是非公平锁的实现。然后从构造方法中，传入一个permits参数。再看到acquire和release方法中，竞争的资源个数都是1，也就是可以看做是获取资源的线程数了。通过AQS的方式，控制获得资源的线程个数。</h4>
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/Volatile修饰符的实现/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Swaggy Q">
+      <meta itemprop="description" content="拉塞尔FMVP了吗">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dloading...">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/07/08/Volatile修饰符的实现/" class="post-title-link" itemprop="url">Volatile修饰符的实现</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:10:25" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+            </span>
+          
+
+          
+            
+
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Volatile修饰符的实现"><a href="#Volatile修饰符的实现" class="headerlink" title="Volatile修饰符的实现"></a>Volatile修饰符的实现</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h4 id="本文要讲讲在java编程中不断会看到的volatile修饰符。探究一下这个修饰底层做了什么，为什么能帮我们解决在并发编程的时候一些问题。"><a href="#本文要讲讲在java编程中不断会看到的volatile修饰符。探究一下这个修饰底层做了什么，为什么能帮我们解决在并发编程的时候一些问题。" class="headerlink" title="本文要讲讲在java编程中不断会看到的volatile修饰符。探究一下这个修饰底层做了什么，为什么能帮我们解决在并发编程的时候一些问题。"></a>本文要讲讲在java编程中不断会看到的volatile修饰符。探究一下这个修饰底层做了什么，为什么能帮我们解决在并发编程的时候一些问题。</h4><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="开始讲Volatile这个修饰符前，我们必须先看看为什么java的设计师要设计出这么一个修饰符。"><a href="#开始讲Volatile这个修饰符前，我们必须先看看为什么java的设计师要设计出这么一个修饰符。" class="headerlink" title="开始讲Volatile这个修饰符前，我们必须先看看为什么java的设计师要设计出这么一个修饰符。"></a>开始讲Volatile这个修饰符前，我们必须先看看为什么java的设计师要设计出这么一个修饰符。</h4><h4 id="探究这个原因，用最简单的一句话去解释一下就是-为了解决多核多cpu的计算机背景下，对编程带来的数据不同步的问题。接下来会讲讲这句话是什么意思。"><a href="#探究这个原因，用最简单的一句话去解释一下就是-为了解决多核多cpu的计算机背景下，对编程带来的数据不同步的问题。接下来会讲讲这句话是什么意思。" class="headerlink" title="探究这个原因，用最简单的一句话去解释一下就是:为了解决多核多cpu的计算机背景下，对编程带来的数据不同步的问题。接下来会讲讲这句话是什么意思。"></a>探究这个原因，用最简单的一句话去解释一下就是:为了解决多核多cpu的计算机背景下，对编程带来的数据不同步的问题。接下来会讲讲这句话是什么意思。</h4><h4 id="因为现代计算机的发展情况下，多个cpu的计算机架构组成是非常常见的。相信我们大家绝大多数都是在这样的电脑上进行编程。另外我们也可以知道，计算机去执行我们写的每段代码的时候，是交由cpu去执行每句指令的。但是每条指令所关联的数据本来都是存储于内存中的，所以cpu每次都需要去内存中去取得一份最新的数据。随着cpu执行速度的越来越快，出现了cpu和内存之间沟通的桥梁，也就是三级缓存L1-L2-L3。缓存出现后，cpu在一般情况下就不需要去和低速内存打交道，直接去高速缓存中得到我们想要的数据。出现了缓存之后，因为每个缓存的数据容量都很小，所以如何最有效的将我们最需要的数据存在缓存中也成为了我们要考虑的问题，所以类似LRU之类的缓存更新策略也开始出现。"><a href="#因为现代计算机的发展情况下，多个cpu的计算机架构组成是非常常见的。相信我们大家绝大多数都是在这样的电脑上进行编程。另外我们也可以知道，计算机去执行我们写的每段代码的时候，是交由cpu去执行每句指令的。但是每条指令所关联的数据本来都是存储于内存中的，所以cpu每次都需要去内存中去取得一份最新的数据。随着cpu执行速度的越来越快，出现了cpu和内存之间沟通的桥梁，也就是三级缓存L1-L2-L3。缓存出现后，cpu在一般情况下就不需要去和低速内存打交道，直接去高速缓存中得到我们想要的数据。出现了缓存之后，因为每个缓存的数据容量都很小，所以如何最有效的将我们最需要的数据存在缓存中也成为了我们要考虑的问题，所以类似LRU之类的缓存更新策略也开始出现。" class="headerlink" title="因为现代计算机的发展情况下，多个cpu的计算机架构组成是非常常见的。相信我们大家绝大多数都是在这样的电脑上进行编程。另外我们也可以知道，计算机去执行我们写的每段代码的时候，是交由cpu去执行每句指令的。但是每条指令所关联的数据本来都是存储于内存中的，所以cpu每次都需要去内存中去取得一份最新的数据。随着cpu执行速度的越来越快，出现了cpu和内存之间沟通的桥梁，也就是三级缓存L1,L2,L3。缓存出现后，cpu在一般情况下就不需要去和低速内存打交道，直接去高速缓存中得到我们想要的数据。出现了缓存之后，因为每个缓存的数据容量都很小，所以如何最有效的将我们最需要的数据存在缓存中也成为了我们要考虑的问题，所以类似LRU之类的缓存更新策略也开始出现。"></a>因为现代计算机的发展情况下，多个cpu的计算机架构组成是非常常见的。相信我们大家绝大多数都是在这样的电脑上进行编程。另外我们也可以知道，计算机去执行我们写的每段代码的时候，是交由cpu去执行每句指令的。但是每条指令所关联的数据本来都是存储于内存中的，所以cpu每次都需要去内存中去取得一份最新的数据。随着cpu执行速度的越来越快，出现了cpu和内存之间沟通的桥梁，也就是三级缓存L1,L2,L3。缓存出现后，cpu在一般情况下就不需要去和低速内存打交道，直接去高速缓存中得到我们想要的数据。出现了缓存之后，因为每个缓存的数据容量都很小，所以如何最有效的将我们最需要的数据存在缓存中也成为了我们要考虑的问题，所以类似LRU之类的缓存更新策略也开始出现。</h4><p><img src="/Users/sugu/Desktop/cache.png" alt="# 三级缓存"></p>
+<ul>
+<li>缓存大大缩小了高速CPU与低速内存之间的差距。以三层缓存架构为例：</li>
+<li>L1 Cache最接近CPU, 容量最小（如32K、64K等）、速度最高，每个核上都有一个L1 Cache。</li>
+<li>L2 Cache容量更大（如256K）、速度更低, 一般情况下，每个核上都有一个独立的L2 Cache。</li>
+<li>L3 Cache最接近内存，容量最大（如12MB），速度最低，在同一个CPU插槽之间的核共享一个L3 Cache。</li>
+</ul>
+<h4 id="从上面的图中我们也可以知道，在以前的单核时代的时候，可能还没问题，因为cpu也只有一个，所以所有的数据都交由同一个cpu来调配，不会出现什么问题。但是假设我们现在有4个cpu，那么每个cpu都会将L3缓存中的数据缓存在L1，L2中，那么很有可能同一个变量的值会在多个地方中存在。那么当多个cpu同时改了自己缓存区中的数据的时候，向共享的内存中写入数据的时候，就很容易发生并发问题。"><a href="#从上面的图中我们也可以知道，在以前的单核时代的时候，可能还没问题，因为cpu也只有一个，所以所有的数据都交由同一个cpu来调配，不会出现什么问题。但是假设我们现在有4个cpu，那么每个cpu都会将L3缓存中的数据缓存在L1，L2中，那么很有可能同一个变量的值会在多个地方中存在。那么当多个cpu同时改了自己缓存区中的数据的时候，向共享的内存中写入数据的时候，就很容易发生并发问题。" class="headerlink" title="从上面的图中我们也可以知道，在以前的单核时代的时候，可能还没问题，因为cpu也只有一个，所以所有的数据都交由同一个cpu来调配，不会出现什么问题。但是假设我们现在有4个cpu，那么每个cpu都会将L3缓存中的数据缓存在L1，L2中，那么很有可能同一个变量的值会在多个地方中存在。那么当多个cpu同时改了自己缓存区中的数据的时候，向共享的内存中写入数据的时候，就很容易发生并发问题。"></a>从上面的图中我们也可以知道，在以前的单核时代的时候，可能还没问题，因为cpu也只有一个，所以所有的数据都交由同一个cpu来调配，不会出现什么问题。但是假设我们现在有4个cpu，那么每个cpu都会将L3缓存中的数据缓存在L1，L2中，那么很有可能同一个变量的值会在多个地方中存在。那么当多个cpu同时改了自己缓存区中的数据的时候，向共享的内存中写入数据的时候，就很容易发生并发问题。</h4><h4 id="最简单的例子就是"><a href="#最简单的例子就是" class="headerlink" title="最简单的例子就是"></a>最简单的例子就是</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">i=i+1</span><br></pre></td></tr></table></figure>
+
+<h4 id="假设i的初始值是0，我们有两个线程执行的这条语句。我们很自然的会想到最后的结果时2-但是事实上这个结果很有可能是1。原因按照我们上面的分析也很容易解释，当线程1和线程2同时将i的初始值刷到的线程独立的缓存内，当执行完后，一起讲值刷回了主存中，那结果就会是1"><a href="#假设i的初始值是0，我们有两个线程执行的这条语句。我们很自然的会想到最后的结果时2-但是事实上这个结果很有可能是1。原因按照我们上面的分析也很容易解释，当线程1和线程2同时将i的初始值刷到的线程独立的缓存内，当执行完后，一起讲值刷回了主存中，那结果就会是1" class="headerlink" title="假设i的初始值是0，我们有两个线程执行的这条语句。我们很自然的会想到最后的结果时2.但是事实上这个结果很有可能是1。原因按照我们上面的分析也很容易解释，当线程1和线程2同时将i的初始值刷到的线程独立的缓存内，当执行完后，一起讲值刷回了主存中，那结果就会是1."></a>假设i的初始值是0，我们有两个线程执行的这条语句。我们很自然的会想到最后的结果时2.但是事实上这个结果很有可能是1。原因按照我们上面的分析也很容易解释，当线程1和线程2同时将i的初始值刷到的线程独立的缓存内，当执行完后，一起讲值刷回了主存中，那结果就会是1.</h4><h4 id="对于这个问题，有两种方式可以解决"><a href="#对于这个问题，有两种方式可以解决" class="headerlink" title="对于这个问题，有两种方式可以解决"></a>对于这个问题，有两种方式可以解决</h4><ul>
+<li><p>总线加锁<br>  对内存总线进行加锁，例如当线程1从共享区域中取了x变量之后，对总线进行加锁。即所有线程此时都不能再访问共享变量，只有线程1对x变量处理之后，写回共享内存之后然后解锁之后，其他线程才能继续记性解锁。</p>
+</li>
+<li><p>缓存一致性协议，MESI协议<br>  MESI是intel公司提出的一种缓存一致性协议，即对缓存中的变量分配4中不同的状态</p>
+<pre><code>- M: modify， 即当前cpu对应的缓存的变量在其他核中已被修改
+- E: exclusive， 即变量只在当前核中被缓存过
+- S: shared， 即当前缓存的变量在其他cpu中也被缓存过
+- I: invalid， 缓存的变量已失效</code></pre></li>
+</ul>
+<h4 id="第一种策略明显不太符合实际需求，总线加锁会大大的拖低效率，所以一般采用第二种情况"><a href="#第一种策略明显不太符合实际需求，总线加锁会大大的拖低效率，所以一般采用第二种情况" class="headerlink" title="第一种策略明显不太符合实际需求，总线加锁会大大的拖低效率，所以一般采用第二种情况"></a>第一种策略明显不太符合实际需求，总线加锁会大大的拖低效率，所以一般采用第二种情况</h4><h4 id="讲完了内存模型的简介。现在再来看看我们平时并发变成中会遇到三个主要问题"><a href="#讲完了内存模型的简介。现在再来看看我们平时并发变成中会遇到三个主要问题" class="headerlink" title="讲完了内存模型的简介。现在再来看看我们平时并发变成中会遇到三个主要问题"></a>讲完了内存模型的简介。现在再来看看我们平时并发变成中会遇到三个主要问题</h4><ul>
+<li><p>原子性:<br>  一个操作必须要么全部完成，要么不完成。不会出现完成一半的情况</p>
+</li>
+<li><p>可见性:<br>  在一个线程中做的修改，能立刻被其他线程感知</p>
+</li>
+<li><p>重排序:<br>  当我们写程序的时候，几行代码不一定都按照我们写的顺序执行。编译器可能会对代码进行看似乱序的执行顺序。但是这个乱序必须保证和单线程执行结果一样。下面用个例子解释一下</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">int i = 0;              //语句1  </span><br><span class="line">boolean flag = false;	//语句2  </span><br><span class="line">i = 1;                //语句3  </span><br><span class="line">flag = true;          //语句4</span><br></pre></td></tr></table></figure>
+
+<p>  上面的代码不一定完全按照1-2-3-4这样的顺序执行，可能会是2-1-4-3。这就是重排序。但是3永远不会在1之前执行，同理4不会在2之前执行。这就是保证有关联的语句之间的顺序不会被打破，保证若是单线程执行条件下，结果都会一样。但是多线程情况就会出现问题</p>
+</li>
+</ul>
+<h3 id="我们知道，Java程序是需要运行在Java虚拟机上面的，Java内存模型（Java-Memory-Model-JMM）就是一种符合内存模型规范的，屏蔽了各种硬件和操作系统的访问差异的，保证了Java程序在各种平台下对内存的访问都能保证效果一致的机制及规范。JMM中主存对应内存模型中的物理内存，每个线程的独立内存对应缓存的概念。"><a href="#我们知道，Java程序是需要运行在Java虚拟机上面的，Java内存模型（Java-Memory-Model-JMM）就是一种符合内存模型规范的，屏蔽了各种硬件和操作系统的访问差异的，保证了Java程序在各种平台下对内存的访问都能保证效果一致的机制及规范。JMM中主存对应内存模型中的物理内存，每个线程的独立内存对应缓存的概念。" class="headerlink" title="我们知道，Java程序是需要运行在Java虚拟机上面的，Java内存模型（Java Memory Model ,JMM）就是一种符合内存模型规范的，屏蔽了各种硬件和操作系统的访问差异的，保证了Java程序在各种平台下对内存的访问都能保证效果一致的机制及规范。JMM中主存对应内存模型中的物理内存，每个线程的独立内存对应缓存的概念。"></a>我们知道，Java程序是需要运行在Java虚拟机上面的，Java内存模型（Java Memory Model ,JMM）就是一种符合内存模型规范的，屏蔽了各种硬件和操作系统的访问差异的，保证了Java程序在各种平台下对内存的访问都能保证效果一致的机制及规范。JMM中主存对应内存模型中的物理内存，每个线程的独立内存对应缓存的概念。</h3><h3 id="Volatile"><a href="#Volatile" class="headerlink" title="Volatile"></a>Volatile</h3><h5 id="好了，上面扯了那么多，终于讲到重点。Volatile是java提供的一个修饰符。主要提供了两个性质"><a href="#好了，上面扯了那么多，终于讲到重点。Volatile是java提供的一个修饰符。主要提供了两个性质" class="headerlink" title="好了，上面扯了那么多，终于讲到重点。Volatile是java提供的一个修饰符。主要提供了两个性质"></a>好了，上面扯了那么多，终于讲到重点。Volatile是java提供的一个修饰符。主要提供了两个性质</h5><ul>
+<li>被Volatile修饰的变量都会保证强可见性</li>
+<li>被Volatile修饰的变量都会禁止重排序</li>
+</ul>
+<h4 id="以上两个性质，下面通过之前提过的三个性质叙述一下，Volatile实现了什么作用"><a href="#以上两个性质，下面通过之前提过的三个性质叙述一下，Volatile实现了什么作用" class="headerlink" title="以上两个性质，下面通过之前提过的三个性质叙述一下，Volatile实现了什么作用"></a>以上两个性质，下面通过之前提过的三个性质叙述一下，Volatile实现了什么作用</h4><h3 id="可见性"><a href="#可见性" class="headerlink" title="可见性"></a>可见性</h3><h4 id="由于被Volatile修饰的变量，若被一个线程修改，将会被强制刷新回主存，同时将其他线程缓存的变量都置失效，所以必须从主存读取最新的值，所以实现了可见性"><a href="#由于被Volatile修饰的变量，若被一个线程修改，将会被强制刷新回主存，同时将其他线程缓存的变量都置失效，所以必须从主存读取最新的值，所以实现了可见性" class="headerlink" title="由于被Volatile修饰的变量，若被一个线程修改，将会被强制刷新回主存，同时将其他线程缓存的变量都置失效，所以必须从主存读取最新的值，所以实现了可见性"></a>由于被Volatile修饰的变量，若被一个线程修改，将会被强制刷新回主存，同时将其他线程缓存的变量都置失效，所以必须从主存读取最新的值，所以实现了可见性</h4><h3 id="重排序"><a href="#重排序" class="headerlink" title="重排序"></a>重排序</h3><h4 id="Volatile的性质规定禁止了重排序，但是这个禁止是有前提的。举个例子"><a href="#Volatile的性质规定禁止了重排序，但是这个禁止是有前提的。举个例子" class="headerlink" title="Volatile的性质规定禁止了重排序，但是这个禁止是有前提的。举个例子"></a>Volatile的性质规定禁止了重排序，但是这个禁止是有前提的。举个例子</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">//x、y为非volatile变量</span><br><span class="line">//flag为volatile变量</span><br><span class="line"> </span><br><span class="line">x = 2;        //语句1</span><br><span class="line">y = 0;        //语句2</span><br><span class="line">flag = true;  //语句3</span><br><span class="line">x = 4;         //语句4</span><br><span class="line">y = -1;       //语句5</span><br></pre></td></tr></table></figure>
+
+<h4 id="这种情况下语句1和语句2不能重排序到语句3之后，且1，2修改的变量值必须已刷新到主存中，语句4和语句5不能重排序到语句3之前，也就是插入了一个storeread内存屏障。但是1，2和4，5的语句是可以重排序的"><a href="#这种情况下语句1和语句2不能重排序到语句3之后，且1，2修改的变量值必须已刷新到主存中，语句4和语句5不能重排序到语句3之前，也就是插入了一个storeread内存屏障。但是1，2和4，5的语句是可以重排序的" class="headerlink" title="这种情况下语句1和语句2不能重排序到语句3之后，且1，2修改的变量值必须已刷新到主存中，语句4和语句5不能重排序到语句3之前，也就是插入了一个storeread内存屏障。但是1，2和4，5的语句是可以重排序的"></a>这种情况下语句1和语句2不能重排序到语句3之后，且1，2修改的变量值必须已刷新到主存中，语句4和语句5不能重排序到语句3之前，也就是插入了一个storeread内存屏障。但是1，2和4，5的语句是可以重排序的</h4><h3 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h3><h4 id="Volatile修饰的变量其实是不保证原子性的。同样看个例子"><a href="#Volatile修饰的变量其实是不保证原子性的。同样看个例子" class="headerlink" title="Volatile修饰的变量其实是不保证原子性的。同样看个例子"></a>Volatile修饰的变量其实是不保证原子性的。同样看个例子</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">public class Test &#123;</span><br><span class="line">    public volatile int inc = 0;</span><br><span class="line">     </span><br><span class="line">    public void increase() &#123;</span><br><span class="line">        inc++;</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        final Test test = new Test();</span><br><span class="line">        for(int i=0;i&lt;10;i++)&#123;</span><br><span class="line">            new Thread()&#123;</span><br><span class="line">                public void run() &#123;</span><br><span class="line">                    for(int j=0;j&lt;1000;j++)</span><br><span class="line">                        test.increase();</span><br><span class="line">                &#125;;</span><br><span class="line">            &#125;.start();</span><br><span class="line">        &#125;</span><br><span class="line">         </span><br><span class="line">        while(Thread.activeCount()&gt;1)  //保证前面的线程都执行完</span><br><span class="line">            Thread.yield();</span><br><span class="line">        System.out.println(test.inc);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
   </section>
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+  </nav>
+
 
 
           </div>
@@ -512,7 +1918,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-count">23</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -520,6 +1926,23 @@
 
               
 
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
               
             </nav>
           

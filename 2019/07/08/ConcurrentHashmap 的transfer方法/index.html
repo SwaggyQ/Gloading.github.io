@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+<link rel="stylesheet" href="/css/main.css?v=7.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.2.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.2.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="ConcurrentHashmap 的transfer方法前文####多线程之间，以volatile的方式读取sizeCtl属性，来判断ConcurrentHashMap当前所处的状态。通过cas设置sizeCtl属性，告知其他线程ConcurrentHashMap的状态变更。不同状态，sizeCtl所代表的含义也有所不同。 未初始化： sizeCtl=0：表示没有指定初始容量。sizeCtl&amp;g">
+<meta name="keywords" content="jdk">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ConcurrentHashMap的transfer方法">
+<meta property="og:url" content="http://yoursite.com/2019/07/08/ConcurrentHashmap 的transfer方法/index.html">
+<meta property="og:site_name" content="Dloading...">
+<meta property="og:description" content="ConcurrentHashmap 的transfer方法前文####多线程之间，以volatile的方式读取sizeCtl属性，来判断ConcurrentHashMap当前所处的状态。通过cas设置sizeCtl属性，告知其他线程ConcurrentHashMap的状态变更。不同状态，sizeCtl所代表的含义也有所不同。 未初始化： sizeCtl=0：表示没有指定初始容量。sizeCtl&amp;g">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/2019/07/08/ConcurrentHashmap%20的transfer方法/img/transfer-1.png">
+<meta property="og:image" content="http://yoursite.com/2019/07/08/ConcurrentHashmap%20的transfer方法/img/transfer-2.png">
+<meta property="og:updated_time" content="2019-07-08T15:07:56.080Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ConcurrentHashMap的transfer方法">
+<meta name="twitter:description" content="ConcurrentHashmap 的transfer方法前文####多线程之间，以volatile的方式读取sizeCtl属性，来判断ConcurrentHashMap当前所处的状态。通过cas设置sizeCtl属性，告知其他线程ConcurrentHashMap的状态变更。不同状态，sizeCtl所代表的含义也有所不同。 未初始化： sizeCtl=0：表示没有指定初始容量。sizeCtl&amp;g">
+<meta name="twitter:image" content="http://yoursite.com/2019/07/08/ConcurrentHashmap%20的transfer方法/img/transfer-1.png">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://yoursite.com/2019/07/08/ConcurrentHashmap 的transfer方法/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>ConcurrentHashMap的transfer方法 | Dloading...</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Dloading...</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">努力成为优秀程序员</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/ConcurrentHashmap 的transfer方法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Swaggy Q">
+      <meta itemprop="description" content="拉塞尔FMVP了吗">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dloading...">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ConcurrentHashMap的transfer方法
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:07:56" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+            </span>
+          
+
+          
+            
+
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="ConcurrentHashmap-的transfer方法"><a href="#ConcurrentHashmap-的transfer方法" class="headerlink" title="ConcurrentHashmap 的transfer方法"></a>ConcurrentHashmap 的transfer方法</h1><h2 id="前文"><a href="#前文" class="headerlink" title="前文"></a>前文</h2><p>####<br>多线程之间，以volatile的方式读取sizeCtl属性，来判断ConcurrentHashMap当前所处的状态。通过cas设置sizeCtl属性，告知其他线程ConcurrentHashMap的状态变更。<br>不同状态，sizeCtl所代表的含义也有所不同。</p>
+<p>未初始化：</p>
+<p>sizeCtl=0：表示没有指定初始容量。<br>sizeCtl&gt;0：表示初始容量。</p>
+<p>初始化中：</p>
+<p>sizeCtl=-1,标记作用，告知其他线程，正在初始化</p>
+<p>正常状态：</p>
+<p>sizeCtl=0.75n ,扩容阈值</p>
+<p>扩容中:</p>
+<p>sizeCtl &lt; 0 : 表示有其他线程正在执行扩容<br>sizeCtl = (resizeStamp(n) &lt;&lt; RESIZE_STAMP_SHIFT) + 2    :表示此时只有一个线程在执行扩容</p>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="本文会解释一下在jdk-1-8中的ConcurrentHashMap是怎么并发的进行扩容的。为了描述这一过程，我们会先看到put方法中，因为当put过程中，发现元素大小超过了阈值的时候，线程才会去对底层数组进行扩容。直接看到putVal方法中，为了节省篇幅，会省去一些不必要的代码"><a href="#本文会解释一下在jdk-1-8中的ConcurrentHashMap是怎么并发的进行扩容的。为了描述这一过程，我们会先看到put方法中，因为当put过程中，发现元素大小超过了阈值的时候，线程才会去对底层数组进行扩容。直接看到putVal方法中，为了节省篇幅，会省去一些不必要的代码" class="headerlink" title="本文会解释一下在jdk 1.8中的ConcurrentHashMap是怎么并发的进行扩容的。为了描述这一过程，我们会先看到put方法中，因为当put过程中，发现元素大小超过了阈值的时候，线程才会去对底层数组进行扩容。直接看到putVal方法中，为了节省篇幅，会省去一些不必要的代码"></a>本文会解释一下在jdk 1.8中的ConcurrentHashMap是怎么并发的进行扩容的。为了描述这一过程，我们会先看到put方法中，因为当put过程中，发现元素大小超过了阈值的时候，线程才会去对底层数组进行扩容。直接看到putVal方法中，为了节省篇幅，会省去一些不必要的代码</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">final V putVal(K key, V value, boolean onlyIfAbsent) &#123;</span><br><span class="line">        ... </span><br><span class="line">        for (Node&lt;K,V&gt;[] tab = table;;) &#123;</span><br><span class="line">            Node&lt;K,V&gt; f; int n, i, fh;</span><br><span class="line">            if (tab == null || (n = tab.length) == 0)</span><br><span class="line">                ...</span><br><span class="line">            else if ((f = tabAt(tab, i = (n - 1) &amp; hash)) == null) &#123;</span><br><span class="line">    			...            </span><br><span class="line">            &#125;</span><br><span class="line">            else if ((fh = f.hash) == MOVED)</span><br><span class="line">                tab = helpTransfer(tab, f);</span><br><span class="line">            else &#123;</span><br><span class="line">            	// 在链表后面添加节点，先省略了</span><br><span class="line">                ...</span><br><span class="line">            &#125;</span><br><span class="line">                if (binCount != 0) &#123;</span><br><span class="line">                    if (binCount &gt;= TREEIFY_THRESHOLD)</span><br><span class="line">                        treeifyBin(tab, i);</span><br><span class="line">                    if (oldVal != null)</span><br><span class="line">                        return oldVal;</span><br><span class="line">                    break;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        addCount(1L, binCount);</span><br><span class="line">        return null;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="注意上面代码中我留下的几块方法。我们一个个解释。先看到helpTransfer方法。可以看到，要进入到方法的条件是要将值put到的对应的桶位的节点存在，而且hash值为MOVED，也就是-1。全局搜索之后，可以发现只有一个地方会创建这种节点"><a href="#注意上面代码中我留下的几块方法。我们一个个解释。先看到helpTransfer方法。可以看到，要进入到方法的条件是要将值put到的对应的桶位的节点存在，而且hash值为MOVED，也就是-1。全局搜索之后，可以发现只有一个地方会创建这种节点" class="headerlink" title="注意上面代码中我留下的几块方法。我们一个个解释。先看到helpTransfer方法。可以看到，要进入到方法的条件是要将值put到的对应的桶位的节点存在，而且hash值为MOVED，也就是-1。全局搜索之后，可以发现只有一个地方会创建这种节点"></a>注意上面代码中我留下的几块方法。我们一个个解释。先看到helpTransfer方法。可以看到，要进入到方法的条件是要将值put到的对应的桶位的节点存在，而且hash值为MOVED，也就是-1。全局搜索之后，可以发现只有一个地方会创建这种节点</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">static final class ForwardingNode&lt;K,V&gt; extends Node&lt;K,V&gt; &#123;</span><br><span class="line">       final Node&lt;K,V&gt;[] nextTable;</span><br><span class="line">       ForwardingNode(Node&lt;K,V&gt;[] tab) &#123;</span><br><span class="line">           super(MOVED, null, null, null);</span><br><span class="line">           this.nextTable = tab;</span><br><span class="line">       &#125;</span><br><span class="line">       </span><br><span class="line">       Node&lt;K,V&gt; find(int h, Object k) &#123;</span><br><span class="line">  			... </span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="可以看到，这一块是将对应的桶变成了一个ForwardingNode-以下简称fwn-，这边先剧透以下，变成这个节点就代表当前桶位正在进行扩容迁移。所以我们回到刚才那个语句"><a href="#可以看到，这一块是将对应的桶变成了一个ForwardingNode-以下简称fwn-，这边先剧透以下，变成这个节点就代表当前桶位正在进行扩容迁移。所以我们回到刚才那个语句" class="headerlink" title="可以看到，这一块是将对应的桶变成了一个ForwardingNode (以下简称fwn)，这边先剧透以下，变成这个节点就代表当前桶位正在进行扩容迁移。所以我们回到刚才那个语句"></a>可以看到，这一块是将对应的桶变成了一个ForwardingNode (以下简称fwn)，这边先剧透以下，变成这个节点就代表当前桶位正在进行扩容迁移。所以我们回到刚才那个语句</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">else if ((fh = f.hash) == MOVED)</span><br><span class="line">       tab = helpTransfer(tab, f);</span><br></pre></td></tr></table></figure>
+
+<h4 id="可以看到如果一个线程在put的时候，发现当前正在进行扩容，他甚至是可以帮忙一起扩容的-跟进去会看到会调用到transfer方法。这也是Cmap一个非常高效的理由。"><a href="#可以看到如果一个线程在put的时候，发现当前正在进行扩容，他甚至是可以帮忙一起扩容的-跟进去会看到会调用到transfer方法。这也是Cmap一个非常高效的理由。" class="headerlink" title="可以看到如果一个线程在put的时候，发现当前正在进行扩容，他甚至是可以帮忙一起扩容的,跟进去会看到会调用到transfer方法。这也是Cmap一个非常高效的理由。"></a>可以看到如果一个线程在put的时候，发现当前正在进行扩容，他甚至是可以帮忙一起扩容的,跟进去会看到会调用到transfer方法。这也是Cmap一个非常高效的理由。</h4><h4 id="再往下看到第二处留下的代码块，这段和HashMap中非常相似，也是如果某个桶位的链表长度大于等于了8，就会尝试进行树化，同样的，在里面也会进行判断，如果此时底层数组的大小还没大于64，则会先进行扩容。"><a href="#再往下看到第二处留下的代码块，这段和HashMap中非常相似，也是如果某个桶位的链表长度大于等于了8，就会尝试进行树化，同样的，在里面也会进行判断，如果此时底层数组的大小还没大于64，则会先进行扩容。" class="headerlink" title="再往下看到第二处留下的代码块，这段和HashMap中非常相似，也是如果某个桶位的链表长度大于等于了8，就会尝试进行树化，同样的，在里面也会进行判断，如果此时底层数组的大小还没大于64，则会先进行扩容。"></a>再往下看到第二处留下的代码块，这段和HashMap中非常相似，也是如果某个桶位的链表长度大于等于了8，就会尝试进行树化，同样的，在里面也会进行判断，如果此时底层数组的大小还没大于64，则会先进行扩容。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">private final void treeifyBin(Node&lt;K,V&gt;[] tab, int index) &#123;</span><br><span class="line">       Node&lt;K,V&gt; b; int n, sc;</span><br><span class="line">       if (tab != null) &#123;</span><br><span class="line">           if ((n = tab.length) &lt; MIN_TREEIFY_CAPACITY)</span><br><span class="line">               tryPresize(n &lt;&lt; 1);</span><br><span class="line">           else if ((b = tabAt(tab, index)) != null &amp;&amp; b.hash &gt;= 0) &#123;</span><br><span class="line">  				... </span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="如果你跟进去tryPresize方法，你会看到里面实际起作用的地方也是transfer方法"><a href="#如果你跟进去tryPresize方法，你会看到里面实际起作用的地方也是transfer方法" class="headerlink" title="如果你跟进去tryPresize方法，你会看到里面实际起作用的地方也是transfer方法"></a>如果你跟进去tryPresize方法，你会看到里面实际起作用的地方也是transfer方法</h4><h4 id="再直接看到上面留下的最后一段代码-addCount-1L-binCount-，跟进去可以看到"><a href="#再直接看到上面留下的最后一段代码-addCount-1L-binCount-，跟进去可以看到" class="headerlink" title="再直接看到上面留下的最后一段代码 addCount(1L, binCount);，跟进去可以看到"></a>再直接看到上面留下的最后一段代码 addCount(1L, binCount);，跟进去可以看到</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">private final void addCount(long x, int check) &#123;</span><br><span class="line">        ...</span><br><span class="line">       if (check &gt;= 0) &#123;</span><br><span class="line">            Node&lt;K,V&gt;[] tab, nt; int n, sc;</span><br><span class="line">            while (s &gt;= (long)(sc = sizeCtl) &amp;&amp; (tab = table) != null &amp;&amp;</span><br><span class="line">                   (n = tab.length) &lt; MAXIMUM_CAPACITY) &#123;</span><br><span class="line">                int rs = resizeStamp(n);</span><br><span class="line">                if (sc &lt; 0) &#123;</span><br><span class="line">                    if ((sc &gt;&gt;&gt; RESIZE_STAMP_SHIFT) != rs || sc == rs + 1 ||</span><br><span class="line">                        sc == rs + MAX_RESIZERS || (nt = nextTable) == null ||</span><br><span class="line">                        // 重点</span><br><span class="line">                        transferIndex &lt;= 0)</span><br><span class="line">                        break;</span><br><span class="line">                    if (U.compareAndSwapInt(this, SIZECTL, sc, sc + 1))</span><br><span class="line">                        transfer(tab, nt);</span><br><span class="line">                &#125;</span><br><span class="line">                else if (U.compareAndSwapInt(this, SIZECTL, sc,</span><br><span class="line">                                             (rs &lt;&lt; RESIZE_STAMP_SHIFT) + 2))</span><br><span class="line">                    transfer(tab, null);</span><br><span class="line">                s = sumCount();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="也就是说，如果节点数大于了阈值，就会进行transfer方法，也就是扩容。"><a href="#也就是说，如果节点数大于了阈值，就会进行transfer方法，也就是扩容。" class="headerlink" title="也就是说，如果节点数大于了阈值，就会进行transfer方法，也就是扩容。"></a>也就是说，如果节点数大于了阈值，就会进行transfer方法，也就是扩容。</h4><h4 id="好了以上三段逻辑，最后都回到了transfer方法，也就是我们今天想要讲到的地方。"><a href="#好了以上三段逻辑，最后都回到了transfer方法，也就是我们今天想要讲到的地方。" class="headerlink" title="好了以上三段逻辑，最后都回到了transfer方法，也就是我们今天想要讲到的地方。"></a>好了以上三段逻辑，最后都回到了transfer方法，也就是我们今天想要讲到的地方。</h4><h4 id="我们开始进入到transfer方法的世界"><a href="#我们开始进入到transfer方法的世界" class="headerlink" title="我们开始进入到transfer方法的世界"></a>我们开始进入到transfer方法的世界</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">int n = tab.length, stride;</span><br><span class="line">if ((stride = (NCPU &gt; 1) ? (n &gt;&gt;&gt; 3) / NCPU : n) &lt; MIN_TRANSFER_STRIDE)</span><br><span class="line">    stride = MIN_TRANSFER_STRIDE; // subdivide range</span><br></pre></td></tr></table></figure>
+
+<h4 id="在方法开始的时候，会得到一个叫做stride的参数。这个参数是指定每个线程可以负责多少个桶。从代码中也可以知道，若当前机器的cpu核数大于1的时候，每个线程负责-n-8-核数-。其中每个线程最小也需要负责16个桶。接下去看"><a href="#在方法开始的时候，会得到一个叫做stride的参数。这个参数是指定每个线程可以负责多少个桶。从代码中也可以知道，若当前机器的cpu核数大于1的时候，每个线程负责-n-8-核数-。其中每个线程最小也需要负责16个桶。接下去看" class="headerlink" title="在方法开始的时候，会得到一个叫做stride的参数。这个参数是指定每个线程可以负责多少个桶。从代码中也可以知道，若当前机器的cpu核数大于1的时候，每个线程负责 n/(8 * 核数)。其中每个线程最小也需要负责16个桶。接下去看"></a>在方法开始的时候，会得到一个叫做stride的参数。这个参数是指定每个线程可以负责多少个桶。从代码中也可以知道，若当前机器的cpu核数大于1的时候，每个线程负责 n/(8 * 核数)。其中每个线程最小也需要负责16个桶。接下去看</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">if (nextTab == null) &#123;            // initiating</span><br><span class="line">       try &#123;</span><br><span class="line">           @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">           Node&lt;K,V&gt;[] nt = (Node&lt;K,V&gt;[])new Node&lt;?,?&gt;[n &lt;&lt; 1];</span><br><span class="line">           nextTab = nt;</span><br><span class="line">       &#125; catch (Throwable ex) &#123;      // try to cope with OOME</span><br><span class="line">           sizeCtl = Integer.MAX_VALUE;</span><br><span class="line">           return;</span><br><span class="line">       &#125;</span><br><span class="line">       nextTable = nextTab;</span><br><span class="line">       transferIndex = n;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="如果新的数组还未初始化，则需要先初始化一下。新数组大小是旧数组的2倍。"><a href="#如果新的数组还未初始化，则需要先初始化一下。新数组大小是旧数组的2倍。" class="headerlink" title="如果新的数组还未初始化，则需要先初始化一下。新数组大小是旧数组的2倍。"></a>如果新的数组还未初始化，则需要先初始化一下。新数组大小是旧数组的2倍。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">int nextn = nextTab.length;</span><br><span class="line">ForwardingNode&lt;K,V&gt; fwd = new ForwardingNode&lt;K,V&gt;(nextTab);</span><br><span class="line">boolean advance = true;</span><br><span class="line">boolean finishing = false; // to ensure sweep before committing nextTab</span><br></pre></td></tr></table></figure>
+
+<h4 id="规定一些参数。继续往下，会看到一个for循环"><a href="#规定一些参数。继续往下，会看到一个for循环" class="headerlink" title="规定一些参数。继续往下，会看到一个for循环"></a>规定一些参数。继续往下，会看到一个for循环</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">for (int i = 0, bound = 0;;) &#123;</span><br><span class="line">    Node&lt;K,V&gt; f; int fh;</span><br><span class="line">    while (advance) &#123;</span><br><span class="line">        int nextIndex, nextBound;</span><br><span class="line">        if (--i &gt;= bound || finishing)</span><br><span class="line">            advance = false;</span><br><span class="line">        else if ((nextIndex = transferIndex) &lt;= 0) &#123;</span><br><span class="line">            i = -1;</span><br><span class="line">            advance = false;</span><br><span class="line">        &#125;</span><br><span class="line">        else if (U.compareAndSwapInt</span><br><span class="line">                 (this, TRANSFERINDEX, nextIndex,</span><br><span class="line">                  nextBound = (nextIndex &gt; stride ?</span><br><span class="line">                               nextIndex - stride : 0))) &#123;</span><br><span class="line">            bound = nextBound;</span><br><span class="line">            i = nextIndex - 1;</span><br><span class="line">            advance = false;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ... </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="这一块注意几个关键的属性transferIndex，nextIndex，nextBound。具体逻辑可以看到这个链接的内容，讲的非常好。"><a href="#这一块注意几个关键的属性transferIndex，nextIndex，nextBound。具体逻辑可以看到这个链接的内容，讲的非常好。" class="headerlink" title="这一块注意几个关键的属性transferIndex，nextIndex，nextBound。具体逻辑可以看到这个链接的内容，讲的非常好。"></a>这一块注意几个关键的属性transferIndex，nextIndex，nextBound。具体逻辑可以看到这个链接的内容，讲的非常好。</h4><p><a href="https://www.jianshu.com/p/487d00afe6ca" target="_blank" rel="noopener">扩容方法的属性</a></p>
+<h4 id="通过上面的for循环之后，我们就可以继续我们接下来的实际迁移过程了。借用上面链接里的几幅图进行理解"><a href="#通过上面的for循环之后，我们就可以继续我们接下来的实际迁移过程了。借用上面链接里的几幅图进行理解" class="headerlink" title="通过上面的for循环之后，我们就可以继续我们接下来的实际迁移过程了。借用上面链接里的几幅图进行理解"></a>通过上面的for循环之后，我们就可以继续我们接下来的实际迁移过程了。借用上面链接里的几幅图进行理解</h4><p><img src="img/transfer-1.png" alt="transfer-1"><br><img src="img/transfer-2.png" alt="transfer-2"></p>
+<h4 id="可以得到现在"><a href="#可以得到现在" class="headerlink" title="可以得到现在"></a>可以得到现在</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nextBound = 16,</span><br><span class="line">nextIndex = 32,</span><br><span class="line">i = nextIndex -1 = 31</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        
+          
+        
+        <div class="post-tags">
+          
+            <a href="/tags/jdk/" rel="tag"># jdk</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/08/java stream/" rel="next" title="java的stream用法">
+                <i class="fa fa-chevron-left"></i> java的stream用法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/08/ThreadLocal的一些看法/" rel="prev" title="ThreadLocal的一些看法">
+                ThreadLocal的一些看法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Swaggy Q</p>
+              <div class="site-description motion-element" itemprop="description">拉塞尔FMVP了吗</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ConcurrentHashmap-的transfer方法"><span class="nav-number">1.</span> <span class="nav-text">ConcurrentHashmap 的transfer方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前文"><span class="nav-number">1.1.</span> <span class="nav-text">前文</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#正文"><span class="nav-number">1.2.</span> <span class="nav-text">正文</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#本文会解释一下在jdk-1-8中的ConcurrentHashMap是怎么并发的进行扩容的。为了描述这一过程，我们会先看到put方法中，因为当put过程中，发现元素大小超过了阈值的时候，线程才会去对底层数组进行扩容。直接看到putVal方法中，为了节省篇幅，会省去一些不必要的代码"><span class="nav-number">1.2.0.1.</span> <span class="nav-text">本文会解释一下在jdk 1.8中的ConcurrentHashMap是怎么并发的进行扩容的。为了描述这一过程，我们会先看到put方法中，因为当put过程中，发现元素大小超过了阈值的时候，线程才会去对底层数组进行扩容。直接看到putVal方法中，为了节省篇幅，会省去一些不必要的代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#注意上面代码中我留下的几块方法。我们一个个解释。先看到helpTransfer方法。可以看到，要进入到方法的条件是要将值put到的对应的桶位的节点存在，而且hash值为MOVED，也就是-1。全局搜索之后，可以发现只有一个地方会创建这种节点"><span class="nav-number">1.2.0.2.</span> <span class="nav-text">注意上面代码中我留下的几块方法。我们一个个解释。先看到helpTransfer方法。可以看到，要进入到方法的条件是要将值put到的对应的桶位的节点存在，而且hash值为MOVED，也就是-1。全局搜索之后，可以发现只有一个地方会创建这种节点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#可以看到，这一块是将对应的桶变成了一个ForwardingNode-以下简称fwn-，这边先剧透以下，变成这个节点就代表当前桶位正在进行扩容迁移。所以我们回到刚才那个语句"><span class="nav-number">1.2.0.3.</span> <span class="nav-text">可以看到，这一块是将对应的桶变成了一个ForwardingNode (以下简称fwn)，这边先剧透以下，变成这个节点就代表当前桶位正在进行扩容迁移。所以我们回到刚才那个语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#可以看到如果一个线程在put的时候，发现当前正在进行扩容，他甚至是可以帮忙一起扩容的-跟进去会看到会调用到transfer方法。这也是Cmap一个非常高效的理由。"><span class="nav-number">1.2.0.4.</span> <span class="nav-text">可以看到如果一个线程在put的时候，发现当前正在进行扩容，他甚至是可以帮忙一起扩容的,跟进去会看到会调用到transfer方法。这也是Cmap一个非常高效的理由。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#再往下看到第二处留下的代码块，这段和HashMap中非常相似，也是如果某个桶位的链表长度大于等于了8，就会尝试进行树化，同样的，在里面也会进行判断，如果此时底层数组的大小还没大于64，则会先进行扩容。"><span class="nav-number">1.2.0.5.</span> <span class="nav-text">再往下看到第二处留下的代码块，这段和HashMap中非常相似，也是如果某个桶位的链表长度大于等于了8，就会尝试进行树化，同样的，在里面也会进行判断，如果此时底层数组的大小还没大于64，则会先进行扩容。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#如果你跟进去tryPresize方法，你会看到里面实际起作用的地方也是transfer方法"><span class="nav-number">1.2.0.6.</span> <span class="nav-text">如果你跟进去tryPresize方法，你会看到里面实际起作用的地方也是transfer方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#再直接看到上面留下的最后一段代码-addCount-1L-binCount-，跟进去可以看到"><span class="nav-number">1.2.0.7.</span> <span class="nav-text">再直接看到上面留下的最后一段代码 addCount(1L, binCount);，跟进去可以看到</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#也就是说，如果节点数大于了阈值，就会进行transfer方法，也就是扩容。"><span class="nav-number">1.2.0.8.</span> <span class="nav-text">也就是说，如果节点数大于了阈值，就会进行transfer方法，也就是扩容。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#好了以上三段逻辑，最后都回到了transfer方法，也就是我们今天想要讲到的地方。"><span class="nav-number">1.2.0.9.</span> <span class="nav-text">好了以上三段逻辑，最后都回到了transfer方法，也就是我们今天想要讲到的地方。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#我们开始进入到transfer方法的世界"><span class="nav-number">1.2.0.10.</span> <span class="nav-text">我们开始进入到transfer方法的世界</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在方法开始的时候，会得到一个叫做stride的参数。这个参数是指定每个线程可以负责多少个桶。从代码中也可以知道，若当前机器的cpu核数大于1的时候，每个线程负责-n-8-核数-。其中每个线程最小也需要负责16个桶。接下去看"><span class="nav-number">1.2.0.11.</span> <span class="nav-text">在方法开始的时候，会得到一个叫做stride的参数。这个参数是指定每个线程可以负责多少个桶。从代码中也可以知道，若当前机器的cpu核数大于1的时候，每个线程负责 n/(8 * 核数)。其中每个线程最小也需要负责16个桶。接下去看</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#如果新的数组还未初始化，则需要先初始化一下。新数组大小是旧数组的2倍。"><span class="nav-number">1.2.0.12.</span> <span class="nav-text">如果新的数组还未初始化，则需要先初始化一下。新数组大小是旧数组的2倍。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#规定一些参数。继续往下，会看到一个for循环"><span class="nav-number">1.2.0.13.</span> <span class="nav-text">规定一些参数。继续往下，会看到一个for循环</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#这一块注意几个关键的属性transferIndex，nextIndex，nextBound。具体逻辑可以看到这个链接的内容，讲的非常好。"><span class="nav-number">1.2.0.14.</span> <span class="nav-text">这一块注意几个关键的属性transferIndex，nextIndex，nextBound。具体逻辑可以看到这个链接的内容，讲的非常好。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#通过上面的for循环之后，我们就可以继续我们接下来的实际迁移过程了。借用上面链接里的几幅图进行理解"><span class="nav-number">1.2.0.15.</span> <span class="nav-text">通过上面的for循环之后，我们就可以继续我们接下来的实际迁移过程了。借用上面链接里的几幅图进行理解</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#可以得到现在"><span class="nav-number">1.2.0.16.</span> <span class="nav-text">可以得到现在</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Swaggy Q</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=3.4.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.2.0"></script>
+
+  <script src="/js/motion.js?v=7.2.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.2.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.2.0"></script>
+<script src="/js/post-details.js?v=7.2.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.2.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
