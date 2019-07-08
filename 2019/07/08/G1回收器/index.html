@@ -94,18 +94,18 @@
 
 
 
-  <meta name="description" content="批量再偏向机制该机制的主要工作原理如下： 引入一个概念 epoch, 其本质是一个时间戳 ， 代表了偏向锁的有效性从前文描述的对象头结构中可以看到， epoch 存储在可偏向对象的 MarkWord 中。除了对象中的 epoch, 对象所属的类 class 信息中， 也会保存一个 epoch 值 每当遇到一个全局安全点时， 如果要对 class C 进行批量再偏向， 则首先对 class C 中保">
-<meta name="keywords" content="jdk">
+  <meta name="description" content="G1回收器CSet：一系列分区的集合，也是在垃圾收集过程中被回收的目标 年轻代收集（young gc）：CSet里全部都是年轻代分区的收集 混合收集（mixed gc）：CSet里包括年轻代分区和一部分老年代分区的收集 -XX:InitiatingHeapOccupancyPercent：在G1中，IHOP的值是老年代空间占Java堆总空间的比例-XX:G1MixedGCCountTarget：一">
+<meta name="keywords" content="jvm">
 <meta property="og:type" content="article">
-<meta property="og:title" content="偏向锁的批量再偏向机制">
-<meta property="og:url" content="http://yoursite.com/2019/07/08/批量再偏向机制/index.html">
+<meta property="og:title" content="G1回收器">
+<meta property="og:url" content="http://yoursite.com/2019/07/08/G1回收器/index.html">
 <meta property="og:site_name" content="Dloading...">
-<meta property="og:description" content="批量再偏向机制该机制的主要工作原理如下： 引入一个概念 epoch, 其本质是一个时间戳 ， 代表了偏向锁的有效性从前文描述的对象头结构中可以看到， epoch 存储在可偏向对象的 MarkWord 中。除了对象中的 epoch, 对象所属的类 class 信息中， 也会保存一个 epoch 值 每当遇到一个全局安全点时， 如果要对 class C 进行批量再偏向， 则首先对 class C 中保">
+<meta property="og:description" content="G1回收器CSet：一系列分区的集合，也是在垃圾收集过程中被回收的目标 年轻代收集（young gc）：CSet里全部都是年轻代分区的收集 混合收集（mixed gc）：CSet里包括年轻代分区和一部分老年代分区的收集 -XX:InitiatingHeapOccupancyPercent：在G1中，IHOP的值是老年代空间占Java堆总空间的比例-XX:G1MixedGCCountTarget：一">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-07-08T15:09:25.871Z">
+<meta property="og:updated_time" content="2019-07-08T15:42:12.733Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="偏向锁的批量再偏向机制">
-<meta name="twitter:description" content="批量再偏向机制该机制的主要工作原理如下： 引入一个概念 epoch, 其本质是一个时间戳 ， 代表了偏向锁的有效性从前文描述的对象头结构中可以看到， epoch 存储在可偏向对象的 MarkWord 中。除了对象中的 epoch, 对象所属的类 class 信息中， 也会保存一个 epoch 值 每当遇到一个全局安全点时， 如果要对 class C 进行批量再偏向， 则首先对 class C 中保">
+<meta name="twitter:title" content="G1回收器">
+<meta name="twitter:description" content="G1回收器CSet：一系列分区的集合，也是在垃圾收集过程中被回收的目标 年轻代收集（young gc）：CSet里全部都是年轻代分区的收集 混合收集（mixed gc）：CSet里包括年轻代分区和一部分老年代分区的收集 -XX:InitiatingHeapOccupancyPercent：在G1中，IHOP的值是老年代空间占Java堆总空间的比例-XX:G1MixedGCCountTarget：一">
 
 
 
@@ -113,7 +113,7 @@
 
   
   
-  <link rel="canonical" href="http://yoursite.com/2019/07/08/批量再偏向机制/">
+  <link rel="canonical" href="http://yoursite.com/2019/07/08/G1回收器/">
 
 
 
@@ -123,7 +123,7 @@
   };
 </script>
 
-  <title>偏向锁的批量再偏向机制 | Dloading...</title>
+  <title>G1回收器 | Dloading...</title>
   
 
 
@@ -290,7 +290,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/批量再偏向机制/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/G1回收器/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Swaggy Q">
@@ -307,7 +307,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">偏向锁的批量再偏向机制
+          <h1 class="post-title" itemprop="name headline">G1回收器
 
               
             
@@ -333,7 +333,7 @@
                 
               
 
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:09:25" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:42:12" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
             </span>
           
 
@@ -375,14 +375,32 @@
       
 
       
-        <h1 id="批量再偏向机制"><a href="#批量再偏向机制" class="headerlink" title="批量再偏向机制"></a>批量再偏向机制</h1><p>该机制的主要工作原理如下：</p>
-<p>引入一个概念 epoch, 其本质是一个时间戳 ， 代表了偏向锁的有效性<br>从前文描述的对象头结构中可以看到， epoch 存储在可偏向对象的 MarkWord 中。<br>除了对象中的 epoch, 对象所属的类 class 信息中， 也会保存一个 epoch 值</p>
-<p>每当遇到一个全局安全点时， 如果要对 class C 进行批量再偏向， 则首先对 class C 中保存的 epoch 进行增加操作， 得到一个新的 epoch_new</p>
-<p>然后扫描所有持有 class C 实例的线程栈， 根据线程栈的信息判断出该线程是否锁定了该对象， 仅将 epoch_new 的值赋给被锁定的对象中。</p>
-<p>退出安全点后， 当有线程需要尝试获取偏向锁时， 直接检查 class C 中存储的 epoch 值是否与目标对象中存储的 epoch 值相等， 如果不相等， 则说明该对象的偏向锁已经失效了， 可以直接通过 CAS 操作尝试再次将该对象再次偏向于请求获得锁的线程。</p>
-<p>直接看到jvm源码里，做个记录</p>
-<p>1: 得到当前的系统时间<br>2: 对kclass的对象头中设置当前时间<br>3: 如果需要批量再偏向<br>    3.1 如果klass的对象头中有偏向记录</p>
-<p>查看jvm源码的monitorenter<br>先查看当前线程的</p>
+        <h1 id="G1回收器"><a href="#G1回收器" class="headerlink" title="G1回收器"></a>G1回收器</h1><p>CSet：一系列分区的集合，也是在垃圾收集过程中被回收的目标</p>
+<p>年轻代收集（young gc）：CSet里全部都是年轻代分区的收集</p>
+<p>混合收集（mixed gc）：CSet里包括年轻代分区和一部分老年代分区的收集</p>
+<p>-XX:InitiatingHeapOccupancyPercent：在G1中，IHOP的值是老年代空间占Java堆总空间的比例<br>-XX:G1MixedGCCountTarget：一个混合收集周期中包含多少次混合收集<br>-XX:G1HeapWastePercent：堆浪费百分比，当G1发现可被回收的空间小于5%时，就不会再进行混合收集，也就是会结束当前的混合收集周期</p>
+<p>常规的垃圾收集器（串行，并行，CMS）都将堆结构分为三个部分：年轻代，老年代和固定大小的永久代。</p>
+<p>G1整个颠覆了之前的的新生代和老年代的紧凑分布，将内存分为了不同的区</p>
+<p>被G1标识成熟的区域是通过转移的方式收集。G1将对象从堆的一个或多个区域复制到堆上的单个区域，并且在此过程中，同时压缩和释放内存。这种转移方法在并行运行在多处理器上，以减少暂停时间并提高吞吐量</p>
+<p>CMS垃圾收集器不执行内存压缩，ParallelOld垃圾收集器执行全堆压缩，这将导致很大的暂停时间。</p>
+<p>Remembered Sets (RSets)跟踪对象引用到给定的区域。堆中每个区域有一个RSet。 RSet使GC能并行和独立地收集一个区域。 RSets的整体性能影响小于5％<br>Collection Sets (CSets)是GC中将要被收集的一组区域。GC中的所有存活数据在GC期间转移（复制/移动）。这些集合可能是eden区，survivor区或者老年代，CSets对JVM的大小影响不到1％。</p>
+<p>G1的推荐用例<br>G1的第一个重要特点是为用户的应用程序的提供一个低GC延时和大内存GC的解决方案。这意味着堆大小6GB或更大，稳定和可预测的暂停时间将低于0.5秒。</p>
+<p>如果应用程序使用CMS或ParallelOld垃圾回收器具有一个或多个以下特征，将有利于切换到G1：</p>
+<p>Full GC持续时间太长或太频繁<br>对象分配率或年轻代升级老年代很频繁<br>不期望的很长的垃圾收集时间或压缩暂停（超过0.5至1秒）</p>
+<p>存活对象从Eden区和一个survivor区拷贝到另一个survivor区，任何一个“年龄”达到阈值的对象会被晋升到老年代。</p>
+<p>主要困惑点： 何时并发何时并行何时stw，和cms的区别，Rset Cset CardTable重点怎么用着三个</p>
+<blockquote>
+<p>CMS和G1算法都涉及对可达对象的并发标记。并发标记的主要问题是collector在标记对象的过程中mutator可能正在改变对象引用关系图，从而造成漏标和错标。错标不会影响程序的正确性，只是造成所谓的浮动垃圾。但漏标则会导致可达对象被当做垃圾收集掉，从而影响程序的正确性。<br>为解决漏标问题，GC Handbook一书首先将对象分为三类，即所谓的black对象，grey对象和white对象。white对象是那些还没有被collector标记到的对象；grey对象是那些自身已经被标记到，但其所有引用字段还没有处理的对象；而black对象则是自身已经被标记到，且其引用的所有对象也已经被标记的对象。 </p>
+</blockquote>
+<p>基于上述分类，一个white对象在并发标记阶段会被漏标的充分必要条件是：<br>1、mutator插入了一个从black对象到该white对象的新引用<br>2、mutator删除了所有从grey对象到该white对象的直接或者间接引用。<br>因此，要避免对象的漏标，只需要打破上述2个条件中的任何一个即可。 </p>
+<p>Incremental update关注的是第一个条件的打破，即引用关系的插入。Incremental update利用write barrier将所有新插入的引用关系都记录下来，最后以这些引用关系的src为根STW地重新扫描一遍即避免了漏标问题。<br>SATB关注的是第二个条件的打破，即引用关系的删除。SATB利用pre write barrier将所有即将被删除的引用关系的旧引用记录下来，最后以这些旧引用为根STW地重新扫描一遍即可避免漏标问题。 </p>
+<h2 id="三色标记法"><a href="#三色标记法" class="headerlink" title="三色标记法"></a>三色标记法</h2><h4 id="一种标记的算法，黑灰白"><a href="#一种标记的算法，黑灰白" class="headerlink" title="一种标记的算法，黑灰白"></a>一种标记的算法，黑灰白</h4><h4 id="G1和CMS都是并发是收集器，所以需要处理在标记的时候，程序改动造成的对象的漏标。"><a href="#G1和CMS都是并发是收集器，所以需要处理在标记的时候，程序改动造成的对象的漏标。" class="headerlink" title="G1和CMS都是并发是收集器，所以需要处理在标记的时候，程序改动造成的对象的漏标。"></a>G1和CMS都是并发是收集器，所以需要处理在标记的时候，程序改动造成的对象的漏标。</h4><p>很显然，此时C是白色，被认为是垃圾需要清理掉，显然这是不合理的。那么我们如何保证应用程序在运行的时候，GC标记的对象不丢失呢？有如下2中可行的方式：</p>
+<p>在插入的时候记录对象<br>在删除的时候记录对象<br>刚好这对应CMS和G1的2种不同实现方式：<br>刚好这对应CMS和G1的2种不同实现方式：</p>
+<p>在CMS采用的是增量更新（Incremental update），只要在写屏障（write barrier）里发现要有一个白对象的引用被赋值到一个黑对象 的字段里，那就把这个白对象变成灰色的。即插入的时候记录下来。</p>
+<p>在G1中，使用的是STAB（snapshot-at-the-beginning）的方式，删除的时候记录所有的对象，它有3个步骤：</p>
+<p>1，在开始标记的时候生成一个快照图标记存活对象</p>
+<p>2，在并发标记的时候所有被改变的对象入队（在write barrier里把所有旧的引用所指向的对象都变成非白的）</p>
+<p>3，可能存在游离的垃圾，将在下次被收集<br></p>
 
       
     </div>
@@ -409,7 +427,7 @@
         
         <div class="post-tags">
           
-            <a href="/tags/jdk/" rel="tag"># jdk</a>
+            <a href="/tags/jvm/" rel="tag"># jvm</a>
           
         </div>
       
@@ -422,8 +440,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/07/08/线程池详解/" rel="next" title="线程池详解">
-                <i class="fa fa-chevron-left"></i> 线程池详解
+              <a href="/2019/07/08/ArrayList与LinkedList的实现和区别/" rel="next" title="ArrayList与LinkedList的实现和区别">
+                <i class="fa fa-chevron-left"></i> ArrayList与LinkedList的实现和区别
               </a>
             
           </div>
@@ -432,8 +450,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/07/08/堆外内存/" rel="prev" title="堆外内存">
-                堆外内存 <i class="fa fa-chevron-right"></i>
+              <a href="/2019/07/08/ArrayBlockingQueue/" rel="prev" title="ArrayBlockQueue源码详解">
+                ArrayBlockQueue源码详解 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -562,7 +580,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#批量再偏向机制"><span class="nav-number">1.</span> <span class="nav-text">批量再偏向机制</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#G1回收器"><span class="nav-number">1.</span> <span class="nav-text">G1回收器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#三色标记法"><span class="nav-number">1.1.</span> <span class="nav-text">三色标记法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一种标记的算法，黑灰白"><span class="nav-number">1.1.0.1.</span> <span class="nav-text">一种标记的算法，黑灰白</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#G1和CMS都是并发是收集器，所以需要处理在标记的时候，程序改动造成的对象的漏标。"><span class="nav-number">1.1.0.2.</span> <span class="nav-text">G1和CMS都是并发是收集器，所以需要处理在标记的时候，程序改动造成的对象的漏标。</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>

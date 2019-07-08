@@ -94,18 +94,21 @@
 
 
 
-  <meta name="description" content="批量再偏向机制该机制的主要工作原理如下： 引入一个概念 epoch, 其本质是一个时间戳 ， 代表了偏向锁的有效性从前文描述的对象头结构中可以看到， epoch 存储在可偏向对象的 MarkWord 中。除了对象中的 epoch, 对象所属的类 class 信息中， 也会保存一个 epoch 值 每当遇到一个全局安全点时， 如果要对 class C 进行批量再偏向， 则首先对 class C 中保">
-<meta name="keywords" content="jdk">
+  <meta name="description" content="java中的对象头正文我们知道每个对象在实例化分配的时候，都是分配在堆内存中的。每个对象在堆中的内存区间存储的时候，都是分为三块地方 对象头 实例属性 填充属性  今天我们就要去探究一下，在对象头中存储的东西有什么。在堆中的对象头中，主要是由两个部分组成的，那就是markword和klass point。其中klass point是指向实例对象的类对象的指针，jvm就是通过这个指针来确定该实例是属">
+<meta name="keywords" content="jvm">
 <meta property="og:type" content="article">
-<meta property="og:title" content="偏向锁的批量再偏向机制">
-<meta property="og:url" content="http://yoursite.com/2019/07/08/批量再偏向机制/index.html">
+<meta property="og:title" content="java中的对象头">
+<meta property="og:url" content="http://yoursite.com/2019/07/08/java中的对象头/index.html">
 <meta property="og:site_name" content="Dloading...">
-<meta property="og:description" content="批量再偏向机制该机制的主要工作原理如下： 引入一个概念 epoch, 其本质是一个时间戳 ， 代表了偏向锁的有效性从前文描述的对象头结构中可以看到， epoch 存储在可偏向对象的 MarkWord 中。除了对象中的 epoch, 对象所属的类 class 信息中， 也会保存一个 epoch 值 每当遇到一个全局安全点时， 如果要对 class C 进行批量再偏向， 则首先对 class C 中保">
+<meta property="og:description" content="java中的对象头正文我们知道每个对象在实例化分配的时候，都是分配在堆内存中的。每个对象在堆中的内存区间存储的时候，都是分为三块地方 对象头 实例属性 填充属性  今天我们就要去探究一下，在对象头中存储的东西有什么。在堆中的对象头中，主要是由两个部分组成的，那就是markword和klass point。其中klass point是指向实例对象的类对象的指针，jvm就是通过这个指针来确定该实例是属">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-07-08T15:09:25.871Z">
+<meta property="og:image" content="http://yoursite.com/2019/07/08/java中的对象头/img/32-bit.png">
+<meta property="og:image" content="http://yoursite.com/2019/07/08/java中的对象头/img/64-bit.png">
+<meta property="og:updated_time" content="2019-07-08T15:41:20.824Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="偏向锁的批量再偏向机制">
-<meta name="twitter:description" content="批量再偏向机制该机制的主要工作原理如下： 引入一个概念 epoch, 其本质是一个时间戳 ， 代表了偏向锁的有效性从前文描述的对象头结构中可以看到， epoch 存储在可偏向对象的 MarkWord 中。除了对象中的 epoch, 对象所属的类 class 信息中， 也会保存一个 epoch 值 每当遇到一个全局安全点时， 如果要对 class C 进行批量再偏向， 则首先对 class C 中保">
+<meta name="twitter:title" content="java中的对象头">
+<meta name="twitter:description" content="java中的对象头正文我们知道每个对象在实例化分配的时候，都是分配在堆内存中的。每个对象在堆中的内存区间存储的时候，都是分为三块地方 对象头 实例属性 填充属性  今天我们就要去探究一下，在对象头中存储的东西有什么。在堆中的对象头中，主要是由两个部分组成的，那就是markword和klass point。其中klass point是指向实例对象的类对象的指针，jvm就是通过这个指针来确定该实例是属">
+<meta name="twitter:image" content="http://yoursite.com/2019/07/08/java中的对象头/img/32-bit.png">
 
 
 
@@ -113,7 +116,7 @@
 
   
   
-  <link rel="canonical" href="http://yoursite.com/2019/07/08/批量再偏向机制/">
+  <link rel="canonical" href="http://yoursite.com/2019/07/08/java中的对象头/">
 
 
 
@@ -123,7 +126,7 @@
   };
 </script>
 
-  <title>偏向锁的批量再偏向机制 | Dloading...</title>
+  <title>java中的对象头 | Dloading...</title>
   
 
 
@@ -290,7 +293,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/批量再偏向机制/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/java中的对象头/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Swaggy Q">
@@ -307,7 +310,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">偏向锁的批量再偏向机制
+          <h1 class="post-title" itemprop="name headline">java中的对象头
 
               
             
@@ -333,7 +336,7 @@
                 
               
 
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:09:25" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:41:20" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
             </span>
           
 
@@ -375,14 +378,12 @@
       
 
       
-        <h1 id="批量再偏向机制"><a href="#批量再偏向机制" class="headerlink" title="批量再偏向机制"></a>批量再偏向机制</h1><p>该机制的主要工作原理如下：</p>
-<p>引入一个概念 epoch, 其本质是一个时间戳 ， 代表了偏向锁的有效性<br>从前文描述的对象头结构中可以看到， epoch 存储在可偏向对象的 MarkWord 中。<br>除了对象中的 epoch, 对象所属的类 class 信息中， 也会保存一个 epoch 值</p>
-<p>每当遇到一个全局安全点时， 如果要对 class C 进行批量再偏向， 则首先对 class C 中保存的 epoch 进行增加操作， 得到一个新的 epoch_new</p>
-<p>然后扫描所有持有 class C 实例的线程栈， 根据线程栈的信息判断出该线程是否锁定了该对象， 仅将 epoch_new 的值赋给被锁定的对象中。</p>
-<p>退出安全点后， 当有线程需要尝试获取偏向锁时， 直接检查 class C 中存储的 epoch 值是否与目标对象中存储的 epoch 值相等， 如果不相等， 则说明该对象的偏向锁已经失效了， 可以直接通过 CAS 操作尝试再次将该对象再次偏向于请求获得锁的线程。</p>
-<p>直接看到jvm源码里，做个记录</p>
-<p>1: 得到当前的系统时间<br>2: 对kclass的对象头中设置当前时间<br>3: 如果需要批量再偏向<br>    3.1 如果klass的对象头中有偏向记录</p>
-<p>查看jvm源码的monitorenter<br>先查看当前线程的</p>
+        <h1 id="java中的对象头"><a href="#java中的对象头" class="headerlink" title="java中的对象头"></a>java中的对象头</h1><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="我们知道每个对象在实例化分配的时候，都是分配在堆内存中的。每个对象在堆中的内存区间存储的时候，都是分为三块地方"><a href="#我们知道每个对象在实例化分配的时候，都是分配在堆内存中的。每个对象在堆中的内存区间存储的时候，都是分为三块地方" class="headerlink" title="我们知道每个对象在实例化分配的时候，都是分配在堆内存中的。每个对象在堆中的内存区间存储的时候，都是分为三块地方"></a>我们知道每个对象在实例化分配的时候，都是分配在堆内存中的。每个对象在堆中的内存区间存储的时候，都是分为三块地方</h4><ul>
+<li>对象头</li>
+<li>实例属性</li>
+<li>填充属性</li>
+</ul>
+<h4 id="今天我们就要去探究一下，在对象头中存储的东西有什么。"><a href="#今天我们就要去探究一下，在对象头中存储的东西有什么。" class="headerlink" title="今天我们就要去探究一下，在对象头中存储的东西有什么。"></a>今天我们就要去探究一下，在对象头中存储的东西有什么。</h4><h4 id="在堆中的对象头中，主要是由两个部分组成的，那就是markword和klass-point。其中klass-point是指向实例对象的类对象的指针，jvm就是通过这个指针来确定该实例是属于哪个类的。而mark-word是为了标识一些在运行时的一些动态数据，如果是数组对象，则对象头占3个字宽，因为还需要存储一份数组的长度，如果是非数组对象，则占2个字宽。具体内容如下图所示"><a href="#在堆中的对象头中，主要是由两个部分组成的，那就是markword和klass-point。其中klass-point是指向实例对象的类对象的指针，jvm就是通过这个指针来确定该实例是属于哪个类的。而mark-word是为了标识一些在运行时的一些动态数据，如果是数组对象，则对象头占3个字宽，因为还需要存储一份数组的长度，如果是非数组对象，则占2个字宽。具体内容如下图所示" class="headerlink" title="在堆中的对象头中，主要是由两个部分组成的，那就是markword和klass point。其中klass point是指向实例对象的类对象的指针，jvm就是通过这个指针来确定该实例是属于哪个类的。而mark word是为了标识一些在运行时的一些动态数据，如果是数组对象，则对象头占3个字宽，因为还需要存储一份数组的长度，如果是非数组对象，则占2个字宽。具体内容如下图所示"></a>在堆中的对象头中，主要是由两个部分组成的，那就是markword和klass point。其中klass point是指向实例对象的类对象的指针，jvm就是通过这个指针来确定该实例是属于哪个类的。而mark word是为了标识一些在运行时的一些动态数据，如果是数组对象，则对象头占3个字宽，因为还需要存储一份数组的长度，如果是非数组对象，则占2个字宽。具体内容如下图所示</h4><p>32位虚拟机对象头<br><img src="img/32-bit.png" alt="32位虚拟机对象头"><br>64位虚拟机对象头<br><img src="img/64-bit.png" alt="64位虚拟机对象头"></p>
 
       
     </div>
@@ -409,7 +410,7 @@
         
         <div class="post-tags">
           
-            <a href="/tags/jdk/" rel="tag"># jdk</a>
+            <a href="/tags/jvm/" rel="tag"># jvm</a>
           
         </div>
       
@@ -422,8 +423,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/07/08/线程池详解/" rel="next" title="线程池详解">
-                <i class="fa fa-chevron-left"></i> 线程池详解
+              <a href="/2019/07/08/java stream/" rel="next" title="java的stream用法">
+                <i class="fa fa-chevron-left"></i> java的stream用法
               </a>
             
           </div>
@@ -432,8 +433,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/07/08/堆外内存/" rel="prev" title="堆外内存">
-                堆外内存 <i class="fa fa-chevron-right"></i>
+              <a href="/2019/07/08/ReentrantLock源码解析/" rel="prev" title="ReetrantLock源码详解">
+                ReetrantLock源码详解 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -562,7 +563,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#批量再偏向机制"><span class="nav-number">1.</span> <span class="nav-text">批量再偏向机制</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#java中的对象头"><span class="nav-number">1.</span> <span class="nav-text">java中的对象头</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#正文"><span class="nav-number">1.1.</span> <span class="nav-text">正文</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#我们知道每个对象在实例化分配的时候，都是分配在堆内存中的。每个对象在堆中的内存区间存储的时候，都是分为三块地方"><span class="nav-number">1.1.0.1.</span> <span class="nav-text">我们知道每个对象在实例化分配的时候，都是分配在堆内存中的。每个对象在堆中的内存区间存储的时候，都是分为三块地方</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#今天我们就要去探究一下，在对象头中存储的东西有什么。"><span class="nav-number">1.1.0.2.</span> <span class="nav-text">今天我们就要去探究一下，在对象头中存储的东西有什么。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在堆中的对象头中，主要是由两个部分组成的，那就是markword和klass-point。其中klass-point是指向实例对象的类对象的指针，jvm就是通过这个指针来确定该实例是属于哪个类的。而mark-word是为了标识一些在运行时的一些动态数据，如果是数组对象，则对象头占3个字宽，因为还需要存储一份数组的长度，如果是非数组对象，则占2个字宽。具体内容如下图所示"><span class="nav-number">1.1.0.3.</span> <span class="nav-text">在堆中的对象头中，主要是由两个部分组成的，那就是markword和klass point。其中klass point是指向实例对象的类对象的指针，jvm就是通过这个指针来确定该实例是属于哪个类的。而mark word是为了标识一些在运行时的一些动态数据，如果是数组对象，则对象头占3个字宽，因为还需要存储一份数组的长度，如果是非数组对象，则占2个字宽。具体内容如下图所示</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>

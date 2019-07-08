@@ -95,16 +95,16 @@
 
 
   <meta name="description" content="线程池详解前文本文旨在针对ThreadPoolExecutor进行一些源码级别的解读，从而对我们平时从Executor类生成的各种不同的线程池有更深的理解正文先看到构造方法做了什么123456789101112131415161718192021public ThreadPoolExecutor(int corePoolSize,                              int">
-<meta name="keywords" content="Dloading...">
+<meta name="keywords" content="jdk">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Dloading...">
-<meta property="og:url" content="http://yoursite.com/2019/03/26/线程池详解/index.html">
+<meta property="og:title" content="线程池详解">
+<meta property="og:url" content="http://yoursite.com/2019/07/08/线程池详解/index.html">
 <meta property="og:site_name" content="Dloading...">
 <meta property="og:description" content="线程池详解前文本文旨在针对ThreadPoolExecutor进行一些源码级别的解读，从而对我们平时从Executor类生成的各种不同的线程池有更深的理解正文先看到构造方法做了什么123456789101112131415161718192021public ThreadPoolExecutor(int corePoolSize,                              int">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-03-25T17:41:41.107Z">
+<meta property="og:updated_time" content="2019-07-08T15:40:51.588Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Dloading...">
+<meta name="twitter:title" content="线程池详解">
 <meta name="twitter:description" content="线程池详解前文本文旨在针对ThreadPoolExecutor进行一些源码级别的解读，从而对我们平时从Executor类生成的各种不同的线程池有更深的理解正文先看到构造方法做了什么123456789101112131415161718192021public ThreadPoolExecutor(int corePoolSize,                              int">
 
 
@@ -113,7 +113,7 @@
 
   
   
-  <link rel="canonical" href="http://yoursite.com/2019/03/26/线程池详解/">
+  <link rel="canonical" href="http://yoursite.com/2019/07/08/线程池详解/">
 
 
 
@@ -123,7 +123,7 @@
   };
 </script>
 
-  <title> | Dloading...</title>
+  <title>线程池详解 | Dloading...</title>
   
 
 
@@ -290,7 +290,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/26/线程池详解/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/线程池详解/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Swaggy Q">
@@ -307,7 +307,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
+          <h1 class="post-title" itemprop="name headline">线程池详解
 
               
             
@@ -333,10 +333,14 @@
                 
               
 
-              <time title="Created: 2019-03-26 01:41:41" itemprop="dateCreated datePublished" datetime="2019-03-26T01:41:41+08:00">2019-03-26</time>
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:40:51" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
             </span>
           
 
+          
+            
+
+            
           
 
           
@@ -407,6 +411,15 @@
 
     <footer class="post-footer">
       
+        
+          
+        
+        <div class="post-tags">
+          
+            <a href="/tags/jdk/" rel="tag"># jdk</a>
+          
+        </div>
+      
 
       
       
@@ -416,14 +429,18 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2019/07/08/类加载器/" rel="next" title="类加载器">
+                <i class="fa fa-chevron-left"></i> 类加载器
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/07/08/谈谈ConcurrentHashmap/" rel="prev" title="ConcurrentHashmap源码详解">
-                ConcurrentHashmap源码详解 <i class="fa fa-chevron-right"></i>
+              <a href="/2019/07/08/批量再偏向机制/" rel="prev" title="偏向锁的批量再偏向机制">
+                偏向锁的批量再偏向机制 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -493,7 +510,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-count">30</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>

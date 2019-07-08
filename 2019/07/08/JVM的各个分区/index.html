@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+<link rel="stylesheet" href="/css/main.css?v=7.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.2.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.2.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="JVM的各个分区前言最近在看JVM的书籍，避免看过就忘了。所以想用文字记录一下。本文会讲一下我理解的JVM中的各个分区。正文现在直接概括一下JVM中到底有哪些分区 堆 (线程共享) (GC的主要发生区) 栈 (细分为虚拟机栈和本地方法栈) (线程独占)  方法区 (non-heap) (线程共享) (内部还包含了一个运行时常量区) 程序计数器 (线程独占)  堆堆是JVM最大的一块区域。主要是用于">
+<meta name="keywords" content="jvm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM的各个分区">
+<meta property="og:url" content="http://yoursite.com/2019/07/08/JVM的各个分区/index.html">
+<meta property="og:site_name" content="Dloading...">
+<meta property="og:description" content="JVM的各个分区前言最近在看JVM的书籍，避免看过就忘了。所以想用文字记录一下。本文会讲一下我理解的JVM中的各个分区。正文现在直接概括一下JVM中到底有哪些分区 堆 (线程共享) (GC的主要发生区) 栈 (细分为虚拟机栈和本地方法栈) (线程独占)  方法区 (non-heap) (线程共享) (内部还包含了一个运行时常量区) 程序计数器 (线程独占)  堆堆是JVM最大的一块区域。主要是用于">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-07-08T15:41:49.375Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JVM的各个分区">
+<meta name="twitter:description" content="JVM的各个分区前言最近在看JVM的书籍，避免看过就忘了。所以想用文字记录一下。本文会讲一下我理解的JVM中的各个分区。正文现在直接概括一下JVM中到底有哪些分区 堆 (线程共享) (GC的主要发生区) 栈 (细分为虚拟机栈和本地方法栈) (线程独占)  方法区 (non-heap) (线程共享) (内部还包含了一个运行时常量区) 程序计数器 (线程独占)  堆堆是JVM最大的一块区域。主要是用于">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://yoursite.com/2019/07/08/JVM的各个分区/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>JVM的各个分区 | Dloading...</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Dloading...</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">努力成为优秀程序员</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/JVM的各个分区/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Swaggy Q">
+      <meta itemprop="description" content="拉塞尔FMVP了吗">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dloading...">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">JVM的各个分区
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:41:49" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+            </span>
+          
+
+          
+            
+
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="JVM的各个分区"><a href="#JVM的各个分区" class="headerlink" title="JVM的各个分区"></a>JVM的各个分区</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h4 id="最近在看JVM的书籍，避免看过就忘了。所以想用文字记录一下。本文会讲一下我理解的JVM中的各个分区。"><a href="#最近在看JVM的书籍，避免看过就忘了。所以想用文字记录一下。本文会讲一下我理解的JVM中的各个分区。" class="headerlink" title="最近在看JVM的书籍，避免看过就忘了。所以想用文字记录一下。本文会讲一下我理解的JVM中的各个分区。"></a>最近在看JVM的书籍，避免看过就忘了。所以想用文字记录一下。本文会讲一下我理解的JVM中的各个分区。</h4><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="现在直接概括一下JVM中到底有哪些分区"><a href="#现在直接概括一下JVM中到底有哪些分区" class="headerlink" title="现在直接概括一下JVM中到底有哪些分区"></a>现在直接概括一下JVM中到底有哪些分区</h4><ul>
+<li>堆 (线程共享) (GC的主要发生区)</li>
+<li>栈 (细分为虚拟机栈和本地方法栈) (线程独占) </li>
+<li>方法区 (non-heap) (线程共享) (内部还包含了一个运行时常量区)</li>
+<li>程序计数器 (线程独占)</li>
+</ul>
+<h2 id="堆"><a href="#堆" class="headerlink" title="堆"></a>堆</h2><h4 id="堆是JVM最大的一块区域。主要是用于存储代码中存储的各个对象。由于是虚拟机中分配的最大的一块区域，所以也是GC发生的最主要的区域。"><a href="#堆是JVM最大的一块区域。主要是用于存储代码中存储的各个对象。由于是虚拟机中分配的最大的一块区域，所以也是GC发生的最主要的区域。" class="headerlink" title="堆是JVM最大的一块区域。主要是用于存储代码中存储的各个对象。由于是虚拟机中分配的最大的一块区域，所以也是GC发生的最主要的区域。"></a>堆是JVM最大的一块区域。主要是用于存储代码中存储的各个对象。由于是虚拟机中分配的最大的一块区域，所以也是GC发生的最主要的区域。</h4><h4 id="堆内部还可以再划分为Eden区，survivorTo区，survivorFrom区。三个区的大小比例最好是8-1-1。当然这些大小都是可以由用户自主的定义大小。有几个参数可供调配"><a href="#堆内部还可以再划分为Eden区，survivorTo区，survivorFrom区。三个区的大小比例最好是8-1-1。当然这些大小都是可以由用户自主的定义大小。有几个参数可供调配" class="headerlink" title="堆内部还可以再划分为Eden区，survivorTo区，survivorFrom区。三个区的大小比例最好是8:1:1。当然这些大小都是可以由用户自主的定义大小。有几个参数可供调配"></a>堆内部还可以再划分为Eden区，survivorTo区，survivorFrom区。三个区的大小比例最好是8:1:1。当然这些大小都是可以由用户自主的定义大小。有几个参数可供调配</h4><ul>
+<li>-Xmx 堆的最大内存</li>
+<li>-Xms 堆的最小内存</li>
+</ul>
+<h4 id="可以看到堆的可以由伸缩范围的，而且在实际的物理内存中，堆可以不是连续的，只要是逻辑连续就可以了。但是若对象分配的总大小已经大过了最大内存。则会报OutOfMemoryError。也就是我们常见的OOM"><a href="#可以看到堆的可以由伸缩范围的，而且在实际的物理内存中，堆可以不是连续的，只要是逻辑连续就可以了。但是若对象分配的总大小已经大过了最大内存。则会报OutOfMemoryError。也就是我们常见的OOM" class="headerlink" title="可以看到堆的可以由伸缩范围的，而且在实际的物理内存中，堆可以不是连续的，只要是逻辑连续就可以了。但是若对象分配的总大小已经大过了最大内存。则会报OutOfMemoryError。也就是我们常见的OOM"></a>可以看到堆的可以由伸缩范围的，而且在实际的物理内存中，堆可以不是连续的，只要是逻辑连续就可以了。但是若对象分配的总大小已经大过了最大内存。则会报OutOfMemoryError。也就是我们常见的OOM</h4><h4 id="因为堆中会不停的发生不同程度的GC，由于不同的GC算法的实际方法有所不同。"><a href="#因为堆中会不停的发生不同程度的GC，由于不同的GC算法的实际方法有所不同。" class="headerlink" title="因为堆中会不停的发生不同程度的GC，由于不同的GC算法的实际方法有所不同。"></a>因为堆中会不停的发生不同程度的GC，由于不同的GC算法的实际方法有所不同。</h4><h4 id="有采用compact算法的Serial，Parnew的GC，会将堆中空闲的内存块都统一合并成一大块，那么对象在创建分配内存的时候，只需要采用指针碰撞的方法，将符合要求的一块内存块的收尾指针移动一下，就可以看做分配给了新创建的对象。"><a href="#有采用compact算法的Serial，Parnew的GC，会将堆中空闲的内存块都统一合并成一大块，那么对象在创建分配内存的时候，只需要采用指针碰撞的方法，将符合要求的一块内存块的收尾指针移动一下，就可以看做分配给了新创建的对象。" class="headerlink" title="有采用compact算法的Serial，Parnew的GC，会将堆中空闲的内存块都统一合并成一大块，那么对象在创建分配内存的时候，只需要采用指针碰撞的方法，将符合要求的一块内存块的收尾指针移动一下，就可以看做分配给了新创建的对象。"></a>有采用compact算法的Serial，Parnew的GC，会将堆中空闲的内存块都统一合并成一大块，那么对象在创建分配内存的时候，只需要采用指针碰撞的方法，将符合要求的一块内存块的收尾指针移动一下，就可以看做分配给了新创建的对象。</h4><h4 id="采用Maek-sweep算法的CMS的GC，只是维护了一个空闲内存块的表格，所以在对象分配的时候直接在表中寻找到一块最适合的分配就行了"><a href="#采用Maek-sweep算法的CMS的GC，只是维护了一个空闲内存块的表格，所以在对象分配的时候直接在表中寻找到一块最适合的分配就行了" class="headerlink" title="采用Maek-sweep算法的CMS的GC，只是维护了一个空闲内存块的表格，所以在对象分配的时候直接在表中寻找到一块最适合的分配就行了"></a>采用Maek-sweep算法的CMS的GC，只是维护了一个空闲内存块的表格，所以在对象分配的时候直接在表中寻找到一块最适合的分配就行了</h4><h4 id="以上两种都是非常常见的方式，但是在采用指针碰撞的时候，要注意并发问题。也就是若同时有两个对象内存需要分配，则要注意指针的移动。一般会采用CAS-重试的方式，保证内存分配的无误。也有一种方式是，为每个线程都预先分配一块内存，叫做TLAB，所以每个线程都可以在自己的内存中无措的分配，只有在新分配TLAB的时候才需要错定内存块。"><a href="#以上两种都是非常常见的方式，但是在采用指针碰撞的时候，要注意并发问题。也就是若同时有两个对象内存需要分配，则要注意指针的移动。一般会采用CAS-重试的方式，保证内存分配的无误。也有一种方式是，为每个线程都预先分配一块内存，叫做TLAB，所以每个线程都可以在自己的内存中无措的分配，只有在新分配TLAB的时候才需要错定内存块。" class="headerlink" title="以上两种都是非常常见的方式，但是在采用指针碰撞的时候，要注意并发问题。也就是若同时有两个对象内存需要分配，则要注意指针的移动。一般会采用CAS+重试的方式，保证内存分配的无误。也有一种方式是，为每个线程都预先分配一块内存，叫做TLAB，所以每个线程都可以在自己的内存中无措的分配，只有在新分配TLAB的时候才需要错定内存块。"></a>以上两种都是非常常见的方式，但是在采用指针碰撞的时候，要注意并发问题。也就是若同时有两个对象内存需要分配，则要注意指针的移动。一般会采用CAS+重试的方式，保证内存分配的无误。也有一种方式是，为每个线程都预先分配一块内存，叫做TLAB，所以每个线程都可以在自己的内存中无措的分配，只有在新分配TLAB的时候才需要错定内存块。</h4><h2 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h2><h4 id="栈也是我们在学校学习的时候，经常听到的一个词。但是其实在JVM定义的时候，栈是有两块组成的，一个叫做虚拟机栈，一个叫做本地方法栈。顾名思义我们也可以看出两个的不同就是本地方法栈存储的都是一些native的方法。但是在HotSpot的虚拟机的实现方法中，其实这两块也是合二为一的。"><a href="#栈也是我们在学校学习的时候，经常听到的一个词。但是其实在JVM定义的时候，栈是有两块组成的，一个叫做虚拟机栈，一个叫做本地方法栈。顾名思义我们也可以看出两个的不同就是本地方法栈存储的都是一些native的方法。但是在HotSpot的虚拟机的实现方法中，其实这两块也是合二为一的。" class="headerlink" title="栈也是我们在学校学习的时候，经常听到的一个词。但是其实在JVM定义的时候，栈是有两块组成的，一个叫做虚拟机栈，一个叫做本地方法栈。顾名思义我们也可以看出两个的不同就是本地方法栈存储的都是一些native的方法。但是在HotSpot的虚拟机的实现方法中，其实这两块也是合二为一的。"></a>栈也是我们在学校学习的时候，经常听到的一个词。但是其实在JVM定义的时候，栈是有两块组成的，一个叫做虚拟机栈，一个叫做本地方法栈。顾名思义我们也可以看出两个的不同就是本地方法栈存储的都是一些native的方法。但是在HotSpot的虚拟机的实现方法中，其实这两块也是合二为一的。</h4><h4 id="那什么叫做存储的是方法呢？方法又是以什么样是形式存在栈中的呢？"><a href="#那什么叫做存储的是方法呢？方法又是以什么样是形式存在栈中的呢？" class="headerlink" title="那什么叫做存储的是方法呢？方法又是以什么样是形式存在栈中的呢？"></a>那什么叫做存储的是方法呢？方法又是以什么样是形式存在栈中的呢？</h4><h4 id="其实存储在栈中的单位叫做栈帧，每个栈帧里面保存的是方法中的局部变量表，操作数，动态链接，方法出口等信息。每个栈帧的入栈表示执行当前方法，出栈表示完成了当前方法。所以当我们在一个方法里递归调用了自己，就会导致不断有新的栈帧入栈，但是没有出栈，就会造成最后达到了栈的最大深度。就会报出StackOverFlowError"><a href="#其实存储在栈中的单位叫做栈帧，每个栈帧里面保存的是方法中的局部变量表，操作数，动态链接，方法出口等信息。每个栈帧的入栈表示执行当前方法，出栈表示完成了当前方法。所以当我们在一个方法里递归调用了自己，就会导致不断有新的栈帧入栈，但是没有出栈，就会造成最后达到了栈的最大深度。就会报出StackOverFlowError" class="headerlink" title="其实存储在栈中的单位叫做栈帧，每个栈帧里面保存的是方法中的局部变量表，操作数，动态链接，方法出口等信息。每个栈帧的入栈表示执行当前方法，出栈表示完成了当前方法。所以当我们在一个方法里递归调用了自己，就会导致不断有新的栈帧入栈，但是没有出栈，就会造成最后达到了栈的最大深度。就会报出StackOverFlowError"></a>其实存储在栈中的单位叫做栈帧，每个栈帧里面保存的是方法中的局部变量表，操作数，动态链接，方法出口等信息。每个栈帧的入栈表示执行当前方法，出栈表示完成了当前方法。所以当我们在一个方法里递归调用了自己，就会导致不断有新的栈帧入栈，但是没有出栈，就会造成最后达到了栈的最大深度。就会报出StackOverFlowError</h4><h2 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a>程序计数器</h2><h4 id="程序计数器就是每个线程都独有的一个寄存器，记录了每个线程目前执行到了哪个语句，那么当cpu在调度别的线程的时候，能将当前进度保存下来。当再度调度到的时候，也就可以继续之前的工作了"><a href="#程序计数器就是每个线程都独有的一个寄存器，记录了每个线程目前执行到了哪个语句，那么当cpu在调度别的线程的时候，能将当前进度保存下来。当再度调度到的时候，也就可以继续之前的工作了" class="headerlink" title="程序计数器就是每个线程都独有的一个寄存器，记录了每个线程目前执行到了哪个语句，那么当cpu在调度别的线程的时候，能将当前进度保存下来。当再度调度到的时候，也就可以继续之前的工作了"></a>程序计数器就是每个线程都独有的一个寄存器，记录了每个线程目前执行到了哪个语句，那么当cpu在调度别的线程的时候，能将当前进度保存下来。当再度调度到的时候，也就可以继续之前的工作了</h4><h2 id="方法区"><a href="#方法区" class="headerlink" title="方法区"></a>方法区</h2><h4 id="方法区在jdk-1-7中可以类比于永久代。其实按书上所说这两者并不完全相同，只是jvm作者用永久代的实现方式实现了方法区而已。在方法区中存储的主要是类的属性方法，基本不进行GC，因为在这个区内GC的成果很低，因为这些常量不会很经常被卸载。这个方法区中还有一个叫做运行时常量区的地方，我们最常用到这块地方就是我们调用String-intern-方法。这个方法会将这个String作为常量保存在这个运行时常量区内。这边还有关于这个方法的小例子。"><a href="#方法区在jdk-1-7中可以类比于永久代。其实按书上所说这两者并不完全相同，只是jvm作者用永久代的实现方式实现了方法区而已。在方法区中存储的主要是类的属性方法，基本不进行GC，因为在这个区内GC的成果很低，因为这些常量不会很经常被卸载。这个方法区中还有一个叫做运行时常量区的地方，我们最常用到这块地方就是我们调用String-intern-方法。这个方法会将这个String作为常量保存在这个运行时常量区内。这边还有关于这个方法的小例子。" class="headerlink" title="方法区在jdk 1.7中可以类比于永久代。其实按书上所说这两者并不完全相同，只是jvm作者用永久代的实现方式实现了方法区而已。在方法区中存储的主要是类的属性方法，基本不进行GC，因为在这个区内GC的成果很低，因为这些常量不会很经常被卸载。这个方法区中还有一个叫做运行时常量区的地方，我们最常用到这块地方就是我们调用String.intern()方法。这个方法会将这个String作为常量保存在这个运行时常量区内。这边还有关于这个方法的小例子。"></a>方法区在jdk 1.7中可以类比于永久代。其实按书上所说这两者并不完全相同，只是jvm作者用永久代的实现方式实现了方法区而已。在方法区中存储的主要是类的属性方法，基本不进行GC，因为在这个区内GC的成果很低，因为这些常量不会很经常被卸载。这个方法区中还有一个叫做运行时常量区的地方，我们最常用到这块地方就是我们调用String.intern()方法。这个方法会将这个String作为常量保存在这个运行时常量区内。这边还有关于这个方法的小例子。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">    String str1 = new StringBuilder(&quot;ab&quot;).append(&quot;cd&quot;).toString();</span><br><span class="line">    System.out.println(str1.intern() == str1);</span><br><span class="line"></span><br><span class="line">    String str2 = new StringBuilder(&quot;ja&quot;).append(&quot;va&quot;).toString();</span><br><span class="line">    System.out.println(str2.intern() == str2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="这个小例子在jdk1-7的版本下运行会返回true，false。但是在jdk1-6版本下运行会出现false，false。这也是因为两个版本的jdk对intern方法实现变量到运行时常量区的方式的不同。具体原理感兴趣的可以参考一下-lt-深入理解java虚拟机-gt-一书的2-4-3小节"><a href="#这个小例子在jdk1-7的版本下运行会返回true，false。但是在jdk1-6版本下运行会出现false，false。这也是因为两个版本的jdk对intern方法实现变量到运行时常量区的方式的不同。具体原理感兴趣的可以参考一下-lt-深入理解java虚拟机-gt-一书的2-4-3小节" class="headerlink" title="这个小例子在jdk1.7的版本下运行会返回true，false。但是在jdk1.6版本下运行会出现false，false。这也是因为两个版本的jdk对intern方法实现变量到运行时常量区的方式的不同。具体原理感兴趣的可以参考一下&lt;深入理解java虚拟机&gt;一书的2.4.3小节"></a>这个小例子在jdk1.7的版本下运行会返回true，false。但是在jdk1.6版本下运行会出现false，false。这也是因为两个版本的jdk对intern方法实现变量到运行时常量区的方式的不同。具体原理感兴趣的可以参考一下&lt;深入理解java虚拟机&gt;一书的2.4.3小节</h4><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h4 id="本文简单叙述了一下我理解的jvm内存格局，里面提到的GC方式，会在下一篇文章中再做叙述。"><a href="#本文简单叙述了一下我理解的jvm内存格局，里面提到的GC方式，会在下一篇文章中再做叙述。" class="headerlink" title="本文简单叙述了一下我理解的jvm内存格局，里面提到的GC方式，会在下一篇文章中再做叙述。"></a>本文简单叙述了一下我理解的jvm内存格局，里面提到的GC方式，会在下一篇文章中再做叙述。</h4>
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        
+          
+        
+        <div class="post-tags">
+          
+            <a href="/tags/jvm/" rel="tag"># jvm</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/08/HashTable/" rel="next" title="HashTable源码详解">
+                <i class="fa fa-chevron-left"></i> HashTable源码详解
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/08/ConcurrentHashmap 的transfer方法/" rel="prev" title="ConcurrentHashMap的transfer方法">
+                ConcurrentHashMap的transfer方法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Swaggy Q</p>
+              <div class="site-description motion-element" itemprop="description">拉塞尔FMVP了吗</div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">30</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#JVM的各个分区"><span class="nav-number">1.</span> <span class="nav-text">JVM的各个分区</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#最近在看JVM的书籍，避免看过就忘了。所以想用文字记录一下。本文会讲一下我理解的JVM中的各个分区。"><span class="nav-number">1.1.0.1.</span> <span class="nav-text">最近在看JVM的书籍，避免看过就忘了。所以想用文字记录一下。本文会讲一下我理解的JVM中的各个分区。</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#正文"><span class="nav-number">1.2.</span> <span class="nav-text">正文</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#现在直接概括一下JVM中到底有哪些分区"><span class="nav-number">1.2.0.1.</span> <span class="nav-text">现在直接概括一下JVM中到底有哪些分区</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#堆"><span class="nav-number">1.3.</span> <span class="nav-text">堆</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#堆是JVM最大的一块区域。主要是用于存储代码中存储的各个对象。由于是虚拟机中分配的最大的一块区域，所以也是GC发生的最主要的区域。"><span class="nav-number">1.3.0.1.</span> <span class="nav-text">堆是JVM最大的一块区域。主要是用于存储代码中存储的各个对象。由于是虚拟机中分配的最大的一块区域，所以也是GC发生的最主要的区域。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#堆内部还可以再划分为Eden区，survivorTo区，survivorFrom区。三个区的大小比例最好是8-1-1。当然这些大小都是可以由用户自主的定义大小。有几个参数可供调配"><span class="nav-number">1.3.0.2.</span> <span class="nav-text">堆内部还可以再划分为Eden区，survivorTo区，survivorFrom区。三个区的大小比例最好是8:1:1。当然这些大小都是可以由用户自主的定义大小。有几个参数可供调配</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#可以看到堆的可以由伸缩范围的，而且在实际的物理内存中，堆可以不是连续的，只要是逻辑连续就可以了。但是若对象分配的总大小已经大过了最大内存。则会报OutOfMemoryError。也就是我们常见的OOM"><span class="nav-number">1.3.0.3.</span> <span class="nav-text">可以看到堆的可以由伸缩范围的，而且在实际的物理内存中，堆可以不是连续的，只要是逻辑连续就可以了。但是若对象分配的总大小已经大过了最大内存。则会报OutOfMemoryError。也就是我们常见的OOM</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#因为堆中会不停的发生不同程度的GC，由于不同的GC算法的实际方法有所不同。"><span class="nav-number">1.3.0.4.</span> <span class="nav-text">因为堆中会不停的发生不同程度的GC，由于不同的GC算法的实际方法有所不同。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#有采用compact算法的Serial，Parnew的GC，会将堆中空闲的内存块都统一合并成一大块，那么对象在创建分配内存的时候，只需要采用指针碰撞的方法，将符合要求的一块内存块的收尾指针移动一下，就可以看做分配给了新创建的对象。"><span class="nav-number">1.3.0.5.</span> <span class="nav-text">有采用compact算法的Serial，Parnew的GC，会将堆中空闲的内存块都统一合并成一大块，那么对象在创建分配内存的时候，只需要采用指针碰撞的方法，将符合要求的一块内存块的收尾指针移动一下，就可以看做分配给了新创建的对象。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#采用Maek-sweep算法的CMS的GC，只是维护了一个空闲内存块的表格，所以在对象分配的时候直接在表中寻找到一块最适合的分配就行了"><span class="nav-number">1.3.0.6.</span> <span class="nav-text">采用Maek-sweep算法的CMS的GC，只是维护了一个空闲内存块的表格，所以在对象分配的时候直接在表中寻找到一块最适合的分配就行了</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#以上两种都是非常常见的方式，但是在采用指针碰撞的时候，要注意并发问题。也就是若同时有两个对象内存需要分配，则要注意指针的移动。一般会采用CAS-重试的方式，保证内存分配的无误。也有一种方式是，为每个线程都预先分配一块内存，叫做TLAB，所以每个线程都可以在自己的内存中无措的分配，只有在新分配TLAB的时候才需要错定内存块。"><span class="nav-number">1.3.0.7.</span> <span class="nav-text">以上两种都是非常常见的方式，但是在采用指针碰撞的时候，要注意并发问题。也就是若同时有两个对象内存需要分配，则要注意指针的移动。一般会采用CAS+重试的方式，保证内存分配的无误。也有一种方式是，为每个线程都预先分配一块内存，叫做TLAB，所以每个线程都可以在自己的内存中无措的分配，只有在新分配TLAB的时候才需要错定内存块。</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#栈"><span class="nav-number">1.4.</span> <span class="nav-text">栈</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#栈也是我们在学校学习的时候，经常听到的一个词。但是其实在JVM定义的时候，栈是有两块组成的，一个叫做虚拟机栈，一个叫做本地方法栈。顾名思义我们也可以看出两个的不同就是本地方法栈存储的都是一些native的方法。但是在HotSpot的虚拟机的实现方法中，其实这两块也是合二为一的。"><span class="nav-number">1.4.0.1.</span> <span class="nav-text">栈也是我们在学校学习的时候，经常听到的一个词。但是其实在JVM定义的时候，栈是有两块组成的，一个叫做虚拟机栈，一个叫做本地方法栈。顾名思义我们也可以看出两个的不同就是本地方法栈存储的都是一些native的方法。但是在HotSpot的虚拟机的实现方法中，其实这两块也是合二为一的。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#那什么叫做存储的是方法呢？方法又是以什么样是形式存在栈中的呢？"><span class="nav-number">1.4.0.2.</span> <span class="nav-text">那什么叫做存储的是方法呢？方法又是以什么样是形式存在栈中的呢？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#其实存储在栈中的单位叫做栈帧，每个栈帧里面保存的是方法中的局部变量表，操作数，动态链接，方法出口等信息。每个栈帧的入栈表示执行当前方法，出栈表示完成了当前方法。所以当我们在一个方法里递归调用了自己，就会导致不断有新的栈帧入栈，但是没有出栈，就会造成最后达到了栈的最大深度。就会报出StackOverFlowError"><span class="nav-number">1.4.0.3.</span> <span class="nav-text">其实存储在栈中的单位叫做栈帧，每个栈帧里面保存的是方法中的局部变量表，操作数，动态链接，方法出口等信息。每个栈帧的入栈表示执行当前方法，出栈表示完成了当前方法。所以当我们在一个方法里递归调用了自己，就会导致不断有新的栈帧入栈，但是没有出栈，就会造成最后达到了栈的最大深度。就会报出StackOverFlowError</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#程序计数器"><span class="nav-number">1.5.</span> <span class="nav-text">程序计数器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#程序计数器就是每个线程都独有的一个寄存器，记录了每个线程目前执行到了哪个语句，那么当cpu在调度别的线程的时候，能将当前进度保存下来。当再度调度到的时候，也就可以继续之前的工作了"><span class="nav-number">1.5.0.1.</span> <span class="nav-text">程序计数器就是每个线程都独有的一个寄存器，记录了每个线程目前执行到了哪个语句，那么当cpu在调度别的线程的时候，能将当前进度保存下来。当再度调度到的时候，也就可以继续之前的工作了</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#方法区"><span class="nav-number">1.6.</span> <span class="nav-text">方法区</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#方法区在jdk-1-7中可以类比于永久代。其实按书上所说这两者并不完全相同，只是jvm作者用永久代的实现方式实现了方法区而已。在方法区中存储的主要是类的属性方法，基本不进行GC，因为在这个区内GC的成果很低，因为这些常量不会很经常被卸载。这个方法区中还有一个叫做运行时常量区的地方，我们最常用到这块地方就是我们调用String-intern-方法。这个方法会将这个String作为常量保存在这个运行时常量区内。这边还有关于这个方法的小例子。"><span class="nav-number">1.6.0.1.</span> <span class="nav-text">方法区在jdk 1.7中可以类比于永久代。其实按书上所说这两者并不完全相同，只是jvm作者用永久代的实现方式实现了方法区而已。在方法区中存储的主要是类的属性方法，基本不进行GC，因为在这个区内GC的成果很低，因为这些常量不会很经常被卸载。这个方法区中还有一个叫做运行时常量区的地方，我们最常用到这块地方就是我们调用String.intern()方法。这个方法会将这个String作为常量保存在这个运行时常量区内。这边还有关于这个方法的小例子。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#这个小例子在jdk1-7的版本下运行会返回true，false。但是在jdk1-6版本下运行会出现false，false。这也是因为两个版本的jdk对intern方法实现变量到运行时常量区的方式的不同。具体原理感兴趣的可以参考一下-lt-深入理解java虚拟机-gt-一书的2-4-3小节"><span class="nav-number">1.6.0.2.</span> <span class="nav-text">这个小例子在jdk1.7的版本下运行会返回true，false。但是在jdk1.6版本下运行会出现false，false。这也是因为两个版本的jdk对intern方法实现变量到运行时常量区的方式的不同。具体原理感兴趣的可以参考一下&lt;深入理解java虚拟机&gt;一书的2.4.3小节</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">1.7.</span> <span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#本文简单叙述了一下我理解的jvm内存格局，里面提到的GC方式，会在下一篇文章中再做叙述。"><span class="nav-number">1.7.0.1.</span> <span class="nav-text">本文简单叙述了一下我理解的jvm内存格局，里面提到的GC方式，会在下一篇文章中再做叙述。</span></a></li></ol></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Swaggy Q</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=3.4.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.2.0"></script>
+
+  <script src="/js/motion.js?v=7.2.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/schemes/muse.js?v=7.2.0"></script>
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.2.0"></script>
+<script src="/js/post-details.js?v=7.2.0"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.2.0"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
