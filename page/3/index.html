@@ -290,7 +290,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/线程池详解/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/批量再偏向机制/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Swaggy Q">
@@ -310,7 +310,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/07/08/线程池详解/" class="post-title-link" itemprop="url">线程池详解</a>
+                <a href="/2019/07/08/批量再偏向机制/" class="post-title-link" itemprop="url">偏向锁的批量再偏向机制</a>
               
             
           </h1>
@@ -335,7 +335,7 @@
                 
               
 
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:40:51" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:09:25" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
             </span>
           
 
@@ -379,359 +379,14 @@
       
         
           
-            <h1 id="线程池详解"><a href="#线程池详解" class="headerlink" title="线程池详解"></a>线程池详解</h1><h2 id="前文"><a href="#前文" class="headerlink" title="前文"></a>前文</h2><h4 id="本文旨在针对ThreadPoolExecutor进行一些源码级别的解读，从而对我们平时从Executor类生成的各种不同的线程池有更深的理解"><a href="#本文旨在针对ThreadPoolExecutor进行一些源码级别的解读，从而对我们平时从Executor类生成的各种不同的线程池有更深的理解" class="headerlink" title="本文旨在针对ThreadPoolExecutor进行一些源码级别的解读，从而对我们平时从Executor类生成的各种不同的线程池有更深的理解"></a>本文旨在针对ThreadPoolExecutor进行一些源码级别的解读，从而对我们平时从Executor类生成的各种不同的线程池有更深的理解</h4><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="先看到构造方法做了什么"><a href="#先看到构造方法做了什么" class="headerlink" title="先看到构造方法做了什么"></a>先看到构造方法做了什么</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">public ThreadPoolExecutor(int corePoolSize,</span><br><span class="line">                              int maximumPoolSize,</span><br><span class="line">                              long keepAliveTime,</span><br><span class="line">                              TimeUnit unit,</span><br><span class="line">                              BlockingQueue&lt;Runnable&gt; workQueue,</span><br><span class="line">                              ThreadFactory threadFactory,</span><br><span class="line">                              RejectedExecutionHandler handler) &#123;</span><br><span class="line">        if (corePoolSize &lt; 0 ||</span><br><span class="line">            maximumPoolSize &lt;= 0 ||</span><br><span class="line">            maximumPoolSize &lt; corePoolSize ||</span><br><span class="line">            keepAliveTime &lt; 0)</span><br><span class="line">            throw new IllegalArgumentException();</span><br><span class="line">        if (workQueue == null || threadFactory == null || handler == null)</span><br><span class="line">            throw new NullPointerException();</span><br><span class="line">        this.corePoolSize = corePoolSize;</span><br><span class="line">        this.maximumPoolSize = maximumPoolSize;</span><br><span class="line">        this.workQueue = workQueue;</span><br><span class="line">        this.keepAliveTime = unit.toNanos(keepAliveTime);</span><br><span class="line">        this.threadFactory = threadFactory;</span><br><span class="line">        this.handler = handler;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="先简单看到初始化了一些参数，然后放入了一个阻塞队列，一个线程制造工厂，还有一个handler。这个handler主要是作为线程调度失败后的一些操作。具体每个参数在后面都会讲到。"><a href="#先简单看到初始化了一些参数，然后放入了一个阻塞队列，一个线程制造工厂，还有一个handler。这个handler主要是作为线程调度失败后的一些操作。具体每个参数在后面都会讲到。" class="headerlink" title="先简单看到初始化了一些参数，然后放入了一个阻塞队列，一个线程制造工厂，还有一个handler。这个handler主要是作为线程调度失败后的一些操作。具体每个参数在后面都会讲到。"></a>先简单看到初始化了一些参数，然后放入了一个阻塞队列，一个线程制造工厂，还有一个handler。这个handler主要是作为线程调度失败后的一些操作。具体每个参数在后面都会讲到。</h4><h4 id="再看到最重要的execute方法。"><a href="#再看到最重要的execute方法。" class="headerlink" title="再看到最重要的execute方法。"></a>再看到最重要的execute方法。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public void execute(Runnable command) &#123;</span><br><span class="line">        if (command == null)</span><br><span class="line">        	throw new NullPointerException();</span><br><span class="line">        ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="首先看到，入参是一个Runnable类型的参数，这个就是我们平时构造线程时会传入的具体执行的内容指令。然后先回对这个参数进行一下校验。再继续往下看"><a href="#首先看到，入参是一个Runnable类型的参数，这个就是我们平时构造线程时会传入的具体执行的内容指令。然后先回对这个参数进行一下校验。再继续往下看" class="headerlink" title="首先看到，入参是一个Runnable类型的参数，这个就是我们平时构造线程时会传入的具体执行的内容指令。然后先回对这个参数进行一下校验。再继续往下看"></a>首先看到，入参是一个Runnable类型的参数，这个就是我们平时构造线程时会传入的具体执行的内容指令。然后先回对这个参数进行一下校验。再继续往下看</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">// 线程池内部的一个AtomInteger类型的参数，可用于计算当前的线程数以及线程池的状态，具体操作内容就是通过对bit之间的操作，先不细讲</span><br><span class="line">int c = ctl.get();</span><br><span class="line">// 通过c先计算得到当前线程池的线程数，如果小于构造函数中传入的核心线程池大小的话，就会通过addWorker方法继续往线程池中添加线程</span><br><span class="line">     if (workerCountOf(c) &lt; corePoolSize) &#123;</span><br><span class="line">     	// 注意这边的第二个参数为true，代表正在添加工作节点</span><br><span class="line">          if (addWorker(command, true))</span><br><span class="line">              return;</span><br><span class="line">          c = ctl.get();</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="在线程池中会涉及到很多的判断条件，所以边看源码边进行记录一下"><a href="#在线程池中会涉及到很多的判断条件，所以边看源码边进行记录一下" class="headerlink" title="在线程池中会涉及到很多的判断条件，所以边看源码边进行记录一下"></a>在线程池中会涉及到很多的判断条件，所以边看源码边进行记录一下</h4><ul>
-<li>如果新任务进来时，线程池中的线程数小于corePoolSize，则继续向线程池中添加新的工作者，也就是新的线程</li>
-</ul>
-<h4 id="现在继续看看addWorker方法里面做了什么"><a href="#现在继续看看addWorker方法里面做了什么" class="headerlink" title="现在继续看看addWorker方法里面做了什么"></a>现在继续看看addWorker方法里面做了什么</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">private boolean addWorker(Runnable firstTask, boolean core) &#123;</span><br><span class="line">        // 做了一次标记，用于之后跳出循环</span><br><span class="line">        retry:</span><br><span class="line">        for (;;) &#123;</span><br><span class="line">        	// 得到这个值，用于计算当前线程池的状态，总共有5种状态</span><br><span class="line">        	// RUNNING    = -1 &lt;&lt; COUNT_BITS;</span><br><span class="line">    		// SHUTDOWN   =  0 &lt;&lt; COUNT_BITS;</span><br><span class="line">    		// STOP       =  1 &lt;&lt; COUNT_BITS;</span><br><span class="line">    		// TIDYING    =  2 &lt;&lt; COUNT_BITS;</span><br><span class="line">    		// TERMINATED =  3 &lt;&lt; COUNT_BITS;</span><br><span class="line">            int c = ctl.get();</span><br><span class="line">            int rs = runStateOf(c);</span><br><span class="line"></span><br><span class="line">            // Check if queue empty only if necessary.</span><br><span class="line">            // 如果计算得到的线程池当前的状态rs &gt; SHUTDOWN 以及以下三个条件不同时满足，则代表添加工作节点失败，否则继续执行</span><br><span class="line">            // 1: rs等于SHUTDOWN</span><br><span class="line">            // 2: 传入的Runnable参数为空</span><br><span class="line">            // 3: 工作队列不为空</span><br><span class="line">            if (rs &gt;= SHUTDOWN &amp;&amp;</span><br><span class="line">                ! (rs == SHUTDOWN &amp;&amp;</span><br><span class="line">                   firstTask == null &amp;&amp;</span><br><span class="line">                   ! workQueue.isEmpty()))</span><br><span class="line">                return false;</span><br><span class="line">			</span><br><span class="line">            for (;;) &#123;</span><br><span class="line">            	// 得到当前线程池的工作线程数</span><br><span class="line">                int wc = workerCountOf(c);</span><br><span class="line">                // 如果当前线程数wc 已经大于了(1 &lt;&lt; 29) - 1</span><br><span class="line">                // 或者</span><br><span class="line">                // 根据方法的第二个参数来判断，wc是大于corePoolSize还是最大线程数，如果是大于，则也代表无法再添加新工作节点了，返回添加失败</span><br><span class="line">                if (wc &gt;= CAPACITY ||</span><br><span class="line">                    wc &gt;= (core ? corePoolSize : maximumPoolSize))</span><br><span class="line">                    return false;</span><br><span class="line">                // 用CAS的方法将变量c+1，代表多了一个线程</span><br><span class="line">                if (compareAndIncrementWorkerCount(c))</span><br><span class="line">        	// 如果线程数新增成功，也跳出永真循环</span><br><span class="line">                    break retry;</span><br><span class="line">                c = ctl.get();  // Re-read ctl</span><br><span class="line">                if (runStateOf(c) != rs)</span><br><span class="line">                    continue retry;</span><br><span class="line">                // else CAS failed due to workerCount change; retry inner loop</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="在方法中若满足条件，会用永真循环将线程数-1，成功后再看下面的操作"><a href="#在方法中若满足条件，会用永真循环将线程数-1，成功后再看下面的操作" class="headerlink" title="在方法中若满足条件，会用永真循环将线程数+1，成功后再看下面的操作"></a>在方法中若满足条件，会用永真循环将线程数+1，成功后再看下面的操作</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">// 两个布尔值，判断工作节点是否加入队列中，以及是否启动</span><br><span class="line">boolean workerStarted = false;</span><br><span class="line">      boolean workerAdded = false;</span><br><span class="line">      Worker w = null;</span><br><span class="line">      try &#123;</span><br><span class="line">      	// 用Runnable参数构建工作节点，内部会通过线程工厂构建一个新的线程，所以Worker内部包括</span><br><span class="line">      	// Runnable , Thread</span><br><span class="line">          w = new Worker(firstTask);</span><br><span class="line">          // 得到对应的线程</span><br><span class="line">          final Thread t = w.thread;</span><br><span class="line">          if (t != null) &#123;</span><br><span class="line">          	// 获得可重入锁</span><br><span class="line">              final ReentrantLock mainLock = this.mainLock;</span><br><span class="line">              mainLock.lock();</span><br><span class="line">              try &#123;</span><br><span class="line">                  // Recheck while holding lock.</span><br><span class="line">                  // Back out on ThreadFactory failure or if</span><br><span class="line">                  // shut down before lock acquired.</span><br><span class="line">                  // 获得当前线程池的状态</span><br><span class="line">                  int rs = runStateOf(ctl.get());</span><br><span class="line">                  if (rs &lt; SHUTDOWN ||</span><br><span class="line">                      (rs == SHUTDOWN &amp;&amp; firstTask == null)) &#123;</span><br><span class="line">                      if (t.isAlive()) // precheck that t is startable</span><br><span class="line">                          throw new IllegalThreadStateException();</span><br><span class="line">					// 在阻塞队列中添加新任务</span><br><span class="line">                      workers.add(w);</span><br><span class="line">                      int s = workers.size();</span><br><span class="line">                      // 然后更新最大的线程池大小</span><br><span class="line">                      if (s &gt; largestPoolSize)</span><br><span class="line">                          largestPoolSize = s;</span><br><span class="line">                      workerAdded = true;</span><br><span class="line">                  &#125;</span><br><span class="line">              &#125; finally &#123;</span><br><span class="line">                  mainLock.unlock();</span><br><span class="line">              &#125;</span><br><span class="line">              // 启动线程</span><br><span class="line">              if (workerAdded) &#123;</span><br><span class="line">                  t.start();</span><br><span class="line">                  workerStarted = true;</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125; finally &#123;</span><br><span class="line">      	// 如果启动失败，则移除</span><br><span class="line">          if (! workerStarted)</span><br><span class="line">              addWorkerFailed(w);</span><br><span class="line">      &#125;</span><br><span class="line">      return workerStarted;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="以上就是添加工作Worker的过程，现在回去看看execute方法中，addWorker成功之后做了什么操作。"><a href="#以上就是添加工作Worker的过程，现在回去看看execute方法中，addWorker成功之后做了什么操作。" class="headerlink" title="以上就是添加工作Worker的过程，现在回去看看execute方法中，addWorker成功之后做了什么操作。"></a>以上就是添加工作Worker的过程，现在回去看看execute方法中，addWorker成功之后做了什么操作。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">public void execute(Runnable command) &#123;</span><br><span class="line">       if (command == null)</span><br><span class="line">           throw new NullPointerException();</span><br><span class="line">       int c = ctl.get();</span><br><span class="line">       if (workerCountOf(c) &lt; corePoolSize) &#123;</span><br><span class="line">       	// 如果添加成功，代表线程已经启动</span><br><span class="line">           if (addWorker(command, true))</span><br><span class="line">               return;</span><br><span class="line">           c = ctl.get();</span><br><span class="line">       &#125;</span><br><span class="line">       </span><br><span class="line">	if (isRunning(c) &amp;&amp; workQueue.offer(command)) &#123;</span><br><span class="line">           int recheck = ctl.get();</span><br><span class="line">           if (! isRunning(recheck) &amp;&amp; remove(command))</span><br><span class="line">               reject(command);</span><br><span class="line">           else if (workerCountOf(recheck) == 0)</span><br><span class="line">               addWorker(null, false);</span><br><span class="line">       &#125;</span><br><span class="line">       else if (!addWorker(command, false))</span><br><span class="line">           reject(command);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="重点看一下这个reject方法，这个就是线程池中的拒绝策略起作用的地方"><a href="#重点看一下这个reject方法，这个就是线程池中的拒绝策略起作用的地方" class="headerlink" title="重点看一下这个reject方法，这个就是线程池中的拒绝策略起作用的地方"></a>重点看一下这个reject方法，这个就是线程池中的拒绝策略起作用的地方</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">final void reject(Runnable command) &#123;</span><br><span class="line">    handler.rejectedExecution(command, this);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/堆外内存/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Swaggy Q">
-      <meta itemprop="description" content="拉塞尔FMVP了吗">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Dloading...">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/07/08/堆外内存/" class="post-title-link" itemprop="url">堆外内存</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-
-          
-          
-          
-
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:10:13" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
-            </span>
-          
-
-          
-            
-
-            
-          
-
-          
-
-          
-            
-            
-          
-
-          
-          
-
-          
-
-          <br>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="堆外内存"><a href="#堆外内存" class="headerlink" title="堆外内存"></a>堆外内存</h1><p>和堆内内存相对应，堆外内存就是把内存对象分配在Java虚拟机的堆以外的内存，这些内存直接受操作系统管理（而不是虚拟机），这样做的结果就是能够在一定程度上减少垃圾回收对应用程序造成的影响。</p>
-<p>二、使用堆外内存的优点</p>
-<p>1、减少了垃圾回收<br>因为垃圾回收会暂停其他的工作。<br>2、加快了复制的速度<br>堆内在flush到远程时，会先复制到直接内存（非堆内存），然后在发送；而堆外内存相当于省略掉了这个工作。<br>同样任何一个事物使用起来有优点就会有缺点，堆外内存的缺点就是内存难以控制，使用了堆外内存就间接失去了JVM管理内存的可行性，改由自己来管理，当发生内存溢出时排查起来非常困难</p>
-<p>-XX:MaxDirectMemorySize来指定最大的堆外内存大小<br>如果没设置-XX:MaxDirectMemorySize，则默认与-Xmx参数值相同</p>
-<p>2、System.gc的作用有哪些<br>说起堆外内存免不了要提及System.gc方法，下面就是使用了System.gc的作用是什么？</p>
-<p>做一次full gc<br>执行后会暂停整个进程。<br>System.gc我们可以禁掉，使用-XX:+DisableExplicitGC，<br>其实一般在cms gc下我们通过-XX:+ExplicitGCInvokesConcurrent也可以做稍微高效一点的gc，也就是并行gc。<br>最常见的场景是RMI/NIO下的堆外内存分配等</p>
-<p>DirectByteBuffer<br>JDK中使用DirectByteBuffer对象来表示堆外内存，每个DirectByteBuffer对象在初始化时，都会创建一个对用的Cleaner对象，这个Cleaner对象会在合适的时候执行unsafe.freeMemory(address)，从而回收这块堆外内存。</p>
-<p>用堆外内存和UNSAFE的内存泄漏问题，可以用下面这个例子解释一下</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">// -verbose:gc -XX:+PrintGCDetails -XX:MaxDirectMemorySize=40M</span><br><span class="line">public static void main(String[] args) throws InterruptedException&#123;</span><br><span class="line">       while (true)</span><br><span class="line">       &#123;</span><br><span class="line">           ByteBuffer buffer = ByteBuffer.allocateDirect(10 * 1024 * 1024);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="用上面这一段代码不停的进行堆外内存的分配的时候，是不会造成OOM的，而是会非常频繁的产生GC"><a href="#用上面这一段代码不停的进行堆外内存的分配的时候，是不会造成OOM的，而是会非常频繁的产生GC" class="headerlink" title="用上面这一段代码不停的进行堆外内存的分配的时候，是不会造成OOM的，而是会非常频繁的产生GC"></a>用上面这一段代码不停的进行堆外内存的分配的时候，是不会造成OOM的，而是会非常频繁的产生GC</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) throws Exception&#123;</span><br><span class="line">	Unsafe unsafe = GetUsafeInstance.getUnsafeInstance();</span><br><span class="line"></span><br><span class="line">	while (true)</span><br><span class="line">	&#123;</span><br><span class="line">		long pointer = unsafe.allocateMemory(1024 * 1024 * 20);</span><br><span class="line">		System.out.println(unsafe.getByte(pointer + 1));</span><br><span class="line"></span><br><span class="line">		// 如果不释放内存,运行一段时间会报错java.lang.OutOfMemoryError</span><br><span class="line">		// unsafe.freeMemory(pointer);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="而如果是用上面这一段代码的话，很快就会OOM异常。这是因为在jvm分配对象的时候，会有内置的垃圾回收器不停的帮我们回收不可用的对象，但是堆外内存显然是不受这个控制的。用UNSAFE分配内存，其实底层调用的还是C语言的malloc命令，我们知道在C语言中，对象必须都是由程序自主的释放的，也就是用free。所以如果UNSAFE使用不当，很容易会造成内存泄漏问题"><a href="#而如果是用上面这一段代码的话，很快就会OOM异常。这是因为在jvm分配对象的时候，会有内置的垃圾回收器不停的帮我们回收不可用的对象，但是堆外内存显然是不受这个控制的。用UNSAFE分配内存，其实底层调用的还是C语言的malloc命令，我们知道在C语言中，对象必须都是由程序自主的释放的，也就是用free。所以如果UNSAFE使用不当，很容易会造成内存泄漏问题" class="headerlink" title="而如果是用上面这一段代码的话，很快就会OOM异常。这是因为在jvm分配对象的时候，会有内置的垃圾回收器不停的帮我们回收不可用的对象，但是堆外内存显然是不受这个控制的。用UNSAFE分配内存，其实底层调用的还是C语言的malloc命令，我们知道在C语言中，对象必须都是由程序自主的释放的，也就是用free。所以如果UNSAFE使用不当，很容易会造成内存泄漏问题"></a>而如果是用上面这一段代码的话，很快就会OOM异常。这是因为在jvm分配对象的时候，会有内置的垃圾回收器不停的帮我们回收不可用的对象，但是堆外内存显然是不受这个控制的。用UNSAFE分配内存，其实底层调用的还是C语言的malloc命令，我们知道在C语言中，对象必须都是由程序自主的释放的，也就是用free。所以如果UNSAFE使用不当，很容易会造成内存泄漏问题</h4><h4 id="再说回ByteBuffer类，为什么这个不会有问题呢？这个是因为在类的包装中，不但考虑到了malloc，还会在合适的时候进行free。这也就是我们接下来想要讨论的，java是怎么监控到堆外内存的生命周期呢？"><a href="#再说回ByteBuffer类，为什么这个不会有问题呢？这个是因为在类的包装中，不但考虑到了malloc，还会在合适的时候进行free。这也就是我们接下来想要讨论的，java是怎么监控到堆外内存的生命周期呢？" class="headerlink" title="再说回ByteBuffer类，为什么这个不会有问题呢？这个是因为在类的包装中，不但考虑到了malloc，还会在合适的时候进行free。这也就是我们接下来想要讨论的，java是怎么监控到堆外内存的生命周期呢？"></a>再说回ByteBuffer类，为什么这个不会有问题呢？这个是因为在类的包装中，不但考虑到了malloc，还会在合适的时候进行free。这也就是我们接下来想要讨论的，java是怎么监控到堆外内存的生命周期呢？</h4><p>DirectByteBuffer构造方法中还做了挺多事情的，总的来说分为几个步骤：</p>
-<p>预分配内存<br>分配内存<br>将刚分配的内存空间初始化为0<br>创建一个cleaner对象，Cleaner对象的作用是当DirectByteBuffer对象被回收时，释放其对应的堆外内存</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cleaner = Cleaner.create(this, new Deallocator(base, size, cap));</span><br></pre></td></tr></table></figure>
-
-<p>cleaner 是一个虚引用类型，然后内部还会有一个Runnable类型的对象，在释放内存的时候被调用<br>Cleaner.create被调用的时候，会在内部组成一个cleaner的链路</p>
-<p>简单的说，就是当字段referent(也就是DirectByteBuffer对象)被回收时，会调用到Cleaner#clean方法，最终会调用到Deallocator#run进行堆外内存的回收。</p>
-<p>Cleaner是虚引用在JDK中的一个典型应用场景。</p>
-<p>在创建一个新的DirecByteBuffer时，会先确认有没有足够的内存，如果没有的话，会通过一些手段回收一部分堆外内存，直到可用内存大于需要分配的内存。具体步骤如下：</p>
-<p>如果可用堆外内存足够，则直接返回<br>调用tryHandlePendingReference方法回收已经变成垃圾的DirectByteBuffer对象对应的堆外内存，直到可用内存足够，或目前没有垃圾DirectByteBuffer对象<br>触发一次full gc，其主要目的是为了防止’冰山现象‘：一个DirectByteBuffer对象本身占用的内存很小，但是它可能引用了一块很大的堆外内存。如果DirectByteBuffer对象进入了老年代之后变成了垃圾，因为老年代GC一直没有触发，导致这块堆外内存也一直没有被回收。需要注意的是如果使用参数-XX:+DisableExplicitGC，那System.gc();是无效的<br>重复1，2步骤的流程，直到可用内存大于需要分配的内存<br>如果超出指定次数还没有回收到足够内存，则OOM</p>
-<p>tryHandlePendingReference最终调用到的是Reference#tryHandlePending</p>
-<p>可以看到，tryHandlePendingReference的最终效果就是：如果有垃圾DirectBytebuffer对象，则调用对应的Cleaner#clean方法进行回收。clean方法在上面已经分析过了。</p>
-<p><img src="img/reference.jpeg" alt="引用被回收的全过程"></p>
-<p>refs_lists中存放了本次GC发现的某种引用类型（虚引用、软引用、弱引用等），而process_discovered_reflist方法的作用就是将不需要被回收的对象从refs_lists移除掉，refs_lists最后剩下的元素全是需要被回收的元素，最后会将其第一个元素赋值给上文提到过的Reference.java#pending字段。<br>判断是不是需要回收是由一个ReferencePolicy决定的，有四种实现方式<br>NeverClearPolicy，AlwaysClearPolicy，LRUCurrentHeapPolicy，LRUMaxHeapPolicy</p>
-<p>软引用默认使用LRUCurrentHeapPolicy</p>
-<p>参考图中的得到DiscoveredList后，会再进行一步将不需要被回收的对象从refs_lists移除的操作。上面说过，如果是软引用，会有policy来进行判断是否被回收。如果是虚引用，或者是弱引用，则不会有这个policy。</p>
-<p>强引用： 如果有指向，永远不会被回收<br>软引用：跟堆内存和get方法被调用的时间有关，在jvm的gc过程中会调用LRUCurrentHeapPolicy来进行判断<br>弱引用：不存在policy判断，只要进行内存回收，都会直接被回收<br>虚引用：指向的对象永远不会被回收，虚引用的get方法也不会得到相应的对象，可以传入一个队列，只是作为当对象被回收后的指示。</p>
-<blockquote>
-<p>2.网上对于虚引用的介绍是：形同虚设，与其他几种引用都不同，虚引用并不会决定对象的生命周期。主要用来跟踪对象被垃圾回收器回收的活动。真的是这样吗？</p>
-</blockquote>
-<blockquote>
-<p>严格的说，虚引用是会影响对象生命周期的，如果不做任何处理，只要虚引用不被回收，那其引用的对象永远不会被回收。所以一般来说，从ReferenceQueue中获得PhantomReference对象后，如果PhantomReference对象不会被回收的话（比如被其他GC ROOT可达的对象引用），需要调用clear方法解除PhantomReference和其引用对象的引用关系。</p>
-</blockquote>
-<p>怎么理解？</p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/聊聊 Synchronize 关键字/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Swaggy Q">
-      <meta itemprop="description" content="拉塞尔FMVP了吗">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Dloading...">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/07/08/聊聊 Synchronize 关键字/" class="post-title-link" itemprop="url">聊聊 Synchronize 关键字</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-
-          
-          
-          
-
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:42:36" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
-            </span>
-          
-
-          
-            
-
-            
-          
-
-          
-
-          
-            
-            
-          
-
-          
-          
-
-          
-
-          <br>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="聊聊-Synchronize-关键字"><a href="#聊聊-Synchronize-关键字" class="headerlink" title="聊聊 Synchronize 关键字"></a>聊聊 Synchronize 关键字</h1><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="Synchronize是java中提供的一个并发控制的一个关键字。主要是为了控制多线程并发情况下对共享资源的竞争情况。加锁有以下三种情况"><a href="#Synchronize是java中提供的一个并发控制的一个关键字。主要是为了控制多线程并发情况下对共享资源的竞争情况。加锁有以下三种情况" class="headerlink" title="Synchronize是java中提供的一个并发控制的一个关键字。主要是为了控制多线程并发情况下对共享资源的竞争情况。加锁有以下三种情况"></a>Synchronize是java中提供的一个并发控制的一个关键字。主要是为了控制多线程并发情况下对共享资源的竞争情况。加锁有以下三种情况</h4><p>1：修饰普通方法，锁的对象是当前实例<br>2：修饰形态方法，锁的对象是当前类class对象<br>3：修饰同步代码块，锁的对象是括号中的内容，可以是实例也可以是class对象</p>
-<h4 id="以上三种情况，简单归纳可以分为两类，一个是同步方法，一个是同步代码块。在java中，这两种的实现方式是不一样的，先说说同步方法，如果我们把我们写的关于同步方法的代码反编译，会发现在反编译代码中，同步方法的代码部分，会是这样子的"><a href="#以上三种情况，简单归纳可以分为两类，一个是同步方法，一个是同步代码块。在java中，这两种的实现方式是不一样的，先说说同步方法，如果我们把我们写的关于同步方法的代码反编译，会发现在反编译代码中，同步方法的代码部分，会是这样子的" class="headerlink" title="以上三种情况，简单归纳可以分为两类，一个是同步方法，一个是同步代码块。在java中，这两种的实现方式是不一样的，先说说同步方法，如果我们把我们写的关于同步方法的代码反编译，会发现在反编译代码中，同步方法的代码部分，会是这样子的"></a>以上三种情况，简单归纳可以分为两类，一个是同步方法，一个是同步代码块。在java中，这两种的实现方式是不一样的，先说说同步方法，如果我们把我们写的关于同步方法的代码反编译，会发现在反编译代码中，同步方法的代码部分，会是这样子的</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flags: ACC_PUBLIC, ACC_SYNCHRONIZED</span><br></pre></td></tr></table></figure>
-
-<h4 id="就代表这个方法是public的，而且是同步的。那么同步代码块是怎么样的呢？同样反编译，我们可以得到答案。"><a href="#就代表这个方法是public的，而且是同步的。那么同步代码块是怎么样的呢？同样反编译，我们可以得到答案。" class="headerlink" title="就代表这个方法是public的，而且是同步的。那么同步代码块是怎么样的呢？同样反编译，我们可以得到答案。"></a>就代表这个方法是public的，而且是同步的。那么同步代码块是怎么样的呢？同样反编译，我们可以得到答案。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">3: monitorenter  //注意此处，进入同步方法</span><br><span class="line">...      </span><br><span class="line">   21: monitorexit //注意此处，退出同步方法</span><br></pre></td></tr></table></figure>
-
-<h4 id="可以很直观的看出来，是用了两个指令来控制的，注意一下两个指令必须是成对出现的，代表获得锁和释放锁的过程。"><a href="#可以很直观的看出来，是用了两个指令来控制的，注意一下两个指令必须是成对出现的，代表获得锁和释放锁的过程。" class="headerlink" title="可以很直观的看出来，是用了两个指令来控制的，注意一下两个指令必须是成对出现的，代表获得锁和释放锁的过程。"></a>可以很直观的看出来，是用了两个指令来控制的，注意一下两个指令必须是成对出现的，代表获得锁和释放锁的过程。</h4><h4 id="再看到，每个实例和类对象都有自己单独的监视器，所以两个线程可以同时访问普通的Synchronize以及静态的Synchronize方法。所以该修饰符可能会有以下几个特性"><a href="#再看到，每个实例和类对象都有自己单独的监视器，所以两个线程可以同时访问普通的Synchronize以及静态的Synchronize方法。所以该修饰符可能会有以下几个特性" class="headerlink" title="再看到，每个实例和类对象都有自己单独的监视器，所以两个线程可以同时访问普通的Synchronize以及静态的Synchronize方法。所以该修饰符可能会有以下几个特性"></a>再看到，每个实例和类对象都有自己单独的监视器，所以两个线程可以同时访问普通的Synchronize以及静态的Synchronize方法。所以该修饰符可能会有以下几个特性</h4><p>1：当线程A正在访问某个实例对象的普通Synchronize方法，或者同步代码块的括号中为一个实例对象是，其他线程不但不能访问这个同步方法，而且其他同步方法也不能方法。但是静态的同步方法是可以访问的，因为之前说过实例对象和类对象是有自己不同的监视器的</p>
-<h4 id="之前说了很多次监视器，那么监视器到底是什么呢-在java中，这部分是用c-实现的，对应的对象内容如下"><a href="#之前说了很多次监视器，那么监视器到底是什么呢-在java中，这部分是用c-实现的，对应的对象内容如下" class="headerlink" title="之前说了很多次监视器，那么监视器到底是什么呢?在java中，这部分是用c++实现的，对应的对象内容如下"></a>之前说了很多次监视器，那么监视器到底是什么呢?在java中，这部分是用c++实现的，对应的对象内容如下</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ObjectMonitor() &#123;</span><br><span class="line">    _count        = 0; //用来记录该对象被线程获取锁的次数</span><br><span class="line">    _waiters      = 0;</span><br><span class="line">    _recursions   = 0; //锁的重入次数</span><br><span class="line">    _owner        = NULL; //指向持有ObjectMonitor对象的线程 </span><br><span class="line">    _WaitSet      = NULL; //处于wait状态的线程，会被加入到_WaitSet</span><br><span class="line">    _WaitSetLock  = 0 ;</span><br><span class="line">    _EntryList    = NULL ; //处于等待锁block状态的线程，会被加入到该列表</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="这一块的解释，我引用被人写的一个整个的属性转换的过程"><a href="#这一块的解释，我引用被人写的一个整个的属性转换的过程" class="headerlink" title="这一块的解释，我引用被人写的一个整个的属性转换的过程"></a>这一块的解释，我引用被人写的一个整个的属性转换的过程</h4><blockquote>
-<p>对于一个synchronized修饰的方法(代码块)来说：<br>当多个线程同时访问该方法，那么这些线程会先被放进_EntryList队列，此时线程处于blocking状态<br>当一个线程获取到了实例对象的监视器（monitor）锁，那么就可以进入running状态，执行方法，此时，ObjectMonitor对象的_owner指向当前线程，_count加1表示当前对象锁被一个线程获取<br>当running状态的线程调用wait()方法，那么当前线程释放monitor对象，进入waiting状态，ObjectMonitor对象的_owner变为null，_count减1，同时线程进入_WaitSet队列，直到有线程调用notify()方法唤醒该线程，则该线程重新获取monitor对象进入_Owner区<br>如果当前线程执行完毕，那么也释放monitor对象，进入waiting状态，ObjectMonitor对象的_owner变为null，_count减1</p>
-</blockquote>
-<h4 id="现在再讲讲关于锁的一些膨胀的机制。其实在jdk-1-6之前，是只有重量锁，在jdk-1-6之后，引用了轻量锁，和偏向锁。在一些竞争不激烈的情况下，减轻锁开销，这些锁的分类都是基于对象头。"><a href="#现在再讲讲关于锁的一些膨胀的机制。其实在jdk-1-6之前，是只有重量锁，在jdk-1-6之后，引用了轻量锁，和偏向锁。在一些竞争不激烈的情况下，减轻锁开销，这些锁的分类都是基于对象头。" class="headerlink" title="现在再讲讲关于锁的一些膨胀的机制。其实在jdk 1.6之前，是只有重量锁，在jdk 1.6之后，引用了轻量锁，和偏向锁。在一些竞争不激烈的情况下，减轻锁开销，这些锁的分类都是基于对象头。"></a>现在再讲讲关于锁的一些膨胀的机制。其实在jdk 1.6之前，是只有重量锁，在jdk 1.6之后，引用了轻量锁，和偏向锁。在一些竞争不激烈的情况下，减轻锁开销，这些锁的分类都是基于对象头。</h4><h4 id="先讲到重量锁"><a href="#先讲到重量锁" class="headerlink" title="先讲到重量锁"></a>先讲到重量锁</h4><p>重量级锁的状态下，对象的mark word为指向一个堆中monitor对象的指针。</p>
-<p>可以看到锁信息也是存在于对象的mark word中的。当对象状态为偏向锁（biasable）时，mark word存储的是偏向的线程ID；当状态为轻量级锁（lightweight locked）时，mark word存储的是指向线程栈中Lock Record的指针；当状态为重量级锁（inflated）时，为指向堆中的monitor对象的指针。</p>
+            <h1 id="批量再偏向机制"><a href="#批量再偏向机制" class="headerlink" title="批量再偏向机制"></a>批量再偏向机制</h1><p>该机制的主要工作原理如下：</p>
+<p>引入一个概念 epoch, 其本质是一个时间戳 ， 代表了偏向锁的有效性<br>从前文描述的对象头结构中可以看到， epoch 存储在可偏向对象的 MarkWord 中。<br>除了对象中的 epoch, 对象所属的类 class 信息中， 也会保存一个 epoch 值</p>
+<p>每当遇到一个全局安全点时， 如果要对 class C 进行批量再偏向， 则首先对 class C 中保存的 epoch 进行增加操作， 得到一个新的 epoch_new</p>
+<p>然后扫描所有持有 class C 实例的线程栈， 根据线程栈的信息判断出该线程是否锁定了该对象， 仅将 epoch_new 的值赋给被锁定的对象中。</p>
+<p>退出安全点后， 当有线程需要尝试获取偏向锁时， 直接检查 class C 中存储的 epoch 值是否与目标对象中存储的 epoch 值相等， 如果不相等， 则说明该对象的偏向锁已经失效了， 可以直接通过 CAS 操作尝试再次将该对象再次偏向于请求获得锁的线程。</p>
+<p>直接看到jvm源码里，做个记录</p>
+<p>1: 得到当前的系统时间<br>2: 对kclass的对象头中设置当前时间<br>3: 如果需要批量再偏向<br>    3.1 如果klass的对象头中有偏向记录</p>
+<p>查看jvm源码的monitorenter<br>先查看当前线程的</p>
 
           
         
@@ -951,6 +606,176 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/线程池详解/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Swaggy Q">
+      <meta itemprop="description" content="拉塞尔FMVP了吗">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dloading...">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/07/08/线程池详解/" class="post-title-link" itemprop="url">线程池详解</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-08 22:59:25" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+            </span>
+          
+
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-07-10 09:52:42" itemprop="dateModified" datetime="2019-07-10T09:52:42+08:00">2019-07-10</time>
+              </span>
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="线程池详解"><a href="#线程池详解" class="headerlink" title="线程池详解"></a>线程池详解</h1><h2 id="前文"><a href="#前文" class="headerlink" title="前文"></a>前文</h2><h4 id="本文旨在针对ThreadPoolExecutor进行一些源码级别的解读，从而对我们平时从Executor类生成的各种不同的线程池有更深的理解"><a href="#本文旨在针对ThreadPoolExecutor进行一些源码级别的解读，从而对我们平时从Executor类生成的各种不同的线程池有更深的理解" class="headerlink" title="本文旨在针对ThreadPoolExecutor进行一些源码级别的解读，从而对我们平时从Executor类生成的各种不同的线程池有更深的理解"></a>本文旨在针对ThreadPoolExecutor进行一些源码级别的解读，从而对我们平时从Executor类生成的各种不同的线程池有更深的理解</h4><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="先看到构造方法做了什么"><a href="#先看到构造方法做了什么" class="headerlink" title="先看到构造方法做了什么"></a>先看到构造方法做了什么</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">public ThreadPoolExecutor(int corePoolSize,</span><br><span class="line">                              int maximumPoolSize,</span><br><span class="line">                              long keepAliveTime,</span><br><span class="line">                              TimeUnit unit,</span><br><span class="line">                              BlockingQueue&lt;Runnable&gt; workQueue,</span><br><span class="line">                              ThreadFactory threadFactory,</span><br><span class="line">                              RejectedExecutionHandler handler) &#123;</span><br><span class="line">        if (corePoolSize &lt; 0 ||</span><br><span class="line">            maximumPoolSize &lt;= 0 ||</span><br><span class="line">            maximumPoolSize &lt; corePoolSize ||</span><br><span class="line">            keepAliveTime &lt; 0)</span><br><span class="line">            throw new IllegalArgumentException();</span><br><span class="line">        if (workQueue == null || threadFactory == null || handler == null)</span><br><span class="line">            throw new NullPointerException();</span><br><span class="line">        this.corePoolSize = corePoolSize;</span><br><span class="line">        this.maximumPoolSize = maximumPoolSize;</span><br><span class="line">        this.workQueue = workQueue;</span><br><span class="line">        this.keepAliveTime = unit.toNanos(keepAliveTime);</span><br><span class="line">        this.threadFactory = threadFactory;</span><br><span class="line">        this.handler = handler;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="先简单看到初始化了一些参数，然后放入了一个阻塞队列，一个线程制造工厂，还有一个handler。这个handler主要是作为线程调度失败后的一些操作。具体每个参数在后面都会讲到。"><a href="#先简单看到初始化了一些参数，然后放入了一个阻塞队列，一个线程制造工厂，还有一个handler。这个handler主要是作为线程调度失败后的一些操作。具体每个参数在后面都会讲到。" class="headerlink" title="先简单看到初始化了一些参数，然后放入了一个阻塞队列，一个线程制造工厂，还有一个handler。这个handler主要是作为线程调度失败后的一些操作。具体每个参数在后面都会讲到。"></a>先简单看到初始化了一些参数，然后放入了一个阻塞队列，一个线程制造工厂，还有一个handler。这个handler主要是作为线程调度失败后的一些操作。具体每个参数在后面都会讲到。</h4><h4 id="再看到最重要的execute方法。"><a href="#再看到最重要的execute方法。" class="headerlink" title="再看到最重要的execute方法。"></a>再看到最重要的execute方法。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public void execute(Runnable command) &#123;</span><br><span class="line">        if (command == null)</span><br><span class="line">        	throw new NullPointerException();</span><br><span class="line">        ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="首先看到，入参是一个Runnable类型的参数，这个就是我们平时构造线程时会传入的具体执行的内容指令。然后先回对这个参数进行一下校验。再继续往下看"><a href="#首先看到，入参是一个Runnable类型的参数，这个就是我们平时构造线程时会传入的具体执行的内容指令。然后先回对这个参数进行一下校验。再继续往下看" class="headerlink" title="首先看到，入参是一个Runnable类型的参数，这个就是我们平时构造线程时会传入的具体执行的内容指令。然后先回对这个参数进行一下校验。再继续往下看"></a>首先看到，入参是一个Runnable类型的参数，这个就是我们平时构造线程时会传入的具体执行的内容指令。然后先回对这个参数进行一下校验。再继续往下看</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">// 线程池内部的一个AtomInteger类型的参数，可用于计算当前的线程数以及线程池的状态，具体操作内容就是通过对bit之间的操作，先不细讲</span><br><span class="line">int c = ctl.get();</span><br><span class="line">// 通过c先计算得到当前线程池的线程数，如果小于构造函数中传入的核心线程池大小的话，就会通过addWorker方法继续往线程池中添加线程</span><br><span class="line">if (workerCountOf(c) &lt; corePoolSize) &#123;</span><br><span class="line">// 注意这边的第二个参数为true，代表正在添加工作节点</span><br><span class="line">    if (addWorker(command, true))</span><br><span class="line">        return;</span><br><span class="line">    c = ctl.get();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="在线程池中会涉及到很多的判断条件，所以边看源码边进行记录一下"><a href="#在线程池中会涉及到很多的判断条件，所以边看源码边进行记录一下" class="headerlink" title="在线程池中会涉及到很多的判断条件，所以边看源码边进行记录一下"></a>在线程池中会涉及到很多的判断条件，所以边看源码边进行记录一下</h4><ul>
+<li>如果新任务进来时，线程池中的线程数小于corePoolSize，则继续向线程池中添加新的工作者，也就是新的线程</li>
+</ul>
+<h4 id="现在继续看看addWorker方法里面做了什么"><a href="#现在继续看看addWorker方法里面做了什么" class="headerlink" title="现在继续看看addWorker方法里面做了什么"></a>现在继续看看addWorker方法里面做了什么</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">private boolean addWorker(Runnable firstTask, boolean core) &#123;</span><br><span class="line">    // 做了一次标记，用于之后跳出循环</span><br><span class="line">    retry:</span><br><span class="line">    for (;;) &#123;</span><br><span class="line">    	// 得到这个值，用于计算当前线程池的状态，总共有5种状态</span><br><span class="line">    	// RUNNING    = -1 &lt;&lt; COUNT_BITS;</span><br><span class="line">		// SHUTDOWN   =  0 &lt;&lt; COUNT_BITS;</span><br><span class="line">		// STOP       =  1 &lt;&lt; COUNT_BITS;</span><br><span class="line">		// TIDYING    =  2 &lt;&lt; COUNT_BITS;</span><br><span class="line">		// TERMINATED =  3 &lt;&lt; COUNT_BITS;</span><br><span class="line">        int c = ctl.get();</span><br><span class="line">        int rs = runStateOf(c);</span><br><span class="line"></span><br><span class="line">        // Check if queue empty only if necessary.</span><br><span class="line">        // 如果计算得到的线程池当前的状态rs &gt; SHUTDOWN 以及以下三个条件不同时满足，则代表添加工作节点失败，否则继续执行</span><br><span class="line">        // 1: rs等于SHUTDOWN</span><br><span class="line">        // 2: 传入的Runnable参数为空</span><br><span class="line">        // 3: 工作队列不为空</span><br><span class="line">        if (rs &gt;= SHUTDOWN &amp;&amp;</span><br><span class="line">            ! (rs == SHUTDOWN &amp;&amp;</span><br><span class="line">               firstTask == null &amp;&amp;</span><br><span class="line">               ! workQueue.isEmpty()))</span><br><span class="line">            return false;</span><br><span class="line">		</span><br><span class="line">        for (;;) &#123;</span><br><span class="line">        	// 得到当前线程池的工作线程数</span><br><span class="line">            int wc = workerCountOf(c);</span><br><span class="line">            // 如果当前线程数wc 已经大于了(1 &lt;&lt; 29) - 1</span><br><span class="line">            // 或者</span><br><span class="line">            // 根据方法的第二个参数来判断，wc是大于corePoolSize还是最大线程数，如果是大于，则也代表无法再添加新工作节点了，返回添加失败</span><br><span class="line">            if (wc &gt;= CAPACITY ||</span><br><span class="line">                wc &gt;= (core ? corePoolSize : maximumPoolSize))</span><br><span class="line">                return false;</span><br><span class="line">            // 用CAS的方法将变量c+1，代表多了一个线程</span><br><span class="line">            if (compareAndIncrementWorkerCount(c))</span><br><span class="line">    	// 如果线程数新增成功，也跳出永真循环</span><br><span class="line">                break retry;</span><br><span class="line">            c = ctl.get();  // Re-read ctl</span><br><span class="line">            if (runStateOf(c) != rs)</span><br><span class="line">                continue retry;</span><br><span class="line">            // else CAS failed due to workerCount change; retry inner loop</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="在方法中若满足条件，会用永真循环将线程数-1，成功后再看下面的操作"><a href="#在方法中若满足条件，会用永真循环将线程数-1，成功后再看下面的操作" class="headerlink" title="在方法中若满足条件，会用永真循环将线程数+1，成功后再看下面的操作"></a>在方法中若满足条件，会用永真循环将线程数+1，成功后再看下面的操作</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">// 两个布尔值，判断工作节点是否加入队列中，以及是否启动</span><br><span class="line">boolean workerStarted = false;</span><br><span class="line">      boolean workerAdded = false;</span><br><span class="line">      Worker w = null;</span><br><span class="line">      try &#123;</span><br><span class="line">      	// 用Runnable参数构建工作节点，内部会通过线程工厂构建一个新的线程，所以Worker内部包括</span><br><span class="line">      	// Runnable , Thread</span><br><span class="line">          w = new Worker(firstTask);</span><br><span class="line">          // 得到对应的线程</span><br><span class="line">          final Thread t = w.thread;</span><br><span class="line">          if (t != null) &#123;</span><br><span class="line">          	// 获得可重入锁</span><br><span class="line">              final ReentrantLock mainLock = this.mainLock;</span><br><span class="line">              mainLock.lock();</span><br><span class="line">              try &#123;</span><br><span class="line">                  // Recheck while holding lock.</span><br><span class="line">                  // Back out on ThreadFactory failure or if</span><br><span class="line">                  // shut down before lock acquired.</span><br><span class="line">                  // 获得当前线程池的状态</span><br><span class="line">                  int rs = runStateOf(ctl.get());</span><br><span class="line">                  if (rs &lt; SHUTDOWN ||</span><br><span class="line">                      (rs == SHUTDOWN &amp;&amp; firstTask == null)) &#123;</span><br><span class="line">                      if (t.isAlive()) // precheck that t is startable</span><br><span class="line">                          throw new IllegalThreadStateException();</span><br><span class="line">					// 在阻塞队列中添加新任务</span><br><span class="line">                      workers.add(w);</span><br><span class="line">                      int s = workers.size();</span><br><span class="line">                      // 然后更新最大的线程池大小</span><br><span class="line">                      if (s &gt; largestPoolSize)</span><br><span class="line">                          largestPoolSize = s;</span><br><span class="line">                      workerAdded = true;</span><br><span class="line">                  &#125;</span><br><span class="line">              &#125; finally &#123;</span><br><span class="line">                  mainLock.unlock();</span><br><span class="line">              &#125;</span><br><span class="line">              // 启动线程</span><br><span class="line">              if (workerAdded) &#123;</span><br><span class="line">                  t.start();</span><br><span class="line">                  workerStarted = true;</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125; finally &#123;</span><br><span class="line">      	// 如果启动失败，则移除</span><br><span class="line">          if (! workerStarted)</span><br><span class="line">              addWorkerFailed(w);</span><br><span class="line">      &#125;</span><br><span class="line">      return workerStarted;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="以上就是添加工作Worker的过程，现在回去看看execute方法中，addWorker成功之后做了什么操作。"><a href="#以上就是添加工作Worker的过程，现在回去看看execute方法中，addWorker成功之后做了什么操作。" class="headerlink" title="以上就是添加工作Worker的过程，现在回去看看execute方法中，addWorker成功之后做了什么操作。"></a>以上就是添加工作Worker的过程，现在回去看看execute方法中，addWorker成功之后做了什么操作。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">public void execute(Runnable command) &#123;</span><br><span class="line">    if (command == null)</span><br><span class="line">        throw new NullPointerException();</span><br><span class="line">    int c = ctl.get();</span><br><span class="line">    if (workerCountOf(c) &lt; corePoolSize) &#123;</span><br><span class="line">    	// 如果添加成功，代表线程已经启动</span><br><span class="line">        if (addWorker(command, true))</span><br><span class="line">            return;</span><br><span class="line">        c = ctl.get();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">	if (isRunning(c) &amp;&amp; workQueue.offer(command)) &#123;</span><br><span class="line">        int recheck = ctl.get();</span><br><span class="line">        if (! isRunning(recheck) &amp;&amp; remove(command))</span><br><span class="line">            reject(command);</span><br><span class="line">        else if (workerCountOf(recheck) == 0)</span><br><span class="line">            addWorker(null, false);</span><br><span class="line">    &#125;</span><br><span class="line">    else if (!addWorker(command, false))</span><br><span class="line">        reject(command);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="重点看一下这个reject方法，这个就是线程池中的拒绝策略起作用的地方"><a href="#重点看一下这个reject方法，这个就是线程池中的拒绝策略起作用的地方" class="headerlink" title="重点看一下这个reject方法，这个就是线程池中的拒绝策略起作用的地方"></a>重点看一下这个reject方法，这个就是线程池中的拒绝策略起作用的地方</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">final void reject(Runnable command) &#123;</span><br><span class="line">    handler.rejectedExecution(command, this);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/线程池/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1086,6 +911,192 @@
 <h2 id="ScheduledThreadPoolExecutor"><a href="#ScheduledThreadPoolExecutor" class="headerlink" title="ScheduledThreadPoolExecutor"></a>ScheduledThreadPoolExecutor</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public static ScheduledExecutorService newScheduledThreadPool(int corePoolSize) &#123;</span><br><span class="line">    return new ScheduledThreadPoolExecutor(corePoolSize);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://www.cnblogs.com/-wyl/p/9760670.html" target="_blank" rel="noopener">线程池五种状态转化的解释</a></p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/聊一聊HashMap/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Swaggy Q">
+      <meta itemprop="description" content="拉塞尔FMVP了吗">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dloading...">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/07/08/聊一聊HashMap/" class="post-title-link" itemprop="url">谈谈HashMap</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:09:41" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+            </span>
+          
+
+          
+            
+
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="谈谈HashMap"><a href="#谈谈HashMap" class="headerlink" title="谈谈HashMap"></a>谈谈HashMap</h1><h2 id="前文"><a href="#前文" class="headerlink" title="前文"></a>前文</h2><h4 id="最近正在复习jdk中的一些源码的细节。今天会讲讲Map接口下的HashMap。这个数据结构我们平时肯定也会经常用到，今天会基于jdk-1-8讲讲他底层是怎么实现的，并会对比jdk-1-7看看这两个版本做了什么修改"><a href="#最近正在复习jdk中的一些源码的细节。今天会讲讲Map接口下的HashMap。这个数据结构我们平时肯定也会经常用到，今天会基于jdk-1-8讲讲他底层是怎么实现的，并会对比jdk-1-7看看这两个版本做了什么修改" class="headerlink" title="最近正在复习jdk中的一些源码的细节。今天会讲讲Map接口下的HashMap。这个数据结构我们平时肯定也会经常用到，今天会基于jdk 1.8讲讲他底层是怎么实现的，并会对比jdk 1.7看看这两个版本做了什么修改"></a>最近正在复习jdk中的一些源码的细节。今天会讲讲Map接口下的HashMap。这个数据结构我们平时肯定也会经常用到，今天会基于jdk 1.8讲讲他底层是怎么实现的，并会对比jdk 1.7看看这两个版本做了什么修改</h4><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="按我们平时的使用习惯，一般就是直接new一个HashMap的实例对象，供之后的操作。那这个构造函数中，HashMap初始化了什么参数呢？"><a href="#按我们平时的使用习惯，一般就是直接new一个HashMap的实例对象，供之后的操作。那这个构造函数中，HashMap初始化了什么参数呢？" class="headerlink" title="按我们平时的使用习惯，一般就是直接new一个HashMap的实例对象，供之后的操作。那这个构造函数中，HashMap初始化了什么参数呢？"></a>按我们平时的使用习惯，一般就是直接new一个HashMap的实例对象，供之后的操作。那这个构造函数中，HashMap初始化了什么参数呢？</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">public HashMap(int initialCapacity, float loadFactor) &#123;</span><br><span class="line">     if (initialCapacity &lt; 0)</span><br><span class="line">         throw new IllegalArgumentException(&quot;Illegal initial capacity: &quot; +</span><br><span class="line">                                            initialCapacity);</span><br><span class="line">     if (initialCapacity &gt; MAXIMUM_CAPACITY)</span><br><span class="line">         initialCapacity = MAXIMUM_CAPACITY;</span><br><span class="line">     if (loadFactor &lt;= 0 || Float.isNaN(loadFactor))</span><br><span class="line">         throw new IllegalArgumentException(&quot;Illegal load factor: &quot; +</span><br><span class="line">                                            loadFactor);</span><br><span class="line">     this.loadFactor = loadFactor;</span><br><span class="line">     this.threshold = tableSizeFor(initialCapacity);</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> public HashMap(int initialCapacity) &#123;</span><br><span class="line">     this(initialCapacity, DEFAULT_LOAD_FACTOR);</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> public HashMap() &#123;</span><br><span class="line">     this.loadFactor = DEFAULT_LOAD_FACTOR; // all other fields defaulted</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="总共有三个不同实现的构造函数。可以看到第1，2种可以看做是同一种实现，因为2中也是调用了1。那我们看到1中也是对传入的参数进行了一些校验，重点看最后一句"><a href="#总共有三个不同实现的构造函数。可以看到第1，2种可以看做是同一种实现，因为2中也是调用了1。那我们看到1中也是对传入的参数进行了一些校验，重点看最后一句" class="headerlink" title="总共有三个不同实现的构造函数。可以看到第1，2种可以看做是同一种实现，因为2中也是调用了1。那我们看到1中也是对传入的参数进行了一些校验，重点看最后一句"></a>总共有三个不同实现的构造函数。可以看到第1，2种可以看做是同一种实现，因为2中也是调用了1。那我们看到1中也是对传入的参数进行了一些校验，重点看最后一句</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">this.threshold = tableSizeFor(initialCapacity);</span><br></pre></td></tr></table></figure>
+
+<h4 id="我们传入了初始容量大小的值，但是构造函数中并没有对应的接收，而只是用这个变量去计算了thershold，也就是我们之后会用到的容量阈值。tableSizeFor方法的逻辑就是，得到最小的大于入参的2的幂次方。-例如传入7会得到8，传入13会返回16。-这样就做了初始化的动作。注意前两个构造函数初始化了loadFactor，和threshold，而第三个构造方法中值初始化了loadFactor一个方法。这个细节在后面也是会被用到。"><a href="#我们传入了初始容量大小的值，但是构造函数中并没有对应的接收，而只是用这个变量去计算了thershold，也就是我们之后会用到的容量阈值。tableSizeFor方法的逻辑就是，得到最小的大于入参的2的幂次方。-例如传入7会得到8，传入13会返回16。-这样就做了初始化的动作。注意前两个构造函数初始化了loadFactor，和threshold，而第三个构造方法中值初始化了loadFactor一个方法。这个细节在后面也是会被用到。" class="headerlink" title="我们传入了初始容量大小的值，但是构造函数中并没有对应的接收，而只是用这个变量去计算了thershold，也就是我们之后会用到的容量阈值。tableSizeFor方法的逻辑就是，得到最小的大于入参的2的幂次方。 例如传入7会得到8，传入13会返回16。 这样就做了初始化的动作。注意前两个构造函数初始化了loadFactor，和threshold，而第三个构造方法中值初始化了loadFactor一个方法。这个细节在后面也是会被用到。"></a>我们传入了初始容量大小的值，但是构造函数中并没有对应的接收，而只是用这个变量去计算了thershold，也就是我们之后会用到的容量阈值。tableSizeFor方法的逻辑就是，得到最小的大于入参的2的幂次方。 例如传入7会得到8，传入13会返回16。 这样就做了初始化的动作。注意前两个构造函数初始化了loadFactor，和threshold，而第三个构造方法中值初始化了loadFactor一个方法。这个细节在后面也是会被用到。</h4><h4 id="既然是HashMap，那最大的作用应该是存储我们给定的键值对。那我们现在看看他是怎么高效存储数据。"><a href="#既然是HashMap，那最大的作用应该是存储我们给定的键值对。那我们现在看看他是怎么高效存储数据。" class="headerlink" title="既然是HashMap，那最大的作用应该是存储我们给定的键值对。那我们现在看看他是怎么高效存储数据。"></a>既然是HashMap，那最大的作用应该是存储我们给定的键值对。那我们现在看看他是怎么高效存储数据。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public V put(K key, V value) &#123;</span><br><span class="line">    return putVal(hash(key), key, value, false, true);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="这个put方法是常用的方法。可以看到里面真正起作用的是putVal方法，但是里面还有一个hash-方法"><a href="#这个put方法是常用的方法。可以看到里面真正起作用的是putVal方法，但是里面还有一个hash-方法" class="headerlink" title="这个put方法是常用的方法。可以看到里面真正起作用的是putVal方法，但是里面还有一个hash()方法"></a>这个put方法是常用的方法。可以看到里面真正起作用的是putVal方法，但是里面还有一个hash()方法</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">static final int hash(Object key) &#123;</span><br><span class="line">    int h;</span><br><span class="line">    return (key == null) ? 0 : (h = key.hashCode()) ^ (h &gt;&gt;&gt; 16);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="这个方法是通过给定的key得到散列算法算出的hash值。这个散列方法只有一行，就是得到key的hashcode，然后前16位-后16位。当然若key是null也是可以接受的，就是直接返回0号位。这个返回的值就是之后会用到的每个key属于哪个桶位的编号。我们接下去看putVal方法。"><a href="#这个方法是通过给定的key得到散列算法算出的hash值。这个散列方法只有一行，就是得到key的hashcode，然后前16位-后16位。当然若key是null也是可以接受的，就是直接返回0号位。这个返回的值就是之后会用到的每个key属于哪个桶位的编号。我们接下去看putVal方法。" class="headerlink" title="这个方法是通过给定的key得到散列算法算出的hash值。这个散列方法只有一行，就是得到key的hashcode，然后前16位 ^ 后16位。当然若key是null也是可以接受的，就是直接返回0号位。这个返回的值就是之后会用到的每个key属于哪个桶位的编号。我们接下去看putVal方法。"></a>这个方法是通过给定的key得到散列算法算出的hash值。这个散列方法只有一行，就是得到key的hashcode，然后前16位 ^ 后16位。当然若key是null也是可以接受的，就是直接返回0号位。这个返回的值就是之后会用到的每个key属于哪个桶位的编号。我们接下去看putVal方法。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">if ((tab = table) == null || (n = tab.length) == 0)</span><br><span class="line">           n = (tab = resize()).length;</span><br></pre></td></tr></table></figure>
+
+<h4 id="在方法的一开头就先判断底层的数组是否已经初始化成功，如果还没初始化，就需要通过resize方法进行初始化。这个方法通过名字就可以看出应该还有改变大小的作用，这个作用会在方法的最后提到。这边先只关注初始化数组的作用。方法内部的初始化部分这边先不说了，核心就是这一句。new了一个Node的数组。"><a href="#在方法的一开头就先判断底层的数组是否已经初始化成功，如果还没初始化，就需要通过resize方法进行初始化。这个方法通过名字就可以看出应该还有改变大小的作用，这个作用会在方法的最后提到。这边先只关注初始化数组的作用。方法内部的初始化部分这边先不说了，核心就是这一句。new了一个Node的数组。" class="headerlink" title="在方法的一开头就先判断底层的数组是否已经初始化成功，如果还没初始化，就需要通过resize方法进行初始化。这个方法通过名字就可以看出应该还有改变大小的作用，这个作用会在方法的最后提到。这边先只关注初始化数组的作用。方法内部的初始化部分这边先不说了，核心就是这一句。new了一个Node的数组。"></a>在方法的一开头就先判断底层的数组是否已经初始化成功，如果还没初始化，就需要通过resize方法进行初始化。这个方法通过名字就可以看出应该还有改变大小的作用，这个作用会在方法的最后提到。这边先只关注初始化数组的作用。方法内部的初始化部分这边先不说了，核心就是这一句。new了一个Node的数组。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Node&lt;K,V&gt;[] newTab = (Node&lt;K,V&gt;[])new Node[newCap];</span><br></pre></td></tr></table></figure>
+
+<h4 id="那这个Node是什么呢？这边插播一下Node的定义"><a href="#那这个Node是什么呢？这边插播一下Node的定义" class="headerlink" title="那这个Node是什么呢？这边插播一下Node的定义"></a>那这个Node是什么呢？这边插播一下Node的定义</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">static class Node&lt;K,V&gt; implements Map.Entry&lt;K,V&gt; &#123;</span><br><span class="line">    final int hash;</span><br><span class="line">    final K key;</span><br><span class="line">    V value;</span><br><span class="line">    Node&lt;K,V&gt; next;</span><br><span class="line"></span><br><span class="line">    Node(int hash, K key, V value, Node&lt;K,V&gt; next) &#123;</span><br><span class="line">        this.hash = hash;</span><br><span class="line">        this.key = key;</span><br><span class="line">        this.value = value;</span><br><span class="line">        this.next = next;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="可以看到里面除了一些hash，key，vaule之外，还有一个Node类型的引用，所以可以合理推断这个Node后面会组成一个链表。所以模糊的可以确认出，HashMap的底层是数组-链表的格式组成的。"><a href="#可以看到里面除了一些hash，key，vaule之外，还有一个Node类型的引用，所以可以合理推断这个Node后面会组成一个链表。所以模糊的可以确认出，HashMap的底层是数组-链表的格式组成的。" class="headerlink" title="可以看到里面除了一些hash，key，vaule之外，还有一个Node类型的引用，所以可以合理推断这个Node后面会组成一个链表。所以模糊的可以确认出，HashMap的底层是数组+链表的格式组成的。"></a>可以看到里面除了一些hash，key，vaule之外，还有一个Node类型的引用，所以可以合理推断这个Node后面会组成一个链表。所以模糊的可以确认出，HashMap的底层是数组+链表的格式组成的。</h4><h4 id="好了，回到正题。看回原来的putVal方法。接下来的代码格式就是一个if-else的逻辑。"><a href="#好了，回到正题。看回原来的putVal方法。接下来的代码格式就是一个if-else的逻辑。" class="headerlink" title="好了，回到正题。看回原来的putVal方法。接下来的代码格式就是一个if-else的逻辑。"></a>好了，回到正题。看回原来的putVal方法。接下来的代码格式就是一个if-else的逻辑。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// (n-1) &amp; hash 计算出给定的key应该保存在数组的第几个位置中</span><br><span class="line">// 如果数组的这个位置现在还是空的，则可以直接new一个Node作为第一个占位的节点，放在给定的位置</span><br><span class="line">   if ((p = tab[i = (n - 1) &amp; hash]) == null)</span><br><span class="line">          tab[i] = newNode(hash, key, value, null);</span><br><span class="line">      else &#123;</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="如果数组对应的位置已经有了元素，需要以原有的元素作为链表的头节点往后延伸。但是这里也有几种情况区分。"><a href="#如果数组对应的位置已经有了元素，需要以原有的元素作为链表的头节点往后延伸。但是这里也有几种情况区分。" class="headerlink" title="如果数组对应的位置已经有了元素，需要以原有的元素作为链表的头节点往后延伸。但是这里也有几种情况区分。"></a>如果数组对应的位置已经有了元素，需要以原有的元素作为链表的头节点往后延伸。但是这里也有几种情况区分。</h4><ul>
+<li><p>新加入的key已经在数组存在了，这个put操作就成为了用新数据更新旧数据的操作</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">if (p.hash == hash &amp;&amp; ((k = p.key) == key || (key != null &amp;&amp; key.equals(k))))</span><br><span class="line">       e = p;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在数组中存在的链表中继续添加新节点。注意当链表长度大于8的时候，链表会转化为红黑树。这也是jdk 1.8中新增的功能，避免了1.7版本中链表长度过长造成的查询效率低的问题。</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">for (int binCount = 0; ; ++binCount) &#123;</span><br><span class="line">		// 到达了链表的末尾，则只需要将原尾节点的后继指针指向新加入的节点</span><br><span class="line">           if ((e = p.next) == null) &#123;</span><br><span class="line">               p.next = newNode(hash, key, value, null);</span><br><span class="line">               // 当链表长度大于7的时候，就会红黑树化</span><br><span class="line">               if (binCount &gt;= TREEIFY_THRESHOLD - 1) // -1 for 1st</span><br><span class="line">                   treeifyBin(tab, hash);</span><br><span class="line">               break;</span><br><span class="line">           &#125;</span><br><span class="line">           // 若在链表中已存在key</span><br><span class="line">           if (e.hash == hash &amp;&amp;</span><br><span class="line">               ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))</span><br><span class="line">               break;</span><br><span class="line">           p = e;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    // 将原数组中的对应位置的链表转为红黑树</span><br><span class="line">    final void treeifyBin(Node&lt;K,V&gt;[] tab, int hash) &#123;</span><br><span class="line">       int n, index; Node&lt;K,V&gt; e;</span><br><span class="line">       // 如果原有的数组的容量小于64，则直接去扩容</span><br><span class="line">       if (tab == null || (n = tab.length) &lt; MIN_TREEIFY_CAPACITY)</span><br><span class="line">           resize();</span><br><span class="line">       // 已达到转化的阈值，则开始转换</span><br><span class="line">       else if ((e = tab[index = (n - 1) &amp; hash]) != null) &#123;</span><br><span class="line">           TreeNode&lt;K,V&gt; hd = null, tl = null; // 树的首尾节点</span><br><span class="line">           do &#123;</span><br><span class="line">           	// 将原有的Node节点，转为TreeNode</span><br><span class="line">               TreeNode&lt;K,V&gt; p = replacementTreeNode(e, null);</span><br><span class="line">               if (tl == null)</span><br><span class="line">                   hd = p;</span><br><span class="line">               else &#123;</span><br><span class="line">                   p.prev = tl;</span><br><span class="line">                   tl.next = p;</span><br><span class="line">               &#125;</span><br><span class="line">               tl = p;</span><br><span class="line">           &#125; while ((e = e.next) != null);</span><br><span class="line">           if ((tab[index] = hd) != null)</span><br><span class="line">               hd.treeify(tab);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   TreeNode&lt;K,V&gt; replacementTreeNode(Node&lt;K,V&gt; p, Node&lt;K,V&gt; next) &#123;</span><br><span class="line">       return new TreeNode&lt;&gt;(p.hash, p.key, p.value, next);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+
+<ul>
+<li>在数组中的链表已经转为了红黑树</li>
+</ul>
+<h4 id="好了，经过上面的操作。我们就已经成功有序的将元素放在了HashMap的底层数组中，不管是以链表的形式，还是红黑树的方式。可以看到在putVal的最后，会判断一下size是否已经超过了之前设定的阈值。若超过需要调用resize方法进行重新散列。"><a href="#好了，经过上面的操作。我们就已经成功有序的将元素放在了HashMap的底层数组中，不管是以链表的形式，还是红黑树的方式。可以看到在putVal的最后，会判断一下size是否已经超过了之前设定的阈值。若超过需要调用resize方法进行重新散列。" class="headerlink" title="好了，经过上面的操作。我们就已经成功有序的将元素放在了HashMap的底层数组中，不管是以链表的形式，还是红黑树的方式。可以看到在putVal的最后，会判断一下size是否已经超过了之前设定的阈值。若超过需要调用resize方法进行重新散列。"></a>好了，经过上面的操作。我们就已经成功有序的将元素放在了HashMap的底层数组中，不管是以链表的形式，还是红黑树的方式。可以看到在putVal的最后，会判断一下size是否已经超过了之前设定的阈值。若超过需要调用resize方法进行重新散列。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">if (++size &gt; threshold)</span><br><span class="line">           resize();</span><br></pre></td></tr></table></figure>
+
+<h4 id="在重新散列方法中，这边就先跳过方法前面部分的一些判断方法，只需要知道若真需要扩容，则将原table的容量大小x2，就得到了新的容量大小。回想到我们之前初始化的时候，容量大小必须是2的幂次方，那么x2之后肯定也会是2的幂次方。为什么要取这个方式呢？我们可以从移动原有数组中的元素到新数组中得到答案。直接看到移动链表的部分"><a href="#在重新散列方法中，这边就先跳过方法前面部分的一些判断方法，只需要知道若真需要扩容，则将原table的容量大小x2，就得到了新的容量大小。回想到我们之前初始化的时候，容量大小必须是2的幂次方，那么x2之后肯定也会是2的幂次方。为什么要取这个方式呢？我们可以从移动原有数组中的元素到新数组中得到答案。直接看到移动链表的部分" class="headerlink" title="在重新散列方法中，这边就先跳过方法前面部分的一些判断方法，只需要知道若真需要扩容，则将原table的容量大小x2，就得到了新的容量大小。回想到我们之前初始化的时候，容量大小必须是2的幂次方，那么x2之后肯定也会是2的幂次方。为什么要取这个方式呢？我们可以从移动原有数组中的元素到新数组中得到答案。直接看到移动链表的部分"></a>在重新散列方法中，这边就先跳过方法前面部分的一些判断方法，只需要知道若真需要扩容，则将原table的容量大小x2，就得到了新的容量大小。回想到我们之前初始化的时候，容量大小必须是2的幂次方，那么x2之后肯定也会是2的幂次方。为什么要取这个方式呢？我们可以从移动原有数组中的元素到新数组中得到答案。直接看到移动链表的部分</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">else &#123; // preserve order</span><br><span class="line">	// 这边定义了两对首尾指针，作为之后移动的两个不同链表的首节点入口</span><br><span class="line">       Node&lt;K,V&gt; loHead = null, loTail = null;</span><br><span class="line">       Node&lt;K,V&gt; hiHead = null, hiTail = null;</span><br><span class="line">       Node&lt;K,V&gt; next;</span><br><span class="line">       do &#123;</span><br><span class="line">           next = e.next;</span><br><span class="line">           // 这边看到主要判断了e.hash &amp; oldCap为0还是1</span><br><span class="line">           if ((e.hash &amp; oldCap) == 0) &#123;</span><br><span class="line">               if (loTail == null)</span><br><span class="line">                   loHead = e;</span><br><span class="line">               else</span><br><span class="line">                   loTail.next = e;</span><br><span class="line">               loTail = e;</span><br><span class="line">           &#125;</span><br><span class="line">           else &#123;</span><br><span class="line">               if (hiTail == null)</span><br><span class="line">                   hiHead = e;</span><br><span class="line">               else</span><br><span class="line">                   hiTail.next = e;</span><br><span class="line">               hiTail = e;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125; while ((e = next) != null);</span><br><span class="line">       if (loTail != null) &#123;</span><br><span class="line">           loTail.next = null;</span><br><span class="line">           newTab[j] = loHead;</span><br><span class="line">       &#125;</span><br><span class="line">       if (hiTail != null) &#123;</span><br><span class="line">           hiTail.next = null;</span><br><span class="line">           newTab[j + oldCap] = hiHead;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="看代码里可以看到主要的逻辑判断是-e-hash-amp-oldCap-这个值为0还是为1。回想一下，在putVal方法的时候，是用hash-amp-n-1-的方法来确定元素所在的桶位值，假设n现在是16，此时来了两个hash分别为为15和31的key，那么通过计算"><a href="#看代码里可以看到主要的逻辑判断是-e-hash-amp-oldCap-这个值为0还是为1。回想一下，在putVal方法的时候，是用hash-amp-n-1-的方法来确定元素所在的桶位值，假设n现在是16，此时来了两个hash分别为为15和31的key，那么通过计算" class="headerlink" title="看代码里可以看到主要的逻辑判断是  (e.hash &amp; oldCap)这个值为0还是为1。回想一下，在putVal方法的时候，是用hash &amp; (n-1)的方法来确定元素所在的桶位值，假设n现在是16，此时来了两个hash分别为为15和31的key，那么通过计算"></a>看代码里可以看到主要的逻辑判断是  (e.hash &amp; oldCap)这个值为0还是为1。回想一下，在putVal方法的时候，是用hash &amp; (n-1)的方法来确定元素所在的桶位值，假设n现在是16，此时来了两个hash分别为为15和31的key，那么通过计算</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">01111 &amp; 1111  = 1111   也就是 (15 &amp; (16-1)) = 15，也就是桶位值为15</span><br><span class="line">  11111 &amp; 1111  = 1111   也就是 (31 &amp; (16-1)) = 15,桶位值同样是15</span><br></pre></td></tr></table></figure>
+
+<h4 id="通过上面的计算也可以看出，最左边的bit被忽略了，为0或者1都会被定位到同一个桶位中连接成一个链表。那么当此时容量大小扩大了两倍，那么结果就会变成"><a href="#通过上面的计算也可以看出，最左边的bit被忽略了，为0或者1都会被定位到同一个桶位中连接成一个链表。那么当此时容量大小扩大了两倍，那么结果就会变成" class="headerlink" title="通过上面的计算也可以看出，最左边的bit被忽略了，为0或者1都会被定位到同一个桶位中连接成一个链表。那么当此时容量大小扩大了两倍，那么结果就会变成"></a>通过上面的计算也可以看出，最左边的bit被忽略了，为0或者1都会被定位到同一个桶位中连接成一个链表。那么当此时容量大小扩大了两倍，那么结果就会变成</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">01111 &amp; 11111  = 01111   也就是 (15 &amp; (32-1)) = 15，也就是桶位值为15</span><br><span class="line">  11111 &amp; 11111  = 11111   也就是 (31 &amp; (32-1)) = 31,桶位值变成了31</span><br></pre></td></tr></table></figure>
+
+<h4 id="也就是最左边的bit值起到了作用，原本同一桶位的两个key可能会被分散在两个不同的桶位中，而根据最左边为0或者为1，就可以轻松的定位到新的桶位"><a href="#也就是最左边的bit值起到了作用，原本同一桶位的两个key可能会被分散在两个不同的桶位中，而根据最左边为0或者为1，就可以轻松的定位到新的桶位" class="headerlink" title="也就是最左边的bit值起到了作用，原本同一桶位的两个key可能会被分散在两个不同的桶位中，而根据最左边为0或者为1，就可以轻松的定位到新的桶位"></a>也就是最左边的bit值起到了作用，原本同一桶位的两个key可能会被分散在两个不同的桶位中，而根据最左边为0或者为1，就可以轻松的定位到新的桶位</h4><h4 id="那现在HashMap就已经完成了他一半的实名，接下来他需要做的就是可以让我们能方便的取出我们的数据。直接看到他的get方法"><a href="#那现在HashMap就已经完成了他一半的实名，接下来他需要做的就是可以让我们能方便的取出我们的数据。直接看到他的get方法" class="headerlink" title="那现在HashMap就已经完成了他一半的实名，接下来他需要做的就是可以让我们能方便的取出我们的数据。直接看到他的get方法"></a>那现在HashMap就已经完成了他一半的实名，接下来他需要做的就是可以让我们能方便的取出我们的数据。直接看到他的get方法</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public V get(Object key) &#123;</span><br><span class="line">    Node&lt;K,V&gt; e;</span><br><span class="line">    return (e = getNode(hash(key), key)) == null ? null : e.value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="可以看到，主要还是要得到key在底层数组中对应的Node。得到Node之后，想得到值就非常容易了。"><a href="#可以看到，主要还是要得到key在底层数组中对应的Node。得到Node之后，想得到值就非常容易了。" class="headerlink" title="可以看到，主要还是要得到key在底层数组中对应的Node。得到Node之后，想得到值就非常容易了。"></a>可以看到，主要还是要得到key在底层数组中对应的Node。得到Node之后，想得到值就非常容易了。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">final Node&lt;K,V&gt; getNode(int hash, Object key) &#123;</span><br><span class="line">    Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; first, e; int n; K k;</span><br><span class="line">    if ((tab = table) != null &amp;&amp; (n = tab.length) &gt; 0 &amp;&amp;</span><br><span class="line">        (first = tab[(n - 1) &amp; hash]) != null) &#123;</span><br><span class="line">        // 找到底层数组对应的桶位的第一个节点，直接查看是否满足要求，是的话可以直接返回</span><br><span class="line">        if (first.hash == hash &amp;&amp; // always check first node</span><br><span class="line">            ((k = first.key) == key || (key != null &amp;&amp; key.equals(k))))</span><br><span class="line">            return first;</span><br><span class="line">        if ((e = first.next) != null) &#123;</span><br><span class="line">        	// 若节点已经是红黑树的一部分，则用查找红黑树的方式得到想要的节点</span><br><span class="line">            if (first instanceof TreeNode)</span><br><span class="line">                return ((TreeNode&lt;K,V&gt;)first).getTreeNode(hash, key);</span><br><span class="line">            // 若是链表，则可以直接按照链表来查找</span><br><span class="line">            do &#123;</span><br><span class="line">                if (e.hash == hash &amp;&amp;</span><br><span class="line">                    ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))</span><br><span class="line">                    return e;</span><br><span class="line">            &#125; while ((e = e.next) != null);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 
           
         

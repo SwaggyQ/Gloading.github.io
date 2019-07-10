@@ -290,6 +290,155 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/Semaphore 详解/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Swaggy Q">
+      <meta itemprop="description" content="拉塞尔FMVP了吗">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dloading...">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/07/08/Semaphore 详解/" class="post-title-link" itemprop="url">Semaphore源码详解</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:06:05" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+            </span>
+          
+
+          
+            
+
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Semaphore-详解"><a href="#Semaphore-详解" class="headerlink" title="Semaphore 详解"></a>Semaphore 详解</h1><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="因为之前详细看过了AQS的代码。所以今天再简单过一下基于AQS的一些子类实现，今天看到这个Semaphore"><a href="#因为之前详细看过了AQS的代码。所以今天再简单过一下基于AQS的一些子类实现，今天看到这个Semaphore" class="headerlink" title="因为之前详细看过了AQS的代码。所以今天再简单过一下基于AQS的一些子类实现，今天看到这个Semaphore"></a>因为之前详细看过了AQS的代码。所以今天再简单过一下基于AQS的一些子类实现，今天看到这个Semaphore</h4><h4 id="先看一下代码结构，可以看到内部实现了一个基于AQS的Sync类，还有两个基于Sync类的公平和非公平的子类实现。那么就先看到这两个子类实现"><a href="#先看一下代码结构，可以看到内部实现了一个基于AQS的Sync类，还有两个基于Sync类的公平和非公平的子类实现。那么就先看到这两个子类实现" class="headerlink" title="先看一下代码结构，可以看到内部实现了一个基于AQS的Sync类，还有两个基于Sync类的公平和非公平的子类实现。那么就先看到这两个子类实现"></a>先看一下代码结构，可以看到内部实现了一个基于AQS的Sync类，还有两个基于Sync类的公平和非公平的子类实现。那么就先看到这两个子类实现</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">static final class NonfairSync extends Sync &#123;</span><br><span class="line">       private static final long serialVersionUID = -2694183684443567898L;</span><br><span class="line"></span><br><span class="line">       NonfairSync(int permits) &#123;</span><br><span class="line">           super(permits);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       protected int tryAcquireShared(int acquires) &#123;</span><br><span class="line">           return nonfairTryAcquireShared(acquires);</span><br><span class="line">       &#125;</span><br><span class="line">       </span><br><span class="line">       final int nonfairTryAcquireShared(int acquires) &#123;</span><br><span class="line">           for (;;) &#123;</span><br><span class="line">               int available = getState();</span><br><span class="line">               int remaining = available - acquires;</span><br><span class="line">               if (remaining &lt; 0 ||</span><br><span class="line">                   compareAndSetState(available, remaining))</span><br><span class="line">                   return remaining;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   /**</span><br><span class="line">    * Fair version</span><br><span class="line">    */</span><br><span class="line">   static final class FairSync extends Sync &#123;</span><br><span class="line">       private static final long serialVersionUID = 2014338818796000944L;</span><br><span class="line"></span><br><span class="line">       FairSync(int permits) &#123;</span><br><span class="line">           super(permits);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       protected int tryAcquireShared(int acquires) &#123;</span><br><span class="line">           for (;;) &#123;</span><br><span class="line">               if (hasQueuedPredecessors())</span><br><span class="line">                   return -1;</span><br><span class="line">               int available = getState();</span><br><span class="line">               int remaining = available - acquires;</span><br><span class="line">               if (remaining &lt; 0 ||</span><br><span class="line">                   compareAndSetState(available, remaining))</span><br><span class="line">                   return remaining;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="很明显看到公平和非公平的实现方式的区别就在tryAcquireShared方法中，公平实现逻辑中，先调用了一下hasQueuedPredecessors方法。这个方法是AQS中自带的方法，逻辑实现如下"><a href="#很明显看到公平和非公平的实现方式的区别就在tryAcquireShared方法中，公平实现逻辑中，先调用了一下hasQueuedPredecessors方法。这个方法是AQS中自带的方法，逻辑实现如下" class="headerlink" title="很明显看到公平和非公平的实现方式的区别就在tryAcquireShared方法中，公平实现逻辑中，先调用了一下hasQueuedPredecessors方法。这个方法是AQS中自带的方法，逻辑实现如下"></a>很明显看到公平和非公平的实现方式的区别就在tryAcquireShared方法中，公平实现逻辑中，先调用了一下hasQueuedPredecessors方法。这个方法是AQS中自带的方法，逻辑实现如下</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public final boolean hasQueuedPredecessors() &#123;</span><br><span class="line">    // The correctness of this depends on head being initialized</span><br><span class="line">    // before tail and on head.next being accurate if the current</span><br><span class="line">    // thread is first in queue.</span><br><span class="line">    Node t = tail; // Read fields in reverse initialization order</span><br><span class="line">    Node h = head;</span><br><span class="line">    Node s;</span><br><span class="line">    return h != t &amp;&amp;</span><br><span class="line">        ((s = h.next) == null || s.thread != Thread.currentThread());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="就是检查在等待者队列中，是不是存在有其他线程已经在队列中，且排在当前线程的前面。所以公平锁的做法是，如果有其他线程排在前面，则返回-1，代表竞争失败，需要排在队列中继续等待。而非公平锁的做法就是，即使有其他线程排在前面了，可以直接插队获取锁。"><a href="#就是检查在等待者队列中，是不是存在有其他线程已经在队列中，且排在当前线程的前面。所以公平锁的做法是，如果有其他线程排在前面，则返回-1，代表竞争失败，需要排在队列中继续等待。而非公平锁的做法就是，即使有其他线程排在前面了，可以直接插队获取锁。" class="headerlink" title="就是检查在等待者队列中，是不是存在有其他线程已经在队列中，且排在当前线程的前面。所以公平锁的做法是，如果有其他线程排在前面，则返回-1，代表竞争失败，需要排在队列中继续等待。而非公平锁的做法就是，即使有其他线程排在前面了，可以直接插队获取锁。"></a>就是检查在等待者队列中，是不是存在有其他线程已经在队列中，且排在当前线程的前面。所以公平锁的做法是，如果有其他线程排在前面，则返回-1，代表竞争失败，需要排在队列中继续等待。而非公平锁的做法就是，即使有其他线程排在前面了，可以直接插队获取锁。</h4><h4 id="现在回到Semaphore类中，从构造方法中我们也可以看出，默认是非公平锁的实现。然后从构造方法中，传入一个permits参数。再看到acquire和release方法中，竞争的资源个数都是1，也就是可以看做是获取资源的线程数了。通过AQS的方式，控制获得资源的线程个数。"><a href="#现在回到Semaphore类中，从构造方法中我们也可以看出，默认是非公平锁的实现。然后从构造方法中，传入一个permits参数。再看到acquire和release方法中，竞争的资源个数都是1，也就是可以看做是获取资源的线程数了。通过AQS的方式，控制获得资源的线程个数。" class="headerlink" title="现在回到Semaphore类中，从构造方法中我们也可以看出，默认是非公平锁的实现。然后从构造方法中，传入一个permits参数。再看到acquire和release方法中，竞争的资源个数都是1，也就是可以看做是获取资源的线程数了。通过AQS的方式，控制获得资源的线程个数。"></a>现在回到Semaphore类中，从构造方法中我们也可以看出，默认是非公平锁的实现。然后从构造方法中，传入一个permits参数。再看到acquire和release方法中，竞争的资源个数都是1，也就是可以看做是获取资源的线程数了。通过AQS的方式，控制获得资源的线程个数。</h4>
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/ThreadLocal的一些看法/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -435,7 +584,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/ReentrantLock源码解析/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/java stream/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Swaggy Q">
@@ -455,7 +604,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/07/08/ReentrantLock源码解析/" class="post-title-link" itemprop="url">ReetrantLock源码详解</a>
+                <a href="/2019/07/08/java stream/" class="post-title-link" itemprop="url">java的stream用法</a>
               
             
           </h1>
@@ -480,7 +629,7 @@
                 
               
 
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:06:24" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:04:14" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
             </span>
           
 
@@ -524,200 +673,7 @@
       
         
           
-            <h1 id="ReentrantLock源码详解"><a href="#ReentrantLock源码详解" class="headerlink" title="ReentrantLock源码详解"></a>ReentrantLock源码详解</h1><h2 id="前文"><a href="#前文" class="headerlink" title="前文"></a>前文</h2><h4 id="之前的文章我们分析了AQS这个并发框架的逻辑，本文再对同在JUC包中的一种锁的具体实现进行一下分析。"><a href="#之前的文章我们分析了AQS这个并发框架的逻辑，本文再对同在JUC包中的一种锁的具体实现进行一下分析。" class="headerlink" title="之前的文章我们分析了AQS这个并发框架的逻辑，本文再对同在JUC包中的一种锁的具体实现进行一下分析。"></a>之前的文章我们分析了AQS这个并发框架的逻辑，本文再对同在JUC包中的一种锁的具体实现进行一下分析。</h4><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="ReentrantLock实现了Lock的接口，用于对代码中的并发控制，内部实现了一个AQS的子类实现。有公平和非公平两种模式。模式选择在初始化的时候就已经选定"><a href="#ReentrantLock实现了Lock的接口，用于对代码中的并发控制，内部实现了一个AQS的子类实现。有公平和非公平两种模式。模式选择在初始化的时候就已经选定" class="headerlink" title="ReentrantLock实现了Lock的接口，用于对代码中的并发控制，内部实现了一个AQS的子类实现。有公平和非公平两种模式。模式选择在初始化的时候就已经选定"></a>ReentrantLock实现了Lock的接口，用于对代码中的并发控制，内部实现了一个AQS的子类实现。有公平和非公平两种模式。模式选择在初始化的时候就已经选定</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public ReentrantLock() &#123;</span><br><span class="line">    sync = new NonfairSync();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public ReentrantLock(boolean fair) &#123;</span><br><span class="line">    sync = fair ? new FairSync() : new NonfairSync();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="可以看到默认实现是非公平的。所以源码的重点就是这两个类FairSync和NonfairSync。进一步可以看到，这两个类都是继承自内部类Sync。所以我们先看到这个统一的父类"><a href="#可以看到默认实现是非公平的。所以源码的重点就是这两个类FairSync和NonfairSync。进一步可以看到，这两个类都是继承自内部类Sync。所以我们先看到这个统一的父类" class="headerlink" title="可以看到默认实现是非公平的。所以源码的重点就是这两个类FairSync和NonfairSync。进一步可以看到，这两个类都是继承自内部类Sync。所以我们先看到这个统一的父类"></a>可以看到默认实现是非公平的。所以源码的重点就是这两个类FairSync和NonfairSync。进一步可以看到，这两个类都是继承自内部类Sync。所以我们先看到这个统一的父类</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">// 继承实现了AQS，使用了独占模式</span><br><span class="line">	abstract static class Sync extends AbstractQueuedSynchronizer &#123;</span><br><span class="line">       private static final long serialVersionUID = -5179523762034025860L;</span><br><span class="line"></span><br><span class="line">       abstract void lock();</span><br><span class="line">	// 这是非公平锁独有的抢占方法</span><br><span class="line">       final boolean nonfairTryAcquire(int acquires) &#123;</span><br><span class="line">           final Thread current = Thread.currentThread();</span><br><span class="line">           int c = getState();</span><br><span class="line">           // 如果当前资源为0，则代表可以开始抢占</span><br><span class="line">           if (c == 0) &#123;</span><br><span class="line">           	// 用CAS的方式将资源改成抢占后的值，一般都是+1</span><br><span class="line">               if (compareAndSetState(0, acquires)) &#123;</span><br><span class="line">               	// 表示当前线程已经独占了锁</span><br><span class="line">                   setExclusiveOwnerThread(current);</span><br><span class="line">                   return true;</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">           // 如果当前锁已经被抢占，而且正是被当前线程抢占，则可以直接再次进入锁</span><br><span class="line">           else if (current == getExclusiveOwnerThread()) &#123;</span><br><span class="line">               int nextc = c + acquires;</span><br><span class="line">               if (nextc &lt; 0) // overflow</span><br><span class="line">                   throw new Error(&quot;Maximum lock count exceeded&quot;);</span><br><span class="line">               setState(nextc);</span><br><span class="line">               return true;</span><br><span class="line">           &#125;</span><br><span class="line">           return false;</span><br><span class="line">       &#125;</span><br><span class="line">	// 继承实现了独占模式的释放资源的抽象方法</span><br><span class="line">       protected final boolean tryRelease(int releases) &#123;</span><br><span class="line">       	// 在ReentrantLock中，得到资源之后会将state + 1;释放之后 再 -1</span><br><span class="line">       	// 所以得到的c的值表示是否已经将所有加锁的资源释放</span><br><span class="line">       	// 例如 初始state = 0，此时 线程A第一次得到了锁，则state += 1，同理多次得到会多次+1</span><br><span class="line">       	// 然后依次释放，依次-1</span><br><span class="line">           int c = getState() - releases;</span><br><span class="line">           // 只有当前线程是抢占到资源的线程时才可以释放</span><br><span class="line">           if (Thread.currentThread() != getExclusiveOwnerThread())</span><br><span class="line">               throw new IllegalMonitorStateException();</span><br><span class="line">           // 标志是否完全可以供抢占</span><br><span class="line">           boolean free = false;</span><br><span class="line">           if (c == 0) &#123;</span><br><span class="line">           	// 如上分析，c==0，代表线程完全释放了资源，</span><br><span class="line">               free = true;</span><br><span class="line">             // 表示当前没有线程抢占了资源</span><br><span class="line">               setExclusiveOwnerThread(null);</span><br><span class="line">           &#125;</span><br><span class="line">           setState(c);</span><br><span class="line">           return free;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       protected final boolean isHeldExclusively() &#123;</span><br><span class="line">           // While we must in general read state before owner,</span><br><span class="line">           // we don&apos;t need to do so to check if current thread is owner</span><br><span class="line">           return getExclusiveOwnerThread() == Thread.currentThread();</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="在ReentrantLock的内部类Sync的实现就是如上。接下来看到他的子类，公平锁和非公平锁的实现。先看到非公平锁"><a href="#在ReentrantLock的内部类Sync的实现就是如上。接下来看到他的子类，公平锁和非公平锁的实现。先看到非公平锁" class="headerlink" title="在ReentrantLock的内部类Sync的实现就是如上。接下来看到他的子类，公平锁和非公平锁的实现。先看到非公平锁"></a>在ReentrantLock的内部类Sync的实现就是如上。接下来看到他的子类，公平锁和非公平锁的实现。先看到非公平锁</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">static final class NonfairSync extends Sync &#123;</span><br><span class="line">       private static final long serialVersionUID = 7316153563782823691L;</span><br><span class="line"></span><br><span class="line">       /**</span><br><span class="line">        * Performs lock.  Try immediate barge, backing up to normal</span><br><span class="line">        * acquire on failure.</span><br><span class="line">        */</span><br><span class="line">       // 抢占锁 </span><br><span class="line">       final void lock() &#123;</span><br><span class="line">       	// 直接先尝试用CAS的方式，改变资源的状态</span><br><span class="line">           if (compareAndSetState(0, 1))</span><br><span class="line">           	// 如果CAS成功，则看做已经得到了锁，直接将独占线程改为自己</span><br><span class="line">               setExclusiveOwnerThread(Thread.currentThread());</span><br><span class="line">           else</span><br><span class="line">           	// 如果CAS没有成功，则进入正常的AQS抢占流程</span><br><span class="line">               acquire(1);</span><br><span class="line">       &#125;</span><br><span class="line">	// 抽象方法直接使用了Sync中的非公平抢占实现</span><br><span class="line">       protected final boolean tryAcquire(int acquires) &#123;</span><br><span class="line">           return nonfairTryAcquire(acquires);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="再看看公平锁"><a href="#再看看公平锁" class="headerlink" title="再看看公平锁"></a>再看看公平锁</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">static final class FairSync extends Sync &#123;</span><br><span class="line">       private static final long serialVersionUID = -3000897897090466540L;</span><br><span class="line"></span><br><span class="line">       final void lock() &#123;</span><br><span class="line">       	// 直接进行AQS抢占流程</span><br><span class="line">           acquire(1);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       /**</span><br><span class="line">        * Fair version of tryAcquire.  Don&apos;t grant access unless</span><br><span class="line">        * recursive call or no waiters or is first.</span><br><span class="line">        */</span><br><span class="line">        // 抽象方法的实现，可以看到和非公平的方式基本相同</span><br><span class="line">       protected final boolean tryAcquire(int acquires) &#123;</span><br><span class="line">           final Thread current = Thread.currentThread();</span><br><span class="line">           int c = getState();</span><br><span class="line">           if (c == 0) &#123;</span><br><span class="line">           		// 只有多了一个这个判断</span><br><span class="line">           		// 就是判断在AQS的等待队列中，是否已经有其他节点在等待</span><br><span class="line">           		// 如果没有，则直接调用</span><br><span class="line">           		// 也就是公平锁代表不能插队</span><br><span class="line">               if (!hasQueuedPredecessors() &amp;&amp;</span><br><span class="line">                   compareAndSetState(0, acquires)) &#123;</span><br><span class="line">                   setExclusiveOwnerThread(current);</span><br><span class="line">                   return true;</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">           else if (current == getExclusiveOwnerThread()) &#123;</span><br><span class="line">               int nextc = c + acquires;</span><br><span class="line">               if (nextc &lt; 0)</span><br><span class="line">                   throw new Error(&quot;Maximum lock count exceeded&quot;);</span><br><span class="line">               setState(nextc);</span><br><span class="line">               return true;</span><br><span class="line">           &#125;</span><br><span class="line">           return false;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="所以看到公平锁和非公平锁的区别就体现在，在尝试获取资源的时候，是否可以插队获取。"><a href="#所以看到公平锁和非公平锁的区别就体现在，在尝试获取资源的时候，是否可以插队获取。" class="headerlink" title="所以看到公平锁和非公平锁的区别就体现在，在尝试获取资源的时候，是否可以插队获取。"></a>所以看到公平锁和非公平锁的区别就体现在，在尝试获取资源的时候，是否可以插队获取。</h4><h4 id="进一步看到这个tryAcquire方法，也就是公平锁和非公平锁具体差异的地方。假设此时在AQS内部已经有一个等待者队列吗。head节点释放了资源，应该去唤醒后续的节点开始竞争，假设此时非公平锁开始插队竞争，而且成功的话。那么在等待者队列中的节点将没有资源再Park了，就会一直不停的永真循环去尝试获取资源。"><a href="#进一步看到这个tryAcquire方法，也就是公平锁和非公平锁具体差异的地方。假设此时在AQS内部已经有一个等待者队列吗。head节点释放了资源，应该去唤醒后续的节点开始竞争，假设此时非公平锁开始插队竞争，而且成功的话。那么在等待者队列中的节点将没有资源再Park了，就会一直不停的永真循环去尝试获取资源。" class="headerlink" title="进一步看到这个tryAcquire方法，也就是公平锁和非公平锁具体差异的地方。假设此时在AQS内部已经有一个等待者队列吗。head节点释放了资源，应该去唤醒后续的节点开始竞争，假设此时非公平锁开始插队竞争，而且成功的话。那么在等待者队列中的节点将没有资源再Park了，就会一直不停的永真循环去尝试获取资源。"></a>进一步看到这个tryAcquire方法，也就是公平锁和非公平锁具体差异的地方。假设此时在AQS内部已经有一个等待者队列吗。head节点释放了资源，应该去唤醒后续的节点开始竞争，假设此时非公平锁开始插队竞争，而且成功的话。那么在等待者队列中的节点将没有资源再Park了，就会一直不停的永真循环去尝试获取资源。</h4>
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/聊一聊HashMap/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Swaggy Q">
-      <meta itemprop="description" content="拉塞尔FMVP了吗">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Dloading...">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/07/08/聊一聊HashMap/" class="post-title-link" itemprop="url">谈谈HashMap</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-
-          
-          
-          
-
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:09:41" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
-            </span>
-          
-
-          
-            
-
-            
-          
-
-          
-
-          
-            
-            
-          
-
-          
-          
-
-          
-
-          <br>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="谈谈HashMap"><a href="#谈谈HashMap" class="headerlink" title="谈谈HashMap"></a>谈谈HashMap</h1><h2 id="前文"><a href="#前文" class="headerlink" title="前文"></a>前文</h2><h4 id="最近正在复习jdk中的一些源码的细节。今天会讲讲Map接口下的HashMap。这个数据结构我们平时肯定也会经常用到，今天会基于jdk-1-8讲讲他底层是怎么实现的，并会对比jdk-1-7看看这两个版本做了什么修改"><a href="#最近正在复习jdk中的一些源码的细节。今天会讲讲Map接口下的HashMap。这个数据结构我们平时肯定也会经常用到，今天会基于jdk-1-8讲讲他底层是怎么实现的，并会对比jdk-1-7看看这两个版本做了什么修改" class="headerlink" title="最近正在复习jdk中的一些源码的细节。今天会讲讲Map接口下的HashMap。这个数据结构我们平时肯定也会经常用到，今天会基于jdk 1.8讲讲他底层是怎么实现的，并会对比jdk 1.7看看这两个版本做了什么修改"></a>最近正在复习jdk中的一些源码的细节。今天会讲讲Map接口下的HashMap。这个数据结构我们平时肯定也会经常用到，今天会基于jdk 1.8讲讲他底层是怎么实现的，并会对比jdk 1.7看看这两个版本做了什么修改</h4><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="按我们平时的使用习惯，一般就是直接new一个HashMap的实例对象，供之后的操作。那这个构造函数中，HashMap初始化了什么参数呢？"><a href="#按我们平时的使用习惯，一般就是直接new一个HashMap的实例对象，供之后的操作。那这个构造函数中，HashMap初始化了什么参数呢？" class="headerlink" title="按我们平时的使用习惯，一般就是直接new一个HashMap的实例对象，供之后的操作。那这个构造函数中，HashMap初始化了什么参数呢？"></a>按我们平时的使用习惯，一般就是直接new一个HashMap的实例对象，供之后的操作。那这个构造函数中，HashMap初始化了什么参数呢？</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">public HashMap(int initialCapacity, float loadFactor) &#123;</span><br><span class="line">     if (initialCapacity &lt; 0)</span><br><span class="line">         throw new IllegalArgumentException(&quot;Illegal initial capacity: &quot; +</span><br><span class="line">                                            initialCapacity);</span><br><span class="line">     if (initialCapacity &gt; MAXIMUM_CAPACITY)</span><br><span class="line">         initialCapacity = MAXIMUM_CAPACITY;</span><br><span class="line">     if (loadFactor &lt;= 0 || Float.isNaN(loadFactor))</span><br><span class="line">         throw new IllegalArgumentException(&quot;Illegal load factor: &quot; +</span><br><span class="line">                                            loadFactor);</span><br><span class="line">     this.loadFactor = loadFactor;</span><br><span class="line">     this.threshold = tableSizeFor(initialCapacity);</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> public HashMap(int initialCapacity) &#123;</span><br><span class="line">     this(initialCapacity, DEFAULT_LOAD_FACTOR);</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> public HashMap() &#123;</span><br><span class="line">     this.loadFactor = DEFAULT_LOAD_FACTOR; // all other fields defaulted</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="总共有三个不同实现的构造函数。可以看到第1，2种可以看做是同一种实现，因为2中也是调用了1。那我们看到1中也是对传入的参数进行了一些校验，重点看最后一句"><a href="#总共有三个不同实现的构造函数。可以看到第1，2种可以看做是同一种实现，因为2中也是调用了1。那我们看到1中也是对传入的参数进行了一些校验，重点看最后一句" class="headerlink" title="总共有三个不同实现的构造函数。可以看到第1，2种可以看做是同一种实现，因为2中也是调用了1。那我们看到1中也是对传入的参数进行了一些校验，重点看最后一句"></a>总共有三个不同实现的构造函数。可以看到第1，2种可以看做是同一种实现，因为2中也是调用了1。那我们看到1中也是对传入的参数进行了一些校验，重点看最后一句</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">this.threshold = tableSizeFor(initialCapacity);</span><br></pre></td></tr></table></figure>
-
-<h4 id="我们传入了初始容量大小的值，但是构造函数中并没有对应的接收，而只是用这个变量去计算了thershold，也就是我们之后会用到的容量阈值。tableSizeFor方法的逻辑就是，得到最小的大于入参的2的幂次方。-例如传入7会得到8，传入13会返回16。-这样就做了初始化的动作。注意前两个构造函数初始化了loadFactor，和threshold，而第三个构造方法中值初始化了loadFactor一个方法。这个细节在后面也是会被用到。"><a href="#我们传入了初始容量大小的值，但是构造函数中并没有对应的接收，而只是用这个变量去计算了thershold，也就是我们之后会用到的容量阈值。tableSizeFor方法的逻辑就是，得到最小的大于入参的2的幂次方。-例如传入7会得到8，传入13会返回16。-这样就做了初始化的动作。注意前两个构造函数初始化了loadFactor，和threshold，而第三个构造方法中值初始化了loadFactor一个方法。这个细节在后面也是会被用到。" class="headerlink" title="我们传入了初始容量大小的值，但是构造函数中并没有对应的接收，而只是用这个变量去计算了thershold，也就是我们之后会用到的容量阈值。tableSizeFor方法的逻辑就是，得到最小的大于入参的2的幂次方。 例如传入7会得到8，传入13会返回16。 这样就做了初始化的动作。注意前两个构造函数初始化了loadFactor，和threshold，而第三个构造方法中值初始化了loadFactor一个方法。这个细节在后面也是会被用到。"></a>我们传入了初始容量大小的值，但是构造函数中并没有对应的接收，而只是用这个变量去计算了thershold，也就是我们之后会用到的容量阈值。tableSizeFor方法的逻辑就是，得到最小的大于入参的2的幂次方。 例如传入7会得到8，传入13会返回16。 这样就做了初始化的动作。注意前两个构造函数初始化了loadFactor，和threshold，而第三个构造方法中值初始化了loadFactor一个方法。这个细节在后面也是会被用到。</h4><h4 id="既然是HashMap，那最大的作用应该是存储我们给定的键值对。那我们现在看看他是怎么高效存储数据。"><a href="#既然是HashMap，那最大的作用应该是存储我们给定的键值对。那我们现在看看他是怎么高效存储数据。" class="headerlink" title="既然是HashMap，那最大的作用应该是存储我们给定的键值对。那我们现在看看他是怎么高效存储数据。"></a>既然是HashMap，那最大的作用应该是存储我们给定的键值对。那我们现在看看他是怎么高效存储数据。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public V put(K key, V value) &#123;</span><br><span class="line">    return putVal(hash(key), key, value, false, true);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="这个put方法是常用的方法。可以看到里面真正起作用的是putVal方法，但是里面还有一个hash-方法"><a href="#这个put方法是常用的方法。可以看到里面真正起作用的是putVal方法，但是里面还有一个hash-方法" class="headerlink" title="这个put方法是常用的方法。可以看到里面真正起作用的是putVal方法，但是里面还有一个hash()方法"></a>这个put方法是常用的方法。可以看到里面真正起作用的是putVal方法，但是里面还有一个hash()方法</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">static final int hash(Object key) &#123;</span><br><span class="line">    int h;</span><br><span class="line">    return (key == null) ? 0 : (h = key.hashCode()) ^ (h &gt;&gt;&gt; 16);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="这个方法是通过给定的key得到散列算法算出的hash值。这个散列方法只有一行，就是得到key的hashcode，然后前16位-后16位。当然若key是null也是可以接受的，就是直接返回0号位。这个返回的值就是之后会用到的每个key属于哪个桶位的编号。我们接下去看putVal方法。"><a href="#这个方法是通过给定的key得到散列算法算出的hash值。这个散列方法只有一行，就是得到key的hashcode，然后前16位-后16位。当然若key是null也是可以接受的，就是直接返回0号位。这个返回的值就是之后会用到的每个key属于哪个桶位的编号。我们接下去看putVal方法。" class="headerlink" title="这个方法是通过给定的key得到散列算法算出的hash值。这个散列方法只有一行，就是得到key的hashcode，然后前16位 ^ 后16位。当然若key是null也是可以接受的，就是直接返回0号位。这个返回的值就是之后会用到的每个key属于哪个桶位的编号。我们接下去看putVal方法。"></a>这个方法是通过给定的key得到散列算法算出的hash值。这个散列方法只有一行，就是得到key的hashcode，然后前16位 ^ 后16位。当然若key是null也是可以接受的，就是直接返回0号位。这个返回的值就是之后会用到的每个key属于哪个桶位的编号。我们接下去看putVal方法。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">if ((tab = table) == null || (n = tab.length) == 0)</span><br><span class="line">           n = (tab = resize()).length;</span><br></pre></td></tr></table></figure>
-
-<h4 id="在方法的一开头就先判断底层的数组是否已经初始化成功，如果还没初始化，就需要通过resize方法进行初始化。这个方法通过名字就可以看出应该还有改变大小的作用，这个作用会在方法的最后提到。这边先只关注初始化数组的作用。方法内部的初始化部分这边先不说了，核心就是这一句。new了一个Node的数组。"><a href="#在方法的一开头就先判断底层的数组是否已经初始化成功，如果还没初始化，就需要通过resize方法进行初始化。这个方法通过名字就可以看出应该还有改变大小的作用，这个作用会在方法的最后提到。这边先只关注初始化数组的作用。方法内部的初始化部分这边先不说了，核心就是这一句。new了一个Node的数组。" class="headerlink" title="在方法的一开头就先判断底层的数组是否已经初始化成功，如果还没初始化，就需要通过resize方法进行初始化。这个方法通过名字就可以看出应该还有改变大小的作用，这个作用会在方法的最后提到。这边先只关注初始化数组的作用。方法内部的初始化部分这边先不说了，核心就是这一句。new了一个Node的数组。"></a>在方法的一开头就先判断底层的数组是否已经初始化成功，如果还没初始化，就需要通过resize方法进行初始化。这个方法通过名字就可以看出应该还有改变大小的作用，这个作用会在方法的最后提到。这边先只关注初始化数组的作用。方法内部的初始化部分这边先不说了，核心就是这一句。new了一个Node的数组。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Node&lt;K,V&gt;[] newTab = (Node&lt;K,V&gt;[])new Node[newCap];</span><br></pre></td></tr></table></figure>
-
-<h4 id="那这个Node是什么呢？这边插播一下Node的定义"><a href="#那这个Node是什么呢？这边插播一下Node的定义" class="headerlink" title="那这个Node是什么呢？这边插播一下Node的定义"></a>那这个Node是什么呢？这边插播一下Node的定义</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">static class Node&lt;K,V&gt; implements Map.Entry&lt;K,V&gt; &#123;</span><br><span class="line">    final int hash;</span><br><span class="line">    final K key;</span><br><span class="line">    V value;</span><br><span class="line">    Node&lt;K,V&gt; next;</span><br><span class="line"></span><br><span class="line">    Node(int hash, K key, V value, Node&lt;K,V&gt; next) &#123;</span><br><span class="line">        this.hash = hash;</span><br><span class="line">        this.key = key;</span><br><span class="line">        this.value = value;</span><br><span class="line">        this.next = next;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="可以看到里面除了一些hash，key，vaule之外，还有一个Node类型的引用，所以可以合理推断这个Node后面会组成一个链表。所以模糊的可以确认出，HashMap的底层是数组-链表的格式组成的。"><a href="#可以看到里面除了一些hash，key，vaule之外，还有一个Node类型的引用，所以可以合理推断这个Node后面会组成一个链表。所以模糊的可以确认出，HashMap的底层是数组-链表的格式组成的。" class="headerlink" title="可以看到里面除了一些hash，key，vaule之外，还有一个Node类型的引用，所以可以合理推断这个Node后面会组成一个链表。所以模糊的可以确认出，HashMap的底层是数组+链表的格式组成的。"></a>可以看到里面除了一些hash，key，vaule之外，还有一个Node类型的引用，所以可以合理推断这个Node后面会组成一个链表。所以模糊的可以确认出，HashMap的底层是数组+链表的格式组成的。</h4><h4 id="好了，回到正题。看回原来的putVal方法。接下来的代码格式就是一个if-else的逻辑。"><a href="#好了，回到正题。看回原来的putVal方法。接下来的代码格式就是一个if-else的逻辑。" class="headerlink" title="好了，回到正题。看回原来的putVal方法。接下来的代码格式就是一个if-else的逻辑。"></a>好了，回到正题。看回原来的putVal方法。接下来的代码格式就是一个if-else的逻辑。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// (n-1) &amp; hash 计算出给定的key应该保存在数组的第几个位置中</span><br><span class="line">// 如果数组的这个位置现在还是空的，则可以直接new一个Node作为第一个占位的节点，放在给定的位置</span><br><span class="line">   if ((p = tab[i = (n - 1) &amp; hash]) == null)</span><br><span class="line">          tab[i] = newNode(hash, key, value, null);</span><br><span class="line">      else &#123;</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="如果数组对应的位置已经有了元素，需要以原有的元素作为链表的头节点往后延伸。但是这里也有几种情况区分。"><a href="#如果数组对应的位置已经有了元素，需要以原有的元素作为链表的头节点往后延伸。但是这里也有几种情况区分。" class="headerlink" title="如果数组对应的位置已经有了元素，需要以原有的元素作为链表的头节点往后延伸。但是这里也有几种情况区分。"></a>如果数组对应的位置已经有了元素，需要以原有的元素作为链表的头节点往后延伸。但是这里也有几种情况区分。</h4><ul>
-<li><p>新加入的key已经在数组存在了，这个put操作就成为了用新数据更新旧数据的操作</p>
-  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">if (p.hash == hash &amp;&amp; ((k = p.key) == key || (key != null &amp;&amp; key.equals(k))))</span><br><span class="line">       e = p;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>在数组中存在的链表中继续添加新节点。注意当链表长度大于8的时候，链表会转化为红黑树。这也是jdk 1.8中新增的功能，避免了1.7版本中链表长度过长造成的查询效率低的问题。</p>
-</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">for (int binCount = 0; ; ++binCount) &#123;</span><br><span class="line">		// 到达了链表的末尾，则只需要将原尾节点的后继指针指向新加入的节点</span><br><span class="line">           if ((e = p.next) == null) &#123;</span><br><span class="line">               p.next = newNode(hash, key, value, null);</span><br><span class="line">               // 当链表长度大于7的时候，就会红黑树化</span><br><span class="line">               if (binCount &gt;= TREEIFY_THRESHOLD - 1) // -1 for 1st</span><br><span class="line">                   treeifyBin(tab, hash);</span><br><span class="line">               break;</span><br><span class="line">           &#125;</span><br><span class="line">           // 若在链表中已存在key</span><br><span class="line">           if (e.hash == hash &amp;&amp;</span><br><span class="line">               ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))</span><br><span class="line">               break;</span><br><span class="line">           p = e;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    // 将原数组中的对应位置的链表转为红黑树</span><br><span class="line">    final void treeifyBin(Node&lt;K,V&gt;[] tab, int hash) &#123;</span><br><span class="line">       int n, index; Node&lt;K,V&gt; e;</span><br><span class="line">       // 如果原有的数组的容量小于64，则直接去扩容</span><br><span class="line">       if (tab == null || (n = tab.length) &lt; MIN_TREEIFY_CAPACITY)</span><br><span class="line">           resize();</span><br><span class="line">       // 已达到转化的阈值，则开始转换</span><br><span class="line">       else if ((e = tab[index = (n - 1) &amp; hash]) != null) &#123;</span><br><span class="line">           TreeNode&lt;K,V&gt; hd = null, tl = null; // 树的首尾节点</span><br><span class="line">           do &#123;</span><br><span class="line">           	// 将原有的Node节点，转为TreeNode</span><br><span class="line">               TreeNode&lt;K,V&gt; p = replacementTreeNode(e, null);</span><br><span class="line">               if (tl == null)</span><br><span class="line">                   hd = p;</span><br><span class="line">               else &#123;</span><br><span class="line">                   p.prev = tl;</span><br><span class="line">                   tl.next = p;</span><br><span class="line">               &#125;</span><br><span class="line">               tl = p;</span><br><span class="line">           &#125; while ((e = e.next) != null);</span><br><span class="line">           if ((tab[index] = hd) != null)</span><br><span class="line">               hd.treeify(tab);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   TreeNode&lt;K,V&gt; replacementTreeNode(Node&lt;K,V&gt; p, Node&lt;K,V&gt; next) &#123;</span><br><span class="line">       return new TreeNode&lt;&gt;(p.hash, p.key, p.value, next);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-
-<ul>
-<li>在数组中的链表已经转为了红黑树</li>
-</ul>
-<h4 id="好了，经过上面的操作。我们就已经成功有序的将元素放在了HashMap的底层数组中，不管是以链表的形式，还是红黑树的方式。可以看到在putVal的最后，会判断一下size是否已经超过了之前设定的阈值。若超过需要调用resize方法进行重新散列。"><a href="#好了，经过上面的操作。我们就已经成功有序的将元素放在了HashMap的底层数组中，不管是以链表的形式，还是红黑树的方式。可以看到在putVal的最后，会判断一下size是否已经超过了之前设定的阈值。若超过需要调用resize方法进行重新散列。" class="headerlink" title="好了，经过上面的操作。我们就已经成功有序的将元素放在了HashMap的底层数组中，不管是以链表的形式，还是红黑树的方式。可以看到在putVal的最后，会判断一下size是否已经超过了之前设定的阈值。若超过需要调用resize方法进行重新散列。"></a>好了，经过上面的操作。我们就已经成功有序的将元素放在了HashMap的底层数组中，不管是以链表的形式，还是红黑树的方式。可以看到在putVal的最后，会判断一下size是否已经超过了之前设定的阈值。若超过需要调用resize方法进行重新散列。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">if (++size &gt; threshold)</span><br><span class="line">           resize();</span><br></pre></td></tr></table></figure>
-
-<h4 id="在重新散列方法中，这边就先跳过方法前面部分的一些判断方法，只需要知道若真需要扩容，则将原table的容量大小x2，就得到了新的容量大小。回想到我们之前初始化的时候，容量大小必须是2的幂次方，那么x2之后肯定也会是2的幂次方。为什么要取这个方式呢？我们可以从移动原有数组中的元素到新数组中得到答案。直接看到移动链表的部分"><a href="#在重新散列方法中，这边就先跳过方法前面部分的一些判断方法，只需要知道若真需要扩容，则将原table的容量大小x2，就得到了新的容量大小。回想到我们之前初始化的时候，容量大小必须是2的幂次方，那么x2之后肯定也会是2的幂次方。为什么要取这个方式呢？我们可以从移动原有数组中的元素到新数组中得到答案。直接看到移动链表的部分" class="headerlink" title="在重新散列方法中，这边就先跳过方法前面部分的一些判断方法，只需要知道若真需要扩容，则将原table的容量大小x2，就得到了新的容量大小。回想到我们之前初始化的时候，容量大小必须是2的幂次方，那么x2之后肯定也会是2的幂次方。为什么要取这个方式呢？我们可以从移动原有数组中的元素到新数组中得到答案。直接看到移动链表的部分"></a>在重新散列方法中，这边就先跳过方法前面部分的一些判断方法，只需要知道若真需要扩容，则将原table的容量大小x2，就得到了新的容量大小。回想到我们之前初始化的时候，容量大小必须是2的幂次方，那么x2之后肯定也会是2的幂次方。为什么要取这个方式呢？我们可以从移动原有数组中的元素到新数组中得到答案。直接看到移动链表的部分</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">else &#123; // preserve order</span><br><span class="line">	// 这边定义了两对首尾指针，作为之后移动的两个不同链表的首节点入口</span><br><span class="line">       Node&lt;K,V&gt; loHead = null, loTail = null;</span><br><span class="line">       Node&lt;K,V&gt; hiHead = null, hiTail = null;</span><br><span class="line">       Node&lt;K,V&gt; next;</span><br><span class="line">       do &#123;</span><br><span class="line">           next = e.next;</span><br><span class="line">           // 这边看到主要判断了e.hash &amp; oldCap为0还是1</span><br><span class="line">           if ((e.hash &amp; oldCap) == 0) &#123;</span><br><span class="line">               if (loTail == null)</span><br><span class="line">                   loHead = e;</span><br><span class="line">               else</span><br><span class="line">                   loTail.next = e;</span><br><span class="line">               loTail = e;</span><br><span class="line">           &#125;</span><br><span class="line">           else &#123;</span><br><span class="line">               if (hiTail == null)</span><br><span class="line">                   hiHead = e;</span><br><span class="line">               else</span><br><span class="line">                   hiTail.next = e;</span><br><span class="line">               hiTail = e;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125; while ((e = next) != null);</span><br><span class="line">       if (loTail != null) &#123;</span><br><span class="line">           loTail.next = null;</span><br><span class="line">           newTab[j] = loHead;</span><br><span class="line">       &#125;</span><br><span class="line">       if (hiTail != null) &#123;</span><br><span class="line">           hiTail.next = null;</span><br><span class="line">           newTab[j + oldCap] = hiHead;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="看代码里可以看到主要的逻辑判断是-e-hash-amp-oldCap-这个值为0还是为1。回想一下，在putVal方法的时候，是用hash-amp-n-1-的方法来确定元素所在的桶位值，假设n现在是16，此时来了两个hash分别为为15和31的key，那么通过计算"><a href="#看代码里可以看到主要的逻辑判断是-e-hash-amp-oldCap-这个值为0还是为1。回想一下，在putVal方法的时候，是用hash-amp-n-1-的方法来确定元素所在的桶位值，假设n现在是16，此时来了两个hash分别为为15和31的key，那么通过计算" class="headerlink" title="看代码里可以看到主要的逻辑判断是  (e.hash &amp; oldCap)这个值为0还是为1。回想一下，在putVal方法的时候，是用hash &amp; (n-1)的方法来确定元素所在的桶位值，假设n现在是16，此时来了两个hash分别为为15和31的key，那么通过计算"></a>看代码里可以看到主要的逻辑判断是  (e.hash &amp; oldCap)这个值为0还是为1。回想一下，在putVal方法的时候，是用hash &amp; (n-1)的方法来确定元素所在的桶位值，假设n现在是16，此时来了两个hash分别为为15和31的key，那么通过计算</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">01111 &amp; 1111  = 1111   也就是 (15 &amp; (16-1)) = 15，也就是桶位值为15</span><br><span class="line">  11111 &amp; 1111  = 1111   也就是 (31 &amp; (16-1)) = 15,桶位值同样是15</span><br></pre></td></tr></table></figure>
-
-<h4 id="通过上面的计算也可以看出，最左边的bit被忽略了，为0或者1都会被定位到同一个桶位中连接成一个链表。那么当此时容量大小扩大了两倍，那么结果就会变成"><a href="#通过上面的计算也可以看出，最左边的bit被忽略了，为0或者1都会被定位到同一个桶位中连接成一个链表。那么当此时容量大小扩大了两倍，那么结果就会变成" class="headerlink" title="通过上面的计算也可以看出，最左边的bit被忽略了，为0或者1都会被定位到同一个桶位中连接成一个链表。那么当此时容量大小扩大了两倍，那么结果就会变成"></a>通过上面的计算也可以看出，最左边的bit被忽略了，为0或者1都会被定位到同一个桶位中连接成一个链表。那么当此时容量大小扩大了两倍，那么结果就会变成</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">01111 &amp; 11111  = 01111   也就是 (15 &amp; (32-1)) = 15，也就是桶位值为15</span><br><span class="line">  11111 &amp; 11111  = 11111   也就是 (31 &amp; (32-1)) = 31,桶位值变成了31</span><br></pre></td></tr></table></figure>
-
-<h4 id="也就是最左边的bit值起到了作用，原本同一桶位的两个key可能会被分散在两个不同的桶位中，而根据最左边为0或者为1，就可以轻松的定位到新的桶位"><a href="#也就是最左边的bit值起到了作用，原本同一桶位的两个key可能会被分散在两个不同的桶位中，而根据最左边为0或者为1，就可以轻松的定位到新的桶位" class="headerlink" title="也就是最左边的bit值起到了作用，原本同一桶位的两个key可能会被分散在两个不同的桶位中，而根据最左边为0或者为1，就可以轻松的定位到新的桶位"></a>也就是最左边的bit值起到了作用，原本同一桶位的两个key可能会被分散在两个不同的桶位中，而根据最左边为0或者为1，就可以轻松的定位到新的桶位</h4><h4 id="那现在HashMap就已经完成了他一半的实名，接下来他需要做的就是可以让我们能方便的取出我们的数据。直接看到他的get方法"><a href="#那现在HashMap就已经完成了他一半的实名，接下来他需要做的就是可以让我们能方便的取出我们的数据。直接看到他的get方法" class="headerlink" title="那现在HashMap就已经完成了他一半的实名，接下来他需要做的就是可以让我们能方便的取出我们的数据。直接看到他的get方法"></a>那现在HashMap就已经完成了他一半的实名，接下来他需要做的就是可以让我们能方便的取出我们的数据。直接看到他的get方法</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public V get(Object key) &#123;</span><br><span class="line">    Node&lt;K,V&gt; e;</span><br><span class="line">    return (e = getNode(hash(key), key)) == null ? null : e.value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="可以看到，主要还是要得到key在底层数组中对应的Node。得到Node之后，想得到值就非常容易了。"><a href="#可以看到，主要还是要得到key在底层数组中对应的Node。得到Node之后，想得到值就非常容易了。" class="headerlink" title="可以看到，主要还是要得到key在底层数组中对应的Node。得到Node之后，想得到值就非常容易了。"></a>可以看到，主要还是要得到key在底层数组中对应的Node。得到Node之后，想得到值就非常容易了。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">final Node&lt;K,V&gt; getNode(int hash, Object key) &#123;</span><br><span class="line">    Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; first, e; int n; K k;</span><br><span class="line">    if ((tab = table) != null &amp;&amp; (n = tab.length) &gt; 0 &amp;&amp;</span><br><span class="line">        (first = tab[(n - 1) &amp; hash]) != null) &#123;</span><br><span class="line">        // 找到底层数组对应的桶位的第一个节点，直接查看是否满足要求，是的话可以直接返回</span><br><span class="line">        if (first.hash == hash &amp;&amp; // always check first node</span><br><span class="line">            ((k = first.key) == key || (key != null &amp;&amp; key.equals(k))))</span><br><span class="line">            return first;</span><br><span class="line">        if ((e = first.next) != null) &#123;</span><br><span class="line">        	// 若节点已经是红黑树的一部分，则用查找红黑树的方式得到想要的节点</span><br><span class="line">            if (first instanceof TreeNode)</span><br><span class="line">                return ((TreeNode&lt;K,V&gt;)first).getTreeNode(hash, key);</span><br><span class="line">            // 若是链表，则可以直接按照链表来查找</span><br><span class="line">            do &#123;</span><br><span class="line">                if (e.hash == hash &amp;&amp;</span><br><span class="line">                    ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))</span><br><span class="line">                    return e;</span><br><span class="line">            &#125; while ((e = e.next) != null);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+            <h1 id="java-stream"><a href="#java-stream" class="headerlink" title="java stream"></a>java stream</h1><p><img src="img/stream.jpeg" alt="stream"></p>
 
           
         
@@ -774,7 +730,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/java动态代理机制/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/虚拟机栈/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Swaggy Q">
@@ -794,7 +750,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/07/08/java动态代理机制/" class="post-title-link" itemprop="url">java的动态代理机制</a>
+                <a href="/2019/07/08/虚拟机栈/" class="post-title-link" itemprop="url">虚拟机栈</a>
               
             
           </h1>
@@ -819,7 +775,7 @@
                 
               
 
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:06:41" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:42:25" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
             </span>
           
 
@@ -863,10 +819,7 @@
       
         
           
-            <h1 id="java动态代理机制"><a href="#java动态代理机制" class="headerlink" title="java动态代理机制"></a>java动态代理机制</h1><p>Java中代理的实现一般分为三种：JDK静态代理、JDK动态代理以及CGLIB动态代理。在Spring的AOP实现中，主要应用了JDK动态代理以及CGLIB动态代理</p>
-<p>代理一般实现的模式为JDK静态代理：创建一个接口，然后创建被代理的类实现该接口并且实现该接口中的抽象方法。之后再创建一个代理类，同时使其也实现这个接口。在代理类中持有一个被代理对象的引用，而后在代理类方法中调用该对象的方法。</p>
-<p>静态代理: 实现一个代理类，然后持有被代理类的引用。则可以在调用前后实现附加方法。但是这个方法非常不好，对多个类会很繁琐。</p>
-<p>JDK静态代理是通过直接编码创建的，而JDK动态代理是利用反射机制在运行时创建代理类的。<br>JDK动态代理，注意看到Proxy类。已经提供了测试类，可以断点跟进去。</p>
+            <h1 id="虚拟机栈"><a href="#虚拟机栈" class="headerlink" title="虚拟机栈"></a>虚拟机栈</h1><p>虚拟机栈由栈帧组成。什么是栈帧呢？栈帧可以理解为一个方法的运行空间。它主要由两部分构成，一部分是局部变量表，方法中定义的局部变量以及方法的参数就存放在这张表中；另一部分是操作数栈，用来存放操作数。</p>
 
           
         
@@ -1269,7 +1222,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/java的自动装箱和自动拆箱/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/java动态代理机制/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Swaggy Q">
@@ -1289,7 +1242,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/07/08/java的自动装箱和自动拆箱/" class="post-title-link" itemprop="url">java的自动装箱和自动拆箱</a>
+                <a href="/2019/07/08/java动态代理机制/" class="post-title-link" itemprop="url">java的动态代理机制</a>
               
             
           </h1>
@@ -1314,7 +1267,7 @@
                 
               
 
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:05:33" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:06:41" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
             </span>
           
 
@@ -1358,11 +1311,11 @@
       
         
           
-            <h1 id="java的自动装箱和自动拆箱"><a href="#java的自动装箱和自动拆箱" class="headerlink" title="java的自动装箱和自动拆箱"></a>java的自动装箱和自动拆箱</h1><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="今天看到一个很有意思的事情，也就是关于在java中的基础类型的自动装箱和自动拆箱的事情。之前可能就是一直在用，但是也不知道为什么可以这样。例如，下面一个最简单的例子"><a href="#今天看到一个很有意思的事情，也就是关于在java中的基础类型的自动装箱和自动拆箱的事情。之前可能就是一直在用，但是也不知道为什么可以这样。例如，下面一个最简单的例子" class="headerlink" title="今天看到一个很有意思的事情，也就是关于在java中的基础类型的自动装箱和自动拆箱的事情。之前可能就是一直在用，但是也不知道为什么可以这样。例如，下面一个最简单的例子"></a>今天看到一个很有意思的事情，也就是关于在java中的基础类型的自动装箱和自动拆箱的事情。之前可能就是一直在用，但是也不知道为什么可以这样。例如，下面一个最简单的例子</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">       Integer a = 10;</span><br><span class="line">       int b = a;</span><br><span class="line">       System.out.println(a);</span><br><span class="line">       System.out.println(b);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+            <h1 id="java动态代理机制"><a href="#java动态代理机制" class="headerlink" title="java动态代理机制"></a>java动态代理机制</h1><p>Java中代理的实现一般分为三种：JDK静态代理、JDK动态代理以及CGLIB动态代理。在Spring的AOP实现中，主要应用了JDK动态代理以及CGLIB动态代理</p>
+<p>代理一般实现的模式为JDK静态代理：创建一个接口，然后创建被代理的类实现该接口并且实现该接口中的抽象方法。之后再创建一个代理类，同时使其也实现这个接口。在代理类中持有一个被代理对象的引用，而后在代理类方法中调用该对象的方法。</p>
+<p>静态代理: 实现一个代理类，然后持有被代理类的引用。则可以在调用前后实现附加方法。但是这个方法非常不好，对多个类会很繁琐。</p>
+<p>JDK静态代理是通过直接编码创建的，而JDK动态代理是利用反射机制在运行时创建代理类的。<br>JDK动态代理，注意看到Proxy类。已经提供了测试类，可以断点跟进去。</p>
 
-<h4 id="平时可能非常理所当然的就这么用了。但是如果问你，这个为什么可以这样子呢？或者给你出这么一道题目"><a href="#平时可能非常理所当然的就这么用了。但是如果问你，这个为什么可以这样子呢？或者给你出这么一道题目" class="headerlink" title="平时可能非常理所当然的就这么用了。但是如果问你，这个为什么可以这样子呢？或者给你出这么一道题目"></a>平时可能非常理所当然的就这么用了。但是如果问你，这个为什么可以这样子呢？或者给你出这么一道题目</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">       Integer x1 = 10;</span><br><span class="line">       Integer x2 = 10;</span><br><span class="line">       Integer x3 = 200;</span><br><span class="line">       Integer x4 = 200;</span><br><span class="line">       System.out.println(x1 == x2); </span><br><span class="line">       System.out.println(x3 == x4);</span><br><span class="line"></span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="这两个的返回值按照常理来说都是一样的情况，应该要么都是false或者都是true。但是不是的，返回值第一个是true，第二个是false。"><a href="#这两个的返回值按照常理来说都是一样的情况，应该要么都是false或者都是true。但是不是的，返回值第一个是true，第二个是false。" class="headerlink" title="这两个的返回值按照常理来说都是一样的情况，应该要么都是false或者都是true。但是不是的，返回值第一个是true，第二个是false。"></a>这两个的返回值按照常理来说都是一样的情况，应该要么都是false或者都是true。但是不是的，返回值第一个是true，第二个是false。</h4>
           
         
       
@@ -1716,7 +1669,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/批量再偏向机制/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/堆外内存/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Swaggy Q">
@@ -1736,7 +1689,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/07/08/批量再偏向机制/" class="post-title-link" itemprop="url">偏向锁的批量再偏向机制</a>
+                <a href="/2019/07/08/堆外内存/" class="post-title-link" itemprop="url">堆外内存</a>
               
             
           </h1>
@@ -1761,7 +1714,7 @@
                 
               
 
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:09:25" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:10:13" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
             </span>
           
 
@@ -1805,14 +1758,41 @@
       
         
           
-            <h1 id="批量再偏向机制"><a href="#批量再偏向机制" class="headerlink" title="批量再偏向机制"></a>批量再偏向机制</h1><p>该机制的主要工作原理如下：</p>
-<p>引入一个概念 epoch, 其本质是一个时间戳 ， 代表了偏向锁的有效性<br>从前文描述的对象头结构中可以看到， epoch 存储在可偏向对象的 MarkWord 中。<br>除了对象中的 epoch, 对象所属的类 class 信息中， 也会保存一个 epoch 值</p>
-<p>每当遇到一个全局安全点时， 如果要对 class C 进行批量再偏向， 则首先对 class C 中保存的 epoch 进行增加操作， 得到一个新的 epoch_new</p>
-<p>然后扫描所有持有 class C 实例的线程栈， 根据线程栈的信息判断出该线程是否锁定了该对象， 仅将 epoch_new 的值赋给被锁定的对象中。</p>
-<p>退出安全点后， 当有线程需要尝试获取偏向锁时， 直接检查 class C 中存储的 epoch 值是否与目标对象中存储的 epoch 值相等， 如果不相等， 则说明该对象的偏向锁已经失效了， 可以直接通过 CAS 操作尝试再次将该对象再次偏向于请求获得锁的线程。</p>
-<p>直接看到jvm源码里，做个记录</p>
-<p>1: 得到当前的系统时间<br>2: 对kclass的对象头中设置当前时间<br>3: 如果需要批量再偏向<br>    3.1 如果klass的对象头中有偏向记录</p>
-<p>查看jvm源码的monitorenter<br>先查看当前线程的</p>
+            <h1 id="堆外内存"><a href="#堆外内存" class="headerlink" title="堆外内存"></a>堆外内存</h1><p>和堆内内存相对应，堆外内存就是把内存对象分配在Java虚拟机的堆以外的内存，这些内存直接受操作系统管理（而不是虚拟机），这样做的结果就是能够在一定程度上减少垃圾回收对应用程序造成的影响。</p>
+<p>二、使用堆外内存的优点</p>
+<p>1、减少了垃圾回收<br>因为垃圾回收会暂停其他的工作。<br>2、加快了复制的速度<br>堆内在flush到远程时，会先复制到直接内存（非堆内存），然后在发送；而堆外内存相当于省略掉了这个工作。<br>同样任何一个事物使用起来有优点就会有缺点，堆外内存的缺点就是内存难以控制，使用了堆外内存就间接失去了JVM管理内存的可行性，改由自己来管理，当发生内存溢出时排查起来非常困难</p>
+<p>-XX:MaxDirectMemorySize来指定最大的堆外内存大小<br>如果没设置-XX:MaxDirectMemorySize，则默认与-Xmx参数值相同</p>
+<p>2、System.gc的作用有哪些<br>说起堆外内存免不了要提及System.gc方法，下面就是使用了System.gc的作用是什么？</p>
+<p>做一次full gc<br>执行后会暂停整个进程。<br>System.gc我们可以禁掉，使用-XX:+DisableExplicitGC，<br>其实一般在cms gc下我们通过-XX:+ExplicitGCInvokesConcurrent也可以做稍微高效一点的gc，也就是并行gc。<br>最常见的场景是RMI/NIO下的堆外内存分配等</p>
+<p>DirectByteBuffer<br>JDK中使用DirectByteBuffer对象来表示堆外内存，每个DirectByteBuffer对象在初始化时，都会创建一个对用的Cleaner对象，这个Cleaner对象会在合适的时候执行unsafe.freeMemory(address)，从而回收这块堆外内存。</p>
+<p>用堆外内存和UNSAFE的内存泄漏问题，可以用下面这个例子解释一下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">// -verbose:gc -XX:+PrintGCDetails -XX:MaxDirectMemorySize=40M</span><br><span class="line">public static void main(String[] args) throws InterruptedException&#123;</span><br><span class="line">       while (true)</span><br><span class="line">       &#123;</span><br><span class="line">           ByteBuffer buffer = ByteBuffer.allocateDirect(10 * 1024 * 1024);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="用上面这一段代码不停的进行堆外内存的分配的时候，是不会造成OOM的，而是会非常频繁的产生GC"><a href="#用上面这一段代码不停的进行堆外内存的分配的时候，是不会造成OOM的，而是会非常频繁的产生GC" class="headerlink" title="用上面这一段代码不停的进行堆外内存的分配的时候，是不会造成OOM的，而是会非常频繁的产生GC"></a>用上面这一段代码不停的进行堆外内存的分配的时候，是不会造成OOM的，而是会非常频繁的产生GC</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) throws Exception&#123;</span><br><span class="line">	Unsafe unsafe = GetUsafeInstance.getUnsafeInstance();</span><br><span class="line"></span><br><span class="line">	while (true)</span><br><span class="line">	&#123;</span><br><span class="line">		long pointer = unsafe.allocateMemory(1024 * 1024 * 20);</span><br><span class="line">		System.out.println(unsafe.getByte(pointer + 1));</span><br><span class="line"></span><br><span class="line">		// 如果不释放内存,运行一段时间会报错java.lang.OutOfMemoryError</span><br><span class="line">		// unsafe.freeMemory(pointer);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="而如果是用上面这一段代码的话，很快就会OOM异常。这是因为在jvm分配对象的时候，会有内置的垃圾回收器不停的帮我们回收不可用的对象，但是堆外内存显然是不受这个控制的。用UNSAFE分配内存，其实底层调用的还是C语言的malloc命令，我们知道在C语言中，对象必须都是由程序自主的释放的，也就是用free。所以如果UNSAFE使用不当，很容易会造成内存泄漏问题"><a href="#而如果是用上面这一段代码的话，很快就会OOM异常。这是因为在jvm分配对象的时候，会有内置的垃圾回收器不停的帮我们回收不可用的对象，但是堆外内存显然是不受这个控制的。用UNSAFE分配内存，其实底层调用的还是C语言的malloc命令，我们知道在C语言中，对象必须都是由程序自主的释放的，也就是用free。所以如果UNSAFE使用不当，很容易会造成内存泄漏问题" class="headerlink" title="而如果是用上面这一段代码的话，很快就会OOM异常。这是因为在jvm分配对象的时候，会有内置的垃圾回收器不停的帮我们回收不可用的对象，但是堆外内存显然是不受这个控制的。用UNSAFE分配内存，其实底层调用的还是C语言的malloc命令，我们知道在C语言中，对象必须都是由程序自主的释放的，也就是用free。所以如果UNSAFE使用不当，很容易会造成内存泄漏问题"></a>而如果是用上面这一段代码的话，很快就会OOM异常。这是因为在jvm分配对象的时候，会有内置的垃圾回收器不停的帮我们回收不可用的对象，但是堆外内存显然是不受这个控制的。用UNSAFE分配内存，其实底层调用的还是C语言的malloc命令，我们知道在C语言中，对象必须都是由程序自主的释放的，也就是用free。所以如果UNSAFE使用不当，很容易会造成内存泄漏问题</h4><h4 id="再说回ByteBuffer类，为什么这个不会有问题呢？这个是因为在类的包装中，不但考虑到了malloc，还会在合适的时候进行free。这也就是我们接下来想要讨论的，java是怎么监控到堆外内存的生命周期呢？"><a href="#再说回ByteBuffer类，为什么这个不会有问题呢？这个是因为在类的包装中，不但考虑到了malloc，还会在合适的时候进行free。这也就是我们接下来想要讨论的，java是怎么监控到堆外内存的生命周期呢？" class="headerlink" title="再说回ByteBuffer类，为什么这个不会有问题呢？这个是因为在类的包装中，不但考虑到了malloc，还会在合适的时候进行free。这也就是我们接下来想要讨论的，java是怎么监控到堆外内存的生命周期呢？"></a>再说回ByteBuffer类，为什么这个不会有问题呢？这个是因为在类的包装中，不但考虑到了malloc，还会在合适的时候进行free。这也就是我们接下来想要讨论的，java是怎么监控到堆外内存的生命周期呢？</h4><p>DirectByteBuffer构造方法中还做了挺多事情的，总的来说分为几个步骤：</p>
+<p>预分配内存<br>分配内存<br>将刚分配的内存空间初始化为0<br>创建一个cleaner对象，Cleaner对象的作用是当DirectByteBuffer对象被回收时，释放其对应的堆外内存</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cleaner = Cleaner.create(this, new Deallocator(base, size, cap));</span><br></pre></td></tr></table></figure>
+
+<p>cleaner 是一个虚引用类型，然后内部还会有一个Runnable类型的对象，在释放内存的时候被调用<br>Cleaner.create被调用的时候，会在内部组成一个cleaner的链路</p>
+<p>简单的说，就是当字段referent(也就是DirectByteBuffer对象)被回收时，会调用到Cleaner#clean方法，最终会调用到Deallocator#run进行堆外内存的回收。</p>
+<p>Cleaner是虚引用在JDK中的一个典型应用场景。</p>
+<p>在创建一个新的DirecByteBuffer时，会先确认有没有足够的内存，如果没有的话，会通过一些手段回收一部分堆外内存，直到可用内存大于需要分配的内存。具体步骤如下：</p>
+<p>如果可用堆外内存足够，则直接返回<br>调用tryHandlePendingReference方法回收已经变成垃圾的DirectByteBuffer对象对应的堆外内存，直到可用内存足够，或目前没有垃圾DirectByteBuffer对象<br>触发一次full gc，其主要目的是为了防止’冰山现象‘：一个DirectByteBuffer对象本身占用的内存很小，但是它可能引用了一块很大的堆外内存。如果DirectByteBuffer对象进入了老年代之后变成了垃圾，因为老年代GC一直没有触发，导致这块堆外内存也一直没有被回收。需要注意的是如果使用参数-XX:+DisableExplicitGC，那System.gc();是无效的<br>重复1，2步骤的流程，直到可用内存大于需要分配的内存<br>如果超出指定次数还没有回收到足够内存，则OOM</p>
+<p>tryHandlePendingReference最终调用到的是Reference#tryHandlePending</p>
+<p>可以看到，tryHandlePendingReference的最终效果就是：如果有垃圾DirectBytebuffer对象，则调用对应的Cleaner#clean方法进行回收。clean方法在上面已经分析过了。</p>
+<p><img src="img/reference.jpeg" alt="引用被回收的全过程"></p>
+<p>refs_lists中存放了本次GC发现的某种引用类型（虚引用、软引用、弱引用等），而process_discovered_reflist方法的作用就是将不需要被回收的对象从refs_lists移除掉，refs_lists最后剩下的元素全是需要被回收的元素，最后会将其第一个元素赋值给上文提到过的Reference.java#pending字段。<br>判断是不是需要回收是由一个ReferencePolicy决定的，有四种实现方式<br>NeverClearPolicy，AlwaysClearPolicy，LRUCurrentHeapPolicy，LRUMaxHeapPolicy</p>
+<p>软引用默认使用LRUCurrentHeapPolicy</p>
+<p>参考图中的得到DiscoveredList后，会再进行一步将不需要被回收的对象从refs_lists移除的操作。上面说过，如果是软引用，会有policy来进行判断是否被回收。如果是虚引用，或者是弱引用，则不会有这个policy。</p>
+<p>强引用： 如果有指向，永远不会被回收<br>软引用：跟堆内存和get方法被调用的时间有关，在jvm的gc过程中会调用LRUCurrentHeapPolicy来进行判断<br>弱引用：不存在policy判断，只要进行内存回收，都会直接被回收<br>虚引用：指向的对象永远不会被回收，虚引用的get方法也不会得到相应的对象，可以传入一个队列，只是作为当对象被回收后的指示。</p>
+<blockquote>
+<p>2.网上对于虚引用的介绍是：形同虚设，与其他几种引用都不同，虚引用并不会决定对象的生命周期。主要用来跟踪对象被垃圾回收器回收的活动。真的是这样吗？</p>
+</blockquote>
+<blockquote>
+<p>严格的说，虚引用是会影响对象生命周期的，如果不做任何处理，只要虚引用不被回收，那其引用的对象永远不会被回收。所以一般来说，从ReferenceQueue中获得PhantomReference对象后，如果PhantomReference对象不会被回收的话（比如被其他GC ROOT可达的对象引用），需要调用clear方法解除PhantomReference和其引用对象的引用关系。</p>
+</blockquote>
+<p>怎么理解？</p>
 
           
         
