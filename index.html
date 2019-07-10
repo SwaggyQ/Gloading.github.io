@@ -290,7 +290,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/java的自动装箱和自动拆箱/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/java中的对象头/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Swaggy Q">
@@ -310,7 +310,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/07/08/java的自动装箱和自动拆箱/" class="post-title-link" itemprop="url">java的自动装箱和自动拆箱</a>
+                <a href="/2019/07/08/java中的对象头/" class="post-title-link" itemprop="url">java中的对象头</a>
               
             
           </h1>
@@ -335,7 +335,7 @@
                 
               
 
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:05:33" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:41:20" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
             </span>
           
 
@@ -379,11 +379,13 @@
       
         
           
-            <h1 id="java的自动装箱和自动拆箱"><a href="#java的自动装箱和自动拆箱" class="headerlink" title="java的自动装箱和自动拆箱"></a>java的自动装箱和自动拆箱</h1><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="今天看到一个很有意思的事情，也就是关于在java中的基础类型的自动装箱和自动拆箱的事情。之前可能就是一直在用，但是也不知道为什么可以这样。例如，下面一个最简单的例子"><a href="#今天看到一个很有意思的事情，也就是关于在java中的基础类型的自动装箱和自动拆箱的事情。之前可能就是一直在用，但是也不知道为什么可以这样。例如，下面一个最简单的例子" class="headerlink" title="今天看到一个很有意思的事情，也就是关于在java中的基础类型的自动装箱和自动拆箱的事情。之前可能就是一直在用，但是也不知道为什么可以这样。例如，下面一个最简单的例子"></a>今天看到一个很有意思的事情，也就是关于在java中的基础类型的自动装箱和自动拆箱的事情。之前可能就是一直在用，但是也不知道为什么可以这样。例如，下面一个最简单的例子</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">       Integer a = 10;</span><br><span class="line">       int b = a;</span><br><span class="line">       System.out.println(a);</span><br><span class="line">       System.out.println(b);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+            <h1 id="java中的对象头"><a href="#java中的对象头" class="headerlink" title="java中的对象头"></a>java中的对象头</h1><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="我们知道每个对象在实例化分配的时候，都是分配在堆内存中的。每个对象在堆中的内存区间存储的时候，都是分为三块地方"><a href="#我们知道每个对象在实例化分配的时候，都是分配在堆内存中的。每个对象在堆中的内存区间存储的时候，都是分为三块地方" class="headerlink" title="我们知道每个对象在实例化分配的时候，都是分配在堆内存中的。每个对象在堆中的内存区间存储的时候，都是分为三块地方"></a>我们知道每个对象在实例化分配的时候，都是分配在堆内存中的。每个对象在堆中的内存区间存储的时候，都是分为三块地方</h4><ul>
+<li>对象头</li>
+<li>实例属性</li>
+<li>填充属性</li>
+</ul>
+<h4 id="今天我们就要去探究一下，在对象头中存储的东西有什么。"><a href="#今天我们就要去探究一下，在对象头中存储的东西有什么。" class="headerlink" title="今天我们就要去探究一下，在对象头中存储的东西有什么。"></a>今天我们就要去探究一下，在对象头中存储的东西有什么。</h4><h4 id="在堆中的对象头中，主要是由两个部分组成的，那就是markword和klass-point。其中klass-point是指向实例对象的类对象的指针，jvm就是通过这个指针来确定该实例是属于哪个类的。而mark-word是为了标识一些在运行时的一些动态数据，如果是数组对象，则对象头占3个字宽，因为还需要存储一份数组的长度，如果是非数组对象，则占2个字宽。具体内容如下图所示"><a href="#在堆中的对象头中，主要是由两个部分组成的，那就是markword和klass-point。其中klass-point是指向实例对象的类对象的指针，jvm就是通过这个指针来确定该实例是属于哪个类的。而mark-word是为了标识一些在运行时的一些动态数据，如果是数组对象，则对象头占3个字宽，因为还需要存储一份数组的长度，如果是非数组对象，则占2个字宽。具体内容如下图所示" class="headerlink" title="在堆中的对象头中，主要是由两个部分组成的，那就是markword和klass point。其中klass point是指向实例对象的类对象的指针，jvm就是通过这个指针来确定该实例是属于哪个类的。而mark word是为了标识一些在运行时的一些动态数据，如果是数组对象，则对象头占3个字宽，因为还需要存储一份数组的长度，如果是非数组对象，则占2个字宽。具体内容如下图所示"></a>在堆中的对象头中，主要是由两个部分组成的，那就是markword和klass point。其中klass point是指向实例对象的类对象的指针，jvm就是通过这个指针来确定该实例是属于哪个类的。而mark word是为了标识一些在运行时的一些动态数据，如果是数组对象，则对象头占3个字宽，因为还需要存储一份数组的长度，如果是非数组对象，则占2个字宽。具体内容如下图所示</h4><p>32位虚拟机对象头<br><img src="img/32-bit.png" alt="32位虚拟机对象头"><br>64位虚拟机对象头<br><img src="img/64-bit.png" alt="64位虚拟机对象头"></p>
 
-<h4 id="平时可能非常理所当然的就这么用了。但是如果问你，这个为什么可以这样子呢？或者给你出这么一道题目"><a href="#平时可能非常理所当然的就这么用了。但是如果问你，这个为什么可以这样子呢？或者给你出这么一道题目" class="headerlink" title="平时可能非常理所当然的就这么用了。但是如果问你，这个为什么可以这样子呢？或者给你出这么一道题目"></a>平时可能非常理所当然的就这么用了。但是如果问你，这个为什么可以这样子呢？或者给你出这么一道题目</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">       Integer x1 = 10;</span><br><span class="line">       Integer x2 = 10;</span><br><span class="line">       Integer x3 = 200;</span><br><span class="line">       Integer x4 = 200;</span><br><span class="line">       System.out.println(x1 == x2); </span><br><span class="line">       System.out.println(x3 == x4);</span><br><span class="line"></span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="这两个的返回值按照常理来说都是一样的情况，应该要么都是false或者都是true。但是不是的，返回值第一个是true，第二个是false。"><a href="#这两个的返回值按照常理来说都是一样的情况，应该要么都是false或者都是true。但是不是的，返回值第一个是true，第二个是false。" class="headerlink" title="这两个的返回值按照常理来说都是一样的情况，应该要么都是false或者都是true。但是不是的，返回值第一个是true，第二个是false。"></a>这两个的返回值按照常理来说都是一样的情况，应该要么都是false或者都是true。但是不是的，返回值第一个是true，第二个是false。</h4>
           
         
       
@@ -439,7 +441,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/ArrayBlockingQueue/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/AQS详解/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Swaggy Q">
@@ -459,7 +461,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/07/08/ArrayBlockingQueue/" class="post-title-link" itemprop="url">ArrayBlockQueue源码详解</a>
+                <a href="/2019/07/08/AQS详解/" class="post-title-link" itemprop="url">AQS详解</a>
               
             
           </h1>
@@ -484,7 +486,7 @@
                 
               
 
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:05:17" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:49:48" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
             </span>
           
 
@@ -528,8 +530,56 @@
       
         
           
-            <h1 id="ArrayBlockingQueue"><a href="#ArrayBlockingQueue" class="headerlink" title="ArrayBlockingQueue"></a>ArrayBlockingQueue</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h4 id="本文讲一下ArrayBlockingQueue-下文简称ABQ-的一些原理，整理一下之前有点混乱的几个方法，具体ABQ是什么我就不详细说了。"><a href="#本文讲一下ArrayBlockingQueue-下文简称ABQ-的一些原理，整理一下之前有点混乱的几个方法，具体ABQ是什么我就不详细说了。" class="headerlink" title="本文讲一下ArrayBlockingQueue(下文简称ABQ)的一些原理，整理一下之前有点混乱的几个方法，具体ABQ是什么我就不详细说了。"></a>本文讲一下ArrayBlockingQueue(下文简称ABQ)的一些原理，整理一下之前有点混乱的几个方法，具体ABQ是什么我就不详细说了。</h4><h2 id="构造"><a href="#构造" class="headerlink" title="构造"></a>构造</h2><h4 id="照例先看看怎么创建这个我们需要的这个数据结构。有三个构造函数，简单看一下可以看到重点的是ArrayBlockingQueue-int-boolean-方法。其他两个都是之后调用这个方法。所以直接看看这个方法"><a href="#照例先看看怎么创建这个我们需要的这个数据结构。有三个构造函数，简单看一下可以看到重点的是ArrayBlockingQueue-int-boolean-方法。其他两个都是之后调用这个方法。所以直接看看这个方法" class="headerlink" title="照例先看看怎么创建这个我们需要的这个数据结构。有三个构造函数，简单看一下可以看到重点的是ArrayBlockingQueue(int , boolean)方法。其他两个都是之后调用这个方法。所以直接看看这个方法"></a>照例先看看怎么创建这个我们需要的这个数据结构。有三个构造函数，简单看一下可以看到重点的是ArrayBlockingQueue(int , boolean)方法。其他两个都是之后调用这个方法。所以直接看看这个方法</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public ArrayBlockingQueue(int capacity, boolean fair) &#123;</span><br><span class="line">	// 校验容量不能是负数</span><br><span class="line">    if (capacity &lt;= 0)</span><br><span class="line">        throw new IllegalArgumentException();</span><br><span class="line">    //</span><br><span class="line">    this.items = new Object[capacity];</span><br><span class="line">    lock = new ReentrantLock(fair);</span><br><span class="line">    notEmpty = lock.newCondition();</span><br><span class="line">    notFull =  lock.newCondition();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+            <h1 id="AQS的详解"><a href="#AQS的详解" class="headerlink" title="AQS的详解"></a>AQS的详解</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h4 id="java的JUC包我断断续续看了零星的几个实现类，一直想写一些文章记录一下，但是由于种种原因，一是由于自己的懒惰，也因为作为一个新手，这种东西我实在没太好的文笔能表达清楚，今天我再次想冲击一下这个疑难杂症。首先说一下，AQS是一个java的java-util-concurrent包中的一个名为AbstractQueuedSynchronizer的类，简称AQS。那这个类为什么这么重要呢？因为这个JUC包中包含了几乎所有我们平时会用于控制并发的锁和并发控制类，而这个AQS更是基本所有锁的核心控制框架，所以这个类是我们学习并发的重中之重。"><a href="#java的JUC包我断断续续看了零星的几个实现类，一直想写一些文章记录一下，但是由于种种原因，一是由于自己的懒惰，也因为作为一个新手，这种东西我实在没太好的文笔能表达清楚，今天我再次想冲击一下这个疑难杂症。首先说一下，AQS是一个java的java-util-concurrent包中的一个名为AbstractQueuedSynchronizer的类，简称AQS。那这个类为什么这么重要呢？因为这个JUC包中包含了几乎所有我们平时会用于控制并发的锁和并发控制类，而这个AQS更是基本所有锁的核心控制框架，所以这个类是我们学习并发的重中之重。" class="headerlink" title="java的JUC包我断断续续看了零星的几个实现类，一直想写一些文章记录一下，但是由于种种原因，一是由于自己的懒惰，也因为作为一个新手，这种东西我实在没太好的文笔能表达清楚，今天我再次想冲击一下这个疑难杂症。首先说一下，AQS是一个java的java.util.concurrent包中的一个名为AbstractQueuedSynchronizer的类，简称AQS。那这个类为什么这么重要呢？因为这个JUC包中包含了几乎所有我们平时会用于控制并发的锁和并发控制类，而这个AQS更是基本所有锁的核心控制框架，所以这个类是我们学习并发的重中之重。"></a>java的JUC包我断断续续看了零星的几个实现类，一直想写一些文章记录一下，但是由于种种原因，一是由于自己的懒惰，也因为作为一个新手，这种东西我实在没太好的文笔能表达清楚，今天我再次想冲击一下这个疑难杂症。首先说一下，AQS是一个java的java.util.concurrent包中的一个名为AbstractQueuedSynchronizer的类，简称AQS。那这个类为什么这么重要呢？因为这个JUC包中包含了几乎所有我们平时会用于控制并发的锁和并发控制类，而这个AQS更是基本所有锁的核心控制框架，所以这个类是我们学习并发的重中之重。</h4><h2 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h2><h4 id="在本系列的后面的文章中，我们会讲到，当多个线程抢占较少的资源的时候，AQS内部所做的一些关于分配资源的策略方法。在这之前我建议大家先想一下，如果由自己设计一个最简单的抢占模型，我们会怎么设计？我这边设想了一下，肯定会有下面几个步骤"><a href="#在本系列的后面的文章中，我们会讲到，当多个线程抢占较少的资源的时候，AQS内部所做的一些关于分配资源的策略方法。在这之前我建议大家先想一下，如果由自己设计一个最简单的抢占模型，我们会怎么设计？我这边设想了一下，肯定会有下面几个步骤" class="headerlink" title="在本系列的后面的文章中，我们会讲到，当多个线程抢占较少的资源的时候，AQS内部所做的一些关于分配资源的策略方法。在这之前我建议大家先想一下，如果由自己设计一个最简单的抢占模型，我们会怎么设计？我这边设想了一下，肯定会有下面几个步骤"></a>在本系列的后面的文章中，我们会讲到，当多个线程抢占较少的资源的时候，AQS内部所做的一些关于分配资源的策略方法。在这之前我建议大家先想一下，如果由自己设计一个最简单的抢占模型，我们会怎么设计？我这边设想了一下，肯定会有下面几个步骤</h4><pre><code>1: 提供一个资源供大家抢占，假设初始状态为1，被占用后设置为0.所以假设有多个线程去获取这个资源的时候，肯定会只有一个线程能抢占成功，那么其他的线程必须按序排好。同时也要考虑到多个节点往队伍中排会出现的并发问题
+2: 当上一个节点消费完成后，要将资源释放出来，然后要通知排在队伍中的第一个节点，通知他可以开始竞争资源了。</code></pre><h4 id="所以我们可以带着这种思路来看AQS内部的实现，看是不是按照我们的设计思路来编写框架的。"><a href="#所以我们可以带着这种思路来看AQS内部的实现，看是不是按照我们的设计思路来编写框架的。" class="headerlink" title="所以我们可以带着这种思路来看AQS内部的实现，看是不是按照我们的设计思路来编写框架的。"></a>所以我们可以带着这种思路来看AQS内部的实现，看是不是按照我们的设计思路来编写框架的。</h4><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="接下来我们直接看到AQS的内部，大致浏览一下类的内部结构。"><a href="#接下来我们直接看到AQS的内部，大致浏览一下类的内部结构。" class="headerlink" title="接下来我们直接看到AQS的内部，大致浏览一下类的内部结构。"></a>接下来我们直接看到AQS的内部，大致浏览一下类的内部结构。</h4><h4 id="首先可以看到，内部有一个叫做Node的内部类实现。这个类就是用于我们之前的设计中，当线程抢占资源失败时，排在队列中的每个单元。在Node的构造函数我们可以看到除了传入了当时的线程，还传入了一个叫mode的参数。"><a href="#首先可以看到，内部有一个叫做Node的内部类实现。这个类就是用于我们之前的设计中，当线程抢占资源失败时，排在队列中的每个单元。在Node的构造函数我们可以看到除了传入了当时的线程，还传入了一个叫mode的参数。" class="headerlink" title="首先可以看到，内部有一个叫做Node的内部类实现。这个类就是用于我们之前的设计中，当线程抢占资源失败时，排在队列中的每个单元。在Node的构造函数我们可以看到除了传入了当时的线程，还传入了一个叫mode的参数。"></a>首先可以看到，内部有一个叫做Node的内部类实现。这个类就是用于我们之前的设计中，当线程抢占资源失败时，排在队列中的每个单元。在Node的构造函数我们可以看到除了传入了当时的线程，还传入了一个叫mode的参数。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Node(Thread thread, Node mode) &#123;     // Used by addWaiter</span><br><span class="line">	this.nextWaiter = mode;</span><br><span class="line"> 			this.thread = thread;</span><br><span class="line">  	&#125;</span><br></pre></td></tr></table></figure>
 
+<h4 id="结合了一些这个构造函数的调用链，可以看到这个mode有两种情况"><a href="#结合了一些这个构造函数的调用链，可以看到这个mode有两种情况" class="headerlink" title="结合了一些这个构造函数的调用链，可以看到这个mode有两种情况"></a>结合了一些这个构造函数的调用链，可以看到这个mode有两种情况</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/** Marker to indicate a node is waiting in shared mode */</span><br><span class="line">static final Node SHARED = new Node();</span><br><span class="line">/** Marker to indicate a node is waiting in exclusive mode */</span><br><span class="line">static final Node EXCLUSIVE = null;</span><br></pre></td></tr></table></figure>
+
+<h4 id="这代表抢占资源的两种模式，一种是独占式，一种是共享式。"><a href="#这代表抢占资源的两种模式，一种是独占式，一种是共享式。" class="headerlink" title="这代表抢占资源的两种模式，一种是独占式，一种是共享式。"></a>这代表抢占资源的两种模式，一种是独占式，一种是共享式。</h4><blockquote>
+<p>独占模式和共享模式。处于独占模式下时，其他线程试图获取该锁将无法取得成功。在共享模式下，多个线程获取某个锁可能（但不是一定）会获得成功</p>
+</blockquote>
+<h4 id="这边引入了一个Node模式的概念。我们浏览过整个AQS的代码结构就可以发现，整份代码里就是有两种模式的不同入口，分别处理不同的模式。从名字也可以看出，比如下面的四个预留的抽象方法。"><a href="#这边引入了一个Node模式的概念。我们浏览过整个AQS的代码结构就可以发现，整份代码里就是有两种模式的不同入口，分别处理不同的模式。从名字也可以看出，比如下面的四个预留的抽象方法。" class="headerlink" title="这边引入了一个Node模式的概念。我们浏览过整个AQS的代码结构就可以发现，整份代码里就是有两种模式的不同入口，分别处理不同的模式。从名字也可以看出，比如下面的四个预留的抽象方法。"></a>这边引入了一个Node模式的概念。我们浏览过整个AQS的代码结构就可以发现，整份代码里就是有两种模式的不同入口，分别处理不同的模式。从名字也可以看出，比如下面的四个预留的抽象方法。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">protected boolean tryAcquire(int arg)</span><br><span class="line">protected boolean tryRelease(int arg)</span><br><span class="line">protected int tryAcquireShared(int arg)</span><br><span class="line">protected boolean tryReleaseShared(int arg)</span><br></pre></td></tr></table></figure>
+
+<h4 id="因为之前我们也说过AQS是一个核心的并发基础框架类，内部处理了很多关于抢占资源的调度方法，同时预留了一些可以处理实际逻辑的方法，供子类处理。以上四个方法就是预留的方法。从方法名字我们也可以知道，这四个方法里面属于两个不同的模式。在单个模式的两个方法中，也分别处理了试图去获取资源和试图去释放资源的实际方法。"><a href="#因为之前我们也说过AQS是一个核心的并发基础框架类，内部处理了很多关于抢占资源的调度方法，同时预留了一些可以处理实际逻辑的方法，供子类处理。以上四个方法就是预留的方法。从方法名字我们也可以知道，这四个方法里面属于两个不同的模式。在单个模式的两个方法中，也分别处理了试图去获取资源和试图去释放资源的实际方法。" class="headerlink" title="因为之前我们也说过AQS是一个核心的并发基础框架类，内部处理了很多关于抢占资源的调度方法，同时预留了一些可以处理实际逻辑的方法，供子类处理。以上四个方法就是预留的方法。从方法名字我们也可以知道，这四个方法里面属于两个不同的模式。在单个模式的两个方法中，也分别处理了试图去获取资源和试图去释放资源的实际方法。"></a>因为之前我们也说过AQS是一个核心的并发基础框架类，内部处理了很多关于抢占资源的调度方法，同时预留了一些可以处理实际逻辑的方法，供子类处理。以上四个方法就是预留的方法。从方法名字我们也可以知道，这四个方法里面属于两个不同的模式。在单个模式的两个方法中，也分别处理了试图去获取资源和试图去释放资源的实际方法。</h4><h4 id="接下来我会尽量用图的方式将这两种模式给讲清楚。好了，先讲一下独占式的模式-这个模式的获取资源和释放资源的入口方法分别的Acquire和Release"><a href="#接下来我会尽量用图的方式将这两种模式给讲清楚。好了，先讲一下独占式的模式-这个模式的获取资源和释放资源的入口方法分别的Acquire和Release" class="headerlink" title="接下来我会尽量用图的方式将这两种模式给讲清楚。好了，先讲一下独占式的模式,这个模式的获取资源和释放资源的入口方法分别的Acquire和Release"></a>接下来我会尽量用图的方式将这两种模式给讲清楚。好了，先讲一下独占式的模式,这个模式的获取资源和释放资源的入口方法分别的Acquire和Release</h4><h2 id="EXCLUSIVE模式"><a href="#EXCLUSIVE模式" class="headerlink" title="EXCLUSIVE模式"></a>EXCLUSIVE模式</h2><h3 id="首先我们看一下独占模式的acquire方法"><a href="#首先我们看一下独占模式的acquire方法" class="headerlink" title="首先我们看一下独占模式的acquire方法"></a>首先我们看一下独占模式的acquire方法</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public final void acquire(int arg) &#123;</span><br><span class="line">	// 直接调用子类复写的方法，尝试去获取资源，</span><br><span class="line">	// 若成功，则直接返回</span><br><span class="line">	// 若失败，则加入内部维护的FIFO队列中</span><br><span class="line">    if (!tryAcquire(arg) &amp;&amp;</span><br><span class="line">        acquireQueued(addWaiter(Node.EXCLUSIVE), arg))</span><br><span class="line">        selfInterrupt();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="简单看一下addWaiter方法内部"><a href="#简单看一下addWaiter方法内部" class="headerlink" title="简单看一下addWaiter方法内部"></a>简单看一下addWaiter方法内部</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">private Node addWaiter(Node mode) &#123;</span><br><span class="line">    Node node = new Node(Thread.currentThread(), mode);</span><br><span class="line">    // Try the fast path of enq; backup to full enq on failure</span><br><span class="line">    Node pred = tail;</span><br><span class="line">    // 若当前队列中已经初始化了尾节点，则会先尝试一种快速入队的方式，即</span><br><span class="line">    // 1：先获得当前队列中的尾节点，假设名字为t</span><br><span class="line">    // 2: 将当前节点的先驱节点设置为t，即将节点排在了队列的最尾端</span><br><span class="line">    // 3: 将队列的尾指针用CAS的方式，安全的指向当前节点。此处用CAS保证了线程安全</span><br><span class="line">    // 4: 之后将原尾节点的后继指针指向了当前节点，从而完成了双向确认</span><br><span class="line">    // 注意: 三个指针的操作中，之后尾指针的指向时用了CAS，其余两个都是普通的赋值操作，这边先埋个点，在之后会再讲到这个地方</span><br><span class="line">    if (pred != null) &#123;</span><br><span class="line">        node.prev = pred;</span><br><span class="line">        if (compareAndSetTail(pred, node)) &#123;</span><br><span class="line">            pred.next = node;</span><br><span class="line">            return node;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    // 若之前的方法成功，则直接返回</span><br><span class="line">    // 否则就要进行比较复杂的方式</span><br><span class="line">    enq(node);</span><br><span class="line">    return node;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private Node enq(final Node node) &#123;</span><br><span class="line">	// 整段代码由一个永真循环包围</span><br><span class="line">    for (;;) &#123;</span><br><span class="line">        Node t = tail;</span><br><span class="line">        // 若第一次调用，则要初始化队列的头尾指针</span><br><span class="line">        if (t == null) &#123; // Must initialize</span><br><span class="line">            if (compareAndSetHead(new Node()))</span><br><span class="line">                tail = head;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">        	// 调用上段的逻辑，不断重试</span><br><span class="line">            node.prev = t;</span><br><span class="line">            if (compareAndSetTail(t, node)) &#123;</span><br><span class="line">                t.next = node;</span><br><span class="line">                return t;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>####可以看到内部就是维护了一个FIFO的队列，队列中每个节点都维护了线程，和当前等待状态以及前驱和后继节点。新节点到来时，会用CAS+自旋的方法去将节点放在等待队列中。然后在acquireQueued方法中，我们也可以看到，每个在队列中的节点，都会不断根据前驱节点的状态的改变，不断的去尝试获取资源。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">  final boolean acquireQueued(final Node node, int arg) &#123;</span><br><span class="line">      boolean failed = true;</span><br><span class="line">      try &#123;</span><br><span class="line">      	// 标识线程是否中断</span><br><span class="line">          boolean interrupted = false;</span><br><span class="line">          for (;;) &#123;</span><br><span class="line">              final Node p = node.predecessor();</span><br><span class="line">              // 判断先驱节点是否为队列首节点</span><br><span class="line">              // 若是，则尝试去获取资源</span><br><span class="line">              if (p == head &amp;&amp; tryAcquire(arg)) &#123;</span><br><span class="line">              	//	若资源获取成功了，则将当前节点设为队列首节点</span><br><span class="line">                  setHead(node);</span><br><span class="line">                  p.next = null; // help GC</span><br><span class="line">                  failed = false;</span><br><span class="line">                  return interrupted;</span><br><span class="line">              &#125;</span><br><span class="line">              // 若还没轮到竞争资源，或者竞争资源失败</span><br><span class="line">              // 每个节点都会判断自己以及前驱节点的状态是否满足当前节点是否可以park，这句话可能比较绕，可以直接先看看shouldParkAfterFailedAcquire这个方法里面做了什么</span><br><span class="line">              if (shouldParkAfterFailedAcquire(p, node) &amp;&amp;</span><br><span class="line">                  parkAndCheckInterrupt())</span><br><span class="line">                  interrupted = true;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125; finally &#123;</span><br><span class="line">          if (failed)</span><br><span class="line">              cancelAcquire(node);</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line">	// 首先看到这个方法的返回值是一个布尔值，为true则标志当前节点可以park，会有其他节点在合适的时候将其唤醒</span><br><span class="line">  private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) &#123;</span><br><span class="line">  	// 先驱节点的状态</span><br><span class="line">      int ws = pred.waitStatus;</span><br><span class="line">// 若前驱节点的状态是SIGNAL，也就是标志着当前节点在park前已经通知了前驱节点</span><br><span class="line">// 换句话说就是，前驱节点知道排在他后面的节点是park状态，那么在竞争完资源或者退出竞争之后，都会将其唤醒</span><br><span class="line">      if (ws == Node.SIGNAL)</span><br><span class="line">          /*</span><br><span class="line">           * This node has already set status asking a release</span><br><span class="line">           * to signal it, so it can safely park.</span><br><span class="line">           */</span><br><span class="line">          return true;</span><br><span class="line">      // 若前驱节点的状态已经是取消状态，则应该跳过这个节点，向前找到未取消的节点作为新的前驱节点</span><br><span class="line">      if (ws &gt; 0) &#123;</span><br><span class="line">          /*</span><br><span class="line">           * Predecessor was cancelled. Skip over predecessors and</span><br><span class="line">           * indicate retry.</span><br><span class="line">           */</span><br><span class="line">           // 如果先驱节点已经取消竞争了，则直接跳过他，查找队列前面最近的没取消的作为新的先驱节点</span><br><span class="line">          do &#123;</span><br><span class="line">              node.prev = pred = pred.prev;</span><br><span class="line">          &#125; while (pred.waitStatus &gt; 0);</span><br><span class="line">          pred.next = node;</span><br><span class="line">      &#125; else &#123;</span><br><span class="line">          /*</span><br><span class="line">           * waitStatus must be 0 or PROPAGATE.  Indicate that we</span><br><span class="line">           * need a signal, but don&apos;t park yet.  Caller will need to</span><br><span class="line">           * retry to make sure it cannot acquire before parking.</span><br><span class="line">           */</span><br><span class="line">           // 若先驱节点即没取消，又没Signal，则手动将其设置为Signal，表示当前节点已经安心park，等前驱节点资源释放后，需要将其唤醒</span><br><span class="line">          compareAndSetWaitStatus(pred, ws, Node.SIGNAL);</span><br><span class="line">      &#125;</span><br><span class="line">      // 仅当先驱节点的状态是Signal的时候返回true，其他都为false</span><br><span class="line">      return false;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="整体逻辑就是在队列中等待的节点，会不断去尝试获得资源。因为是先入先出队列，所以节点都会根据排在前面的节点的状态，来判断是不是轮到自己了。shouldParkAfterFailedAcquire方法就是用于根据前驱节点的状态来确定自己是否可以park"><a href="#整体逻辑就是在队列中等待的节点，会不断去尝试获得资源。因为是先入先出队列，所以节点都会根据排在前面的节点的状态，来判断是不是轮到自己了。shouldParkAfterFailedAcquire方法就是用于根据前驱节点的状态来确定自己是否可以park" class="headerlink" title="整体逻辑就是在队列中等待的节点，会不断去尝试获得资源。因为是先入先出队列，所以节点都会根据排在前面的节点的状态，来判断是不是轮到自己了。shouldParkAfterFailedAcquire方法就是用于根据前驱节点的状态来确定自己是否可以park"></a>整体逻辑就是在队列中等待的节点，会不断去尝试获得资源。因为是先入先出队列，所以节点都会根据排在前面的节点的状态，来判断是不是轮到自己了。shouldParkAfterFailedAcquire方法就是用于根据前驱节点的状态来确定自己是否可以park</h4><h4 id="若shouldParkAfterFailedAcquire方法返回了true，就是需要去park当前线程，等待先驱节点完成之后唤醒。park部分的代码就是直接调用了LockSupport的park方法，等待唤醒。唤醒可能是被前驱节点唤醒，也有可能是线程中断，所以唤醒后要检查一下线程状态"><a href="#若shouldParkAfterFailedAcquire方法返回了true，就是需要去park当前线程，等待先驱节点完成之后唤醒。park部分的代码就是直接调用了LockSupport的park方法，等待唤醒。唤醒可能是被前驱节点唤醒，也有可能是线程中断，所以唤醒后要检查一下线程状态" class="headerlink" title="若shouldParkAfterFailedAcquire方法返回了true，就是需要去park当前线程，等待先驱节点完成之后唤醒。park部分的代码就是直接调用了LockSupport的park方法，等待唤醒。唤醒可能是被前驱节点唤醒，也有可能是线程中断，所以唤醒后要检查一下线程状态"></a>若shouldParkAfterFailedAcquire方法返回了true，就是需要去park当前线程，等待先驱节点完成之后唤醒。park部分的代码就是直接调用了LockSupport的park方法，等待唤醒。唤醒可能是被前驱节点唤醒，也有可能是线程中断，所以唤醒后要检查一下线程状态</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">private final boolean parkAndCheckInterrupt() &#123;</span><br><span class="line">    LockSupport.park(this);</span><br><span class="line">    return Thread.interrupted();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="简单总结一下acquireQueued方法的内部逻辑。就是排在队列中的每个节点，内部都有一个永真循环去不断判断是否可以去竞争资源，或者排在前面的节点是不是放弃竞争了，如果是，则向前找到最近的没放弃的节点作为先驱节点。当先驱节点的状态已经是Signal的时候，则park当前线程，等待唤醒。"><a href="#简单总结一下acquireQueued方法的内部逻辑。就是排在队列中的每个节点，内部都有一个永真循环去不断判断是否可以去竞争资源，或者排在前面的节点是不是放弃竞争了，如果是，则向前找到最近的没放弃的节点作为先驱节点。当先驱节点的状态已经是Signal的时候，则park当前线程，等待唤醒。" class="headerlink" title="简单总结一下acquireQueued方法的内部逻辑。就是排在队列中的每个节点，内部都有一个永真循环去不断判断是否可以去竞争资源，或者排在前面的节点是不是放弃竞争了，如果是，则向前找到最近的没放弃的节点作为先驱节点。当先驱节点的状态已经是Signal的时候，则park当前线程，等待唤醒。"></a>简单总结一下acquireQueued方法的内部逻辑。就是排在队列中的每个节点，内部都有一个永真循环去不断判断是否可以去竞争资源，或者排在前面的节点是不是放弃竞争了，如果是，则向前找到最近的没放弃的节点作为先驱节点。当先驱节点的状态已经是Signal的时候，则park当前线程，等待唤醒。</h4><h3 id="再看一下独占模式的release方法"><a href="#再看一下独占模式的release方法" class="headerlink" title="再看一下独占模式的release方法"></a>再看一下独占模式的release方法</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public final boolean release(int arg) &#123;</span><br><span class="line">	// 同样的，开始就去尝试释放资源，这个方法也是由子类去覆写的</span><br><span class="line">    if (tryRelease(arg)) &#123;</span><br><span class="line">    	//	若释放成功，则得到等待队列中的头节点，如果节点存在，则唤醒头节点后的等待者，唤醒他开始竞争资源</span><br><span class="line">        Node h = head;</span><br><span class="line">        if (h != null &amp;&amp; h.waitStatus != 0)</span><br><span class="line">        	// 唤醒后继节点开始竞争资源</span><br><span class="line">            unparkSuccessor(h);</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="和acquire方法一样，里面具体的try…-方法都是抽象方法，由继承的子类来覆写逻辑。当前节点释放资源成功后，要去主动提醒后续节点。这部分的逻辑在unparkSuccessor方法中实现"><a href="#和acquire方法一样，里面具体的try…-方法都是抽象方法，由继承的子类来覆写逻辑。当前节点释放资源成功后，要去主动提醒后续节点。这部分的逻辑在unparkSuccessor方法中实现" class="headerlink" title="和acquire方法一样，里面具体的try…()方法都是抽象方法，由继承的子类来覆写逻辑。当前节点释放资源成功后，要去主动提醒后续节点。这部分的逻辑在unparkSuccessor方法中实现"></a>和acquire方法一样，里面具体的try…()方法都是抽象方法，由继承的子类来覆写逻辑。当前节点释放资源成功后，要去主动提醒后续节点。这部分的逻辑在unparkSuccessor方法中实现</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">private void unparkSuccessor(Node node) &#123;</span><br><span class="line">    /*</span><br><span class="line">     * If status is negative (i.e., possibly needing signal) try</span><br><span class="line">     * to clear in anticipation of signalling.  It is OK if this</span><br><span class="line">     * fails or if status is changed by waiting thread.</span><br><span class="line">     */</span><br><span class="line">    int ws = node.waitStatus;</span><br><span class="line">    if (ws &lt; 0)</span><br><span class="line">        compareAndSetWaitStatus(node, ws, 0);</span><br><span class="line"></span><br><span class="line">    /*</span><br><span class="line">     * Thread to unpark is held in successor, which is normally</span><br><span class="line">     * just the next node.  But if cancelled or apparently null,</span><br><span class="line">     * traverse backwards from tail to find the actual</span><br><span class="line">     * non-cancelled successor.</span><br><span class="line">     */</span><br><span class="line">     // 从队列的末尾向前找到后继节点中，没有取消的节点，去唤醒。</span><br><span class="line">    Node s = node.next;</span><br><span class="line">    if (s == null || s.waitStatus &gt; 0) &#123;</span><br><span class="line">        s = null;</span><br><span class="line">        for (Node t = tail; t != null &amp;&amp; t != node; t = t.prev)</span><br><span class="line">            if (t.waitStatus &lt;= 0)</span><br><span class="line">                s = t;</span><br><span class="line">    &#125;</span><br><span class="line">    // 找到有效的后继节点，尝试去唤醒</span><br><span class="line">    if (s != null)</span><br><span class="line">        LockSupport.unpark(s.thread);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="这边逻辑大部分都是易懂的，无非就是释放资源后，通知队列中排在后面的节点开始竞争。但是为什么倒序？"><a href="#这边逻辑大部分都是易懂的，无非就是释放资源后，通知队列中排在后面的节点开始竞争。但是为什么倒序？" class="headerlink" title="这边逻辑大部分都是易懂的，无非就是释放资源后，通知队列中排在后面的节点开始竞争。但是为什么倒序？"></a>这边逻辑大部分都是易懂的，无非就是释放资源后，通知队列中排在后面的节点开始竞争。但是为什么倒序？</h4><h4 id="因为考虑enq方法的时候，后继节点可能为null。也就是我们之前说的入队的时候，埋下的坑"><a href="#因为考虑enq方法的时候，后继节点可能为null。也就是我们之前说的入队的时候，埋下的坑" class="headerlink" title="因为考虑enq方法的时候，后继节点可能为null。也就是我们之前说的入队的时候，埋下的坑"></a>因为考虑enq方法的时候，后继节点可能为null。也就是我们之前说的入队的时候，埋下的坑</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">if (pred != null) &#123;</span><br><span class="line">    node.prev = pred;                    1</span><br><span class="line">    if (compareAndSetTail(pred, node)) &#123; 2</span><br><span class="line">        pred.next = node;                3</span><br><span class="line">        return node;                     4</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="观察这段代码，其中只有在2的时候，是用CAS，保证尾指针指向了新加入的节点。而且在CAS之前，已经将当前节点的前驱节点设置为了原来的尾指针。CAS完成后，进行3。这边是一个简单的赋值语句。所以考虑这么一种情况"><a href="#观察这段代码，其中只有在2的时候，是用CAS，保证尾指针指向了新加入的节点。而且在CAS之前，已经将当前节点的前驱节点设置为了原来的尾指针。CAS完成后，进行3。这边是一个简单的赋值语句。所以考虑这么一种情况" class="headerlink" title="观察这段代码，其中只有在2的时候，是用CAS，保证尾指针指向了新加入的节点。而且在CAS之前，已经将当前节点的前驱节点设置为了原来的尾指针。CAS完成后，进行3。这边是一个简单的赋值语句。所以考虑这么一种情况"></a>观察这段代码，其中只有在2的时候，是用CAS，保证尾指针指向了新加入的节点。而且在CAS之前，已经将当前节点的前驱节点设置为了原来的尾指针。CAS完成后，进行3。这边是一个简单的赋值语句。所以考虑这么一种情况</h4><ul>
+<li><p>当2步骤完成时，由于是多线程。此时如果调度到了别的线程的release方法。若按照正常的正序查找后继结点。可以发现由于3步骤还没执行，原尾节点是没有后继节点的。那么就会认为队列已经空了，这显然是不对的。</p>
+</li>
+<li><p>但是由于尾指针的指向时CAS操作的，所以由尾指针作为入口，肯定是没问题的</p>
+</li>
+<li><p>倒序查找还跟CANCEL操作的时候有关，这部分可以直接看我文章下面的链接。写的非常好，我写不出那么好，就不班门弄斧了</p>
+<h4 id="这里注意几点细节。"><a href="#这里注意几点细节。" class="headerlink" title="这里注意几点细节。"></a>这里注意几点细节。</h4></li>
+<li><p>当前节点释放资源成功后，要去唤醒队伍中排在后面的人去消费。按常理来说，应该就是排在后面的那个节点，但是由于每个节点都有可能取消竞争状态，所以要跳过这种节点，以及跳过为空的节点</p>
+</li>
+<li><p>查找的时候要从队伍的末尾往前查找</p>
+</li>
+</ul>
+<h4 id="唤醒成功后，就完成了释放资源的过程。之前park住的线程会被唤醒，继续他的竞争资源的过程"><a href="#唤醒成功后，就完成了释放资源的过程。之前park住的线程会被唤醒，继续他的竞争资源的过程" class="headerlink" title="唤醒成功后，就完成了释放资源的过程。之前park住的线程会被唤醒，继续他的竞争资源的过程"></a>唤醒成功后，就完成了释放资源的过程。之前park住的线程会被唤醒，继续他的竞争资源的过程</h4><h3 id="共享模式的acquire方法"><a href="#共享模式的acquire方法" class="headerlink" title="共享模式的acquire方法"></a>共享模式的acquire方法</h3><h4 id="上面说完了独占模式下，资源竞争的问题，现在我们再看看另一种共享模式下有什么不一样。"><a href="#上面说完了独占模式下，资源竞争的问题，现在我们再看看另一种共享模式下有什么不一样。" class="headerlink" title="上面说完了独占模式下，资源竞争的问题，现在我们再看看另一种共享模式下有什么不一样。"></a>上面说完了独占模式下，资源竞争的问题，现在我们再看看另一种共享模式下有什么不一样。</h4><h4 id="之前也说过，共享模式就是允许多个线程同时占有资源的情形。那这个acquireShared方法是怎么实现的呢？"><a href="#之前也说过，共享模式就是允许多个线程同时占有资源的情形。那这个acquireShared方法是怎么实现的呢？" class="headerlink" title="之前也说过，共享模式就是允许多个线程同时占有资源的情形。那这个acquireShared方法是怎么实现的呢？"></a>之前也说过，共享模式就是允许多个线程同时占有资源的情形。那这个acquireShared方法是怎么实现的呢？</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public final void acquireShared(int arg) &#123;</span><br><span class="line">    if (tryAcquireShared(arg) &lt; 0)</span><br><span class="line">        doAcquireShared(arg);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="回想一下之前说的独占模式的acquire方法。可以很明显的看到几点不同"><a href="#回想一下之前说的独占模式的acquire方法。可以很明显的看到几点不同" class="headerlink" title="回想一下之前说的独占模式的acquire方法。可以很明显的看到几点不同"></a>回想一下之前说的独占模式的acquire方法。可以很明显的看到几点不同</h4><ul>
+<li>独占模式下try…()方法返回的是一个布尔值，直接确定是否抢占到了资源。而在共享模式下，返回的是一个int值，为负数的时候则表明抢占失败</li>
+<li>共享模式这边少了一句 selfInterrupt()</li>
+</ul>
+<h4 id="和独占模式一样，如果尝试获取失败，会在队列中新建一个节点，持续等待机会去抢占"><a href="#和独占模式一样，如果尝试获取失败，会在队列中新建一个节点，持续等待机会去抢占" class="headerlink" title="和独占模式一样，如果尝试获取失败，会在队列中新建一个节点，持续等待机会去抢占"></a>和独占模式一样，如果尝试获取失败，会在队列中新建一个节点，持续等待机会去抢占</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">private void doAcquireShared(int arg) &#123;</span><br><span class="line">	// 注意这里的Node的模式已经是SHARED了</span><br><span class="line">       final Node node = addWaiter(Node.SHARED);</span><br><span class="line">       boolean failed = true;</span><br><span class="line">       try &#123;</span><br><span class="line">           boolean interrupted = false;</span><br><span class="line">           for (;;) &#123;</span><br><span class="line">               final Node p = node.predecessor();</span><br><span class="line">               if (p == head) &#123;</span><br><span class="line">               	// 同样的，注意这个返回是一个int值</span><br><span class="line">                   int r = tryAcquireShared(arg);</span><br><span class="line">                  // 返回值是正数，代表获取成功</span><br><span class="line">                   if (r &gt;= 0) &#123;</span><br><span class="line">                   	// 这是共享模式独有的Node状态</span><br><span class="line">                       setHeadAndPropagate(node, r);</span><br><span class="line">                       p.next = null; // help GC</span><br><span class="line">                       if (interrupted)</span><br><span class="line">                           selfInterrupt();</span><br><span class="line">                       failed = false;</span><br><span class="line">                       return;</span><br><span class="line">                   &#125;</span><br><span class="line">               &#125;</span><br><span class="line">               if (shouldParkAfterFailedAcquire(p, node) &amp;&amp;</span><br><span class="line">                   parkAndCheckInterrupt())</span><br><span class="line">                   interrupted = true;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125; finally &#123;</span><br><span class="line">           if (failed)</span><br><span class="line">               cancelAcquire(node);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="大部分逻辑和独占模式的时候差不多，独有的代码部分就是返回值为int以及setHeadAndPropagate这个方法，我们再看看这个方法里面做了什么"><a href="#大部分逻辑和独占模式的时候差不多，独有的代码部分就是返回值为int以及setHeadAndPropagate这个方法，我们再看看这个方法里面做了什么" class="headerlink" title="大部分逻辑和独占模式的时候差不多，独有的代码部分就是返回值为int以及setHeadAndPropagate这个方法，我们再看看这个方法里面做了什么"></a>大部分逻辑和独占模式的时候差不多，独有的代码部分就是返回值为int以及setHeadAndPropagate这个方法，我们再看看这个方法里面做了什么</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"> private void setHeadAndPropagate(Node node, int propagate) &#123;</span><br><span class="line">     Node h = head; // Record old head for check below</span><br><span class="line">     setHead(node);</span><br><span class="line">     // 这是和独占模式有区别的地方，在共享模式中，当设置完头节点之后，还要考虑是否还有唤醒后面的节点继续抢占</span><br><span class="line">     // 1:当prop参数大于0,即表示资源还要剩余</span><br><span class="line">     // 2:当原头节点为null或者已被标注为SIGNAL模式，就表示后继节点待被唤醒</span><br><span class="line">// 3:当现头节点为null或者已被标注为SIGNAL模式，就表示后继节点待被唤醒</span><br><span class="line"></span><br><span class="line">     if (propagate &gt; 0 || h == null || h.waitStatus &lt; 0 ||</span><br><span class="line">         (h = head) == null || h.waitStatus &lt; 0) &#123;</span><br><span class="line">         Node s = node.next;</span><br><span class="line">         if (s == null || s.isShared())</span><br><span class="line">             doReleaseShared();</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="和独占模式的区别只是在因为共享模式允许多个线程同时占有资源，所以当一个线程竞争到资源时，其他线程仍可以被唤醒去竞争。接下来看看共享模式怎么去释放资源"><a href="#和独占模式的区别只是在因为共享模式允许多个线程同时占有资源，所以当一个线程竞争到资源时，其他线程仍可以被唤醒去竞争。接下来看看共享模式怎么去释放资源" class="headerlink" title="和独占模式的区别只是在因为共享模式允许多个线程同时占有资源，所以当一个线程竞争到资源时，其他线程仍可以被唤醒去竞争。接下来看看共享模式怎么去释放资源"></a>和独占模式的区别只是在因为共享模式允许多个线程同时占有资源，所以当一个线程竞争到资源时，其他线程仍可以被唤醒去竞争。接下来看看共享模式怎么去释放资源</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">private void doReleaseShared() &#123;</span><br><span class="line">    for (;;) &#123;</span><br><span class="line">        Node h = head;</span><br><span class="line">        if (h != null &amp;&amp; h != tail) &#123;</span><br><span class="line">            int ws = h.waitStatus;</span><br><span class="line">            if (ws == Node.SIGNAL) &#123;</span><br><span class="line">                if (!compareAndSetWaitStatus(h, Node.SIGNAL, 0))</span><br><span class="line">                    continue;            // loop to recheck cases</span><br><span class="line">                unparkSuccessor(h);</span><br><span class="line">            &#125;</span><br><span class="line">            else if (ws == 0 &amp;&amp;</span><br><span class="line">                     !compareAndSetWaitStatus(h, 0, Node.PROPAGATE))</span><br><span class="line">                continue;                // loop on failed CAS</span><br><span class="line">        &#125;</span><br><span class="line">        if (h == head)                   // loop if head changed</span><br><span class="line">            break;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="具体的逻辑也和独占模式差不多，依旧是倒序的查找后继结点去唤醒。但是注意共享模式多了一个叫PROPAGATE的模式，表示在队列中的节点都可以依次被唤醒去竞争资源"><a href="#具体的逻辑也和独占模式差不多，依旧是倒序的查找后继结点去唤醒。但是注意共享模式多了一个叫PROPAGATE的模式，表示在队列中的节点都可以依次被唤醒去竞争资源" class="headerlink" title="具体的逻辑也和独占模式差不多，依旧是倒序的查找后继结点去唤醒。但是注意共享模式多了一个叫PROPAGATE的模式，表示在队列中的节点都可以依次被唤醒去竞争资源"></a>具体的逻辑也和独占模式差不多，依旧是倒序的查找后继结点去唤醒。但是注意共享模式多了一个叫PROPAGATE的模式，表示在队列中的节点都可以依次被唤醒去竞争资源</h4><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h4 id="综上，用大篇幅详解了AQS的主要两个模式的竞争和释放资源的过程。"><a href="#综上，用大篇幅详解了AQS的主要两个模式的竞争和释放资源的过程。" class="headerlink" title="综上，用大篇幅详解了AQS的主要两个模式的竞争和释放资源的过程。"></a>综上，用大篇幅详解了AQS的主要两个模式的竞争和释放资源的过程。</h4><h2 id="超链接："><a href="#超链接：" class="headerlink" title="超链接："></a>超链接：</h2><p><a href="http://www.ideabuffer.cn/2017/03/15/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3AbstractQueuedSynchronizer%EF%BC%88%E4%B8%80%EF%BC%89/" target="_blank" rel="noopener">关于为何倒序查找的Cancel方法论证</a></p>
 
           
         
@@ -1080,164 +1130,6 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/聊聊 Synchronize 关键字/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Swaggy Q">
-      <meta itemprop="description" content="拉塞尔FMVP了吗">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Dloading...">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/07/08/聊聊 Synchronize 关键字/" class="post-title-link" itemprop="url">聊聊 Synchronize 关键字</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-
-          
-          
-          
-
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:42:36" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
-            </span>
-          
-
-          
-            
-
-            
-          
-
-          
-
-          
-            
-            
-          
-
-          
-          
-
-          
-
-          <br>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="聊聊-Synchronize-关键字"><a href="#聊聊-Synchronize-关键字" class="headerlink" title="聊聊 Synchronize 关键字"></a>聊聊 Synchronize 关键字</h1><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="Synchronize是java中提供的一个并发控制的一个关键字。主要是为了控制多线程并发情况下对共享资源的竞争情况。加锁有以下三种情况"><a href="#Synchronize是java中提供的一个并发控制的一个关键字。主要是为了控制多线程并发情况下对共享资源的竞争情况。加锁有以下三种情况" class="headerlink" title="Synchronize是java中提供的一个并发控制的一个关键字。主要是为了控制多线程并发情况下对共享资源的竞争情况。加锁有以下三种情况"></a>Synchronize是java中提供的一个并发控制的一个关键字。主要是为了控制多线程并发情况下对共享资源的竞争情况。加锁有以下三种情况</h4><p>1：修饰普通方法，锁的对象是当前实例<br>2：修饰形态方法，锁的对象是当前类class对象<br>3：修饰同步代码块，锁的对象是括号中的内容，可以是实例也可以是class对象</p>
-<h4 id="以上三种情况，简单归纳可以分为两类，一个是同步方法，一个是同步代码块。在java中，这两种的实现方式是不一样的，先说说同步方法，如果我们把我们写的关于同步方法的代码反编译，会发现在反编译代码中，同步方法的代码部分，会是这样子的"><a href="#以上三种情况，简单归纳可以分为两类，一个是同步方法，一个是同步代码块。在java中，这两种的实现方式是不一样的，先说说同步方法，如果我们把我们写的关于同步方法的代码反编译，会发现在反编译代码中，同步方法的代码部分，会是这样子的" class="headerlink" title="以上三种情况，简单归纳可以分为两类，一个是同步方法，一个是同步代码块。在java中，这两种的实现方式是不一样的，先说说同步方法，如果我们把我们写的关于同步方法的代码反编译，会发现在反编译代码中，同步方法的代码部分，会是这样子的"></a>以上三种情况，简单归纳可以分为两类，一个是同步方法，一个是同步代码块。在java中，这两种的实现方式是不一样的，先说说同步方法，如果我们把我们写的关于同步方法的代码反编译，会发现在反编译代码中，同步方法的代码部分，会是这样子的</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flags: ACC_PUBLIC, ACC_SYNCHRONIZED</span><br></pre></td></tr></table></figure>
-
-<h4 id="就代表这个方法是public的，而且是同步的。那么同步代码块是怎么样的呢？同样反编译，我们可以得到答案。"><a href="#就代表这个方法是public的，而且是同步的。那么同步代码块是怎么样的呢？同样反编译，我们可以得到答案。" class="headerlink" title="就代表这个方法是public的，而且是同步的。那么同步代码块是怎么样的呢？同样反编译，我们可以得到答案。"></a>就代表这个方法是public的，而且是同步的。那么同步代码块是怎么样的呢？同样反编译，我们可以得到答案。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">3: monitorenter  //注意此处，进入同步方法</span><br><span class="line">...      </span><br><span class="line">   21: monitorexit //注意此处，退出同步方法</span><br></pre></td></tr></table></figure>
-
-<h4 id="可以很直观的看出来，是用了两个指令来控制的，注意一下两个指令必须是成对出现的，代表获得锁和释放锁的过程。"><a href="#可以很直观的看出来，是用了两个指令来控制的，注意一下两个指令必须是成对出现的，代表获得锁和释放锁的过程。" class="headerlink" title="可以很直观的看出来，是用了两个指令来控制的，注意一下两个指令必须是成对出现的，代表获得锁和释放锁的过程。"></a>可以很直观的看出来，是用了两个指令来控制的，注意一下两个指令必须是成对出现的，代表获得锁和释放锁的过程。</h4><h4 id="再看到，每个实例和类对象都有自己单独的监视器，所以两个线程可以同时访问普通的Synchronize以及静态的Synchronize方法。所以该修饰符可能会有以下几个特性"><a href="#再看到，每个实例和类对象都有自己单独的监视器，所以两个线程可以同时访问普通的Synchronize以及静态的Synchronize方法。所以该修饰符可能会有以下几个特性" class="headerlink" title="再看到，每个实例和类对象都有自己单独的监视器，所以两个线程可以同时访问普通的Synchronize以及静态的Synchronize方法。所以该修饰符可能会有以下几个特性"></a>再看到，每个实例和类对象都有自己单独的监视器，所以两个线程可以同时访问普通的Synchronize以及静态的Synchronize方法。所以该修饰符可能会有以下几个特性</h4><p>1：当线程A正在访问某个实例对象的普通Synchronize方法，或者同步代码块的括号中为一个实例对象是，其他线程不但不能访问这个同步方法，而且其他同步方法也不能方法。但是静态的同步方法是可以访问的，因为之前说过实例对象和类对象是有自己不同的监视器的</p>
-<h4 id="之前说了很多次监视器，那么监视器到底是什么呢-在java中，这部分是用c-实现的，对应的对象内容如下"><a href="#之前说了很多次监视器，那么监视器到底是什么呢-在java中，这部分是用c-实现的，对应的对象内容如下" class="headerlink" title="之前说了很多次监视器，那么监视器到底是什么呢?在java中，这部分是用c++实现的，对应的对象内容如下"></a>之前说了很多次监视器，那么监视器到底是什么呢?在java中，这部分是用c++实现的，对应的对象内容如下</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ObjectMonitor() &#123;</span><br><span class="line">    _count        = 0; //用来记录该对象被线程获取锁的次数</span><br><span class="line">    _waiters      = 0;</span><br><span class="line">    _recursions   = 0; //锁的重入次数</span><br><span class="line">    _owner        = NULL; //指向持有ObjectMonitor对象的线程 </span><br><span class="line">    _WaitSet      = NULL; //处于wait状态的线程，会被加入到_WaitSet</span><br><span class="line">    _WaitSetLock  = 0 ;</span><br><span class="line">    _EntryList    = NULL ; //处于等待锁block状态的线程，会被加入到该列表</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="这一块的解释，我引用被人写的一个整个的属性转换的过程"><a href="#这一块的解释，我引用被人写的一个整个的属性转换的过程" class="headerlink" title="这一块的解释，我引用被人写的一个整个的属性转换的过程"></a>这一块的解释，我引用被人写的一个整个的属性转换的过程</h4><blockquote>
-<p>对于一个synchronized修饰的方法(代码块)来说：<br>当多个线程同时访问该方法，那么这些线程会先被放进_EntryList队列，此时线程处于blocking状态<br>当一个线程获取到了实例对象的监视器（monitor）锁，那么就可以进入running状态，执行方法，此时，ObjectMonitor对象的_owner指向当前线程，_count加1表示当前对象锁被一个线程获取<br>当running状态的线程调用wait()方法，那么当前线程释放monitor对象，进入waiting状态，ObjectMonitor对象的_owner变为null，_count减1，同时线程进入_WaitSet队列，直到有线程调用notify()方法唤醒该线程，则该线程重新获取monitor对象进入_Owner区<br>如果当前线程执行完毕，那么也释放monitor对象，进入waiting状态，ObjectMonitor对象的_owner变为null，_count减1</p>
-</blockquote>
-<h4 id="现在再讲讲关于锁的一些膨胀的机制。其实在jdk-1-6之前，是只有重量锁，在jdk-1-6之后，引用了轻量锁，和偏向锁。在一些竞争不激烈的情况下，减轻锁开销，这些锁的分类都是基于对象头。"><a href="#现在再讲讲关于锁的一些膨胀的机制。其实在jdk-1-6之前，是只有重量锁，在jdk-1-6之后，引用了轻量锁，和偏向锁。在一些竞争不激烈的情况下，减轻锁开销，这些锁的分类都是基于对象头。" class="headerlink" title="现在再讲讲关于锁的一些膨胀的机制。其实在jdk 1.6之前，是只有重量锁，在jdk 1.6之后，引用了轻量锁，和偏向锁。在一些竞争不激烈的情况下，减轻锁开销，这些锁的分类都是基于对象头。"></a>现在再讲讲关于锁的一些膨胀的机制。其实在jdk 1.6之前，是只有重量锁，在jdk 1.6之后，引用了轻量锁，和偏向锁。在一些竞争不激烈的情况下，减轻锁开销，这些锁的分类都是基于对象头。</h4><h4 id="先讲到重量锁"><a href="#先讲到重量锁" class="headerlink" title="先讲到重量锁"></a>先讲到重量锁</h4><p>重量级锁的状态下，对象的mark word为指向一个堆中monitor对象的指针。</p>
-<p>可以看到锁信息也是存在于对象的mark word中的。当对象状态为偏向锁（biasable）时，mark word存储的是偏向的线程ID；当状态为轻量级锁（lightweight locked）时，mark word存储的是指向线程栈中Lock Record的指针；当状态为重量级锁（inflated）时，为指向堆中的monitor对象的指针。</p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/HashMap 1.7 版本的transfer方法/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1541,7 +1433,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/HashTable/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/虚拟机栈/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Swaggy Q">
@@ -1561,7 +1453,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/07/08/HashTable/" class="post-title-link" itemprop="url">HashTable源码详解</a>
+                <a href="/2019/07/08/虚拟机栈/" class="post-title-link" itemprop="url">虚拟机栈</a>
               
             
           </h1>
@@ -1586,7 +1478,7 @@
                 
               
 
-              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:04:30" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:42:25" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
             </span>
           
 
@@ -1630,24 +1522,8 @@
       
         
           
-            <h1 id="聊一聊HashTable"><a href="#聊一聊HashTable" class="headerlink" title="聊一聊HashTable"></a>聊一聊HashTable</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h4 id="关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下"><a href="#关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下" class="headerlink" title="关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下"></a>关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下</h4><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？"><a href="#大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？" class="headerlink" title="大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？"></a>大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？</h4><h4 id="这边用一个小例子作为入口，我们可以进去一探究竟"><a href="#这边用一个小例子作为入口，我们可以进去一探究竟" class="headerlink" title="这边用一个小例子作为入口，我们可以进去一探究竟"></a>这边用一个小例子作为入口，我们可以进去一探究竟</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">    // 初始化</span><br><span class="line">    Hashtable hb = new Hashtable();</span><br><span class="line">    // 存储</span><br><span class="line">    hb.put(&quot;1&quot;,new Integer(1));</span><br><span class="line">    hb.put(&quot;2&quot;,new Integer(2));</span><br><span class="line">    hb.put(&quot;3&quot;,new Integer(3));</span><br><span class="line">    // 取值</span><br><span class="line">    System.out.println(hb.get(&quot;1&quot;));</span><br><span class="line">    System.out.println(hb.get(&quot;2&quot;));</span><br><span class="line">    System.out.println(hb.get(&quot;3&quot;));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+            <h1 id="虚拟机栈"><a href="#虚拟机栈" class="headerlink" title="虚拟机栈"></a>虚拟机栈</h1><p>虚拟机栈由栈帧组成。什么是栈帧呢？栈帧可以理解为一个方法的运行空间。它主要由两部分构成，一部分是局部变量表，方法中定义的局部变量以及方法的参数就存放在这张表中；另一部分是操作数栈，用来存放操作数。</p>
 
-<h4 id="这边写了一个最简单的例子。例子包括三部分，在注释中也有指出。"><a href="#这边写了一个最简单的例子。例子包括三部分，在注释中也有指出。" class="headerlink" title="这边写了一个最简单的例子。例子包括三部分，在注释中也有指出。"></a>这边写了一个最简单的例子。例子包括三部分，在注释中也有指出。</h4><ul>
-<li>初始化 </li>
-<li>存储</li>
-<li>取值</li>
-</ul>
-<h4 id="这三个步骤也是我们平时用到的流程，本文就会根据这三个小块来探究一下内部的实现"><a href="#这三个步骤也是我们平时用到的流程，本文就会根据这三个小块来探究一下内部的实现" class="headerlink" title="这三个步骤也是我们平时用到的流程，本文就会根据这三个小块来探究一下内部的实现"></a>这三个步骤也是我们平时用到的流程，本文就会根据这三个小块来探究一下内部的实现</h4><h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><h4 id="当我们想要使用一个HashTable的时候，最显而易见的就是我们会先new一个实例化对象出来。这样我们才会有对象可操作，那么就先看看这个构造函数。"><a href="#当我们想要使用一个HashTable的时候，最显而易见的就是我们会先new一个实例化对象出来。这样我们才会有对象可操作，那么就先看看这个构造函数。" class="headerlink" title="当我们想要使用一个HashTable的时候，最显而易见的就是我们会先new一个实例化对象出来。这样我们才会有对象可操作，那么就先看看这个构造函数。"></a>当我们想要使用一个HashTable的时候，最显而易见的就是我们会先new一个实例化对象出来。这样我们才会有对象可操作，那么就先看看这个构造函数。</h4><h1 id="TODO-构造函数截图"><a href="#TODO-构造函数截图" class="headerlink" title="TODO 构造函数截图"></a>TODO 构造函数截图</h1><h4 id="从这个图中也可以看到，总共提供了四种不同的构造函数。其实当我们看过实现之后我们可以发现，其实四个不同的方法最终都是调用了Hashtable-int-float-这个方法，其他构造方法只是提供了一些默认参数而已。所以我们直接先看到这个方法。"><a href="#从这个图中也可以看到，总共提供了四种不同的构造函数。其实当我们看过实现之后我们可以发现，其实四个不同的方法最终都是调用了Hashtable-int-float-这个方法，其他构造方法只是提供了一些默认参数而已。所以我们直接先看到这个方法。" class="headerlink" title="从这个图中也可以看到，总共提供了四种不同的构造函数。其实当我们看过实现之后我们可以发现，其实四个不同的方法最终都是调用了Hashtable(int, float) 这个方法，其他构造方法只是提供了一些默认参数而已。所以我们直接先看到这个方法。"></a>从这个图中也可以看到，总共提供了四种不同的构造函数。其实当我们看过实现之后我们可以发现，其实四个不同的方法最终都是调用了Hashtable(int, float) 这个方法，其他构造方法只是提供了一些默认参数而已。所以我们直接先看到这个方法。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">public Hashtable(int initialCapacity, float loadFactor) &#123;</span><br><span class="line">    if (initialCapacity &lt; 0)</span><br><span class="line">        throw new IllegalArgumentException(&quot;Illegal Capacity: &quot;+</span><br><span class="line">                                           initialCapacity);</span><br><span class="line">    if (loadFactor &lt;= 0 || Float.isNaN(loadFactor))</span><br><span class="line">        throw new IllegalArgumentException(&quot;Illegal Load: &quot;+loadFactor);</span><br><span class="line"></span><br><span class="line">    if (initialCapacity==0)</span><br><span class="line">        initialCapacity = 1;</span><br><span class="line">    this.loadFactor = loadFactor;</span><br><span class="line">    // 上面的代码主要对参数的格式做了一些检验，例如initialCapacity不能为负数，而且最小也必须是1，</span><br><span class="line">    // loadFactor 必须是大于零的浮点数</span><br><span class="line">    </span><br><span class="line">    // 再根据initialCapacity参数创建一个Entry数组</span><br><span class="line">    table = new Entry&lt;?,?&gt;[initialCapacity];</span><br><span class="line">    // 初始化threshold，(两个参数的乘积)和(Int最大值-8)中的较小值</span><br><span class="line">    threshold = (int)Math.min(initialCapacity * loadFactor, MAX_ARRAY_SIZE + 1);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="这样我们就完成了HashTable的部分参数初始化的工作。可以看到主要是创建了一个Entry的数组。另外如果我们使用的是无参数的构造函数，那么这两个的参数的默认值为11-0-75f。"><a href="#这样我们就完成了HashTable的部分参数初始化的工作。可以看到主要是创建了一个Entry的数组。另外如果我们使用的是无参数的构造函数，那么这两个的参数的默认值为11-0-75f。" class="headerlink" title="这样我们就完成了HashTable的部分参数初始化的工作。可以看到主要是创建了一个Entry的数组。另外如果我们使用的是无参数的构造函数，那么这两个的参数的默认值为11, 0.75f。"></a>这样我们就完成了HashTable的部分参数初始化的工作。可以看到主要是创建了一个Entry的数组。另外如果我们使用的是无参数的构造函数，那么这两个的参数的默认值为11, 0.75f。</h4><h2 id="存储"><a href="#存储" class="headerlink" title="存储"></a>存储</h2><h4 id="现在我们看一下当我们put的时候，内部发生了什么"><a href="#现在我们看一下当我们put的时候，内部发生了什么" class="headerlink" title="现在我们看一下当我们put的时候，内部发生了什么"></a>现在我们看一下当我们put的时候，内部发生了什么</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">// 可以看到这个方法名上加了synchronized，这和在HashMap上是有不一样的地方</span><br><span class="line">   public synchronized V put(K key, V value) &#123;</span><br><span class="line">       // Make sure the value is not null</span><br><span class="line">       if (value == null) &#123;</span><br><span class="line">           throw new NullPointerException();</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       // Makes sure the key is not already in the hashtable.</span><br><span class="line">       Entry&lt;?,?&gt; tab[] = table;</span><br><span class="line">       // 会取传入的键的Hashcode，所以每个字符串的Hashcode都是一样的</span><br><span class="line">       int hash = key.hashCode();</span><br><span class="line">       // 通过计算得到当前键在Entry数组中的下标</span><br><span class="line">       int index = (hash &amp; 0x7FFFFFFF) % tab.length;</span><br><span class="line">       @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">       // 取出在数组中指定下标已存在的值，指定下标取出来可能是一个链表，在Entry中存有链表后继结点的引用</span><br><span class="line">       Entry&lt;K,V&gt; entry = (Entry&lt;K,V&gt;)tab[index];</span><br><span class="line">       for(; entry != null ; entry = entry.next) &#123;</span><br><span class="line">       	// 必须双重判断hash值一样，而且键值内容一样，才能说明传入的key已存在</span><br><span class="line">           if ((entry.hash == hash) &amp;&amp; entry.key.equals(key)) &#123;</span><br><span class="line">           	// 若已存在，则替换新传入的值，并返回旧值</span><br><span class="line">               V old = entry.value;</span><br><span class="line">               entry.value = value;</span><br><span class="line">               return old;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">	// 若key在原结构中不存在，则需要新增</span><br><span class="line">       addEntry(hash, key, value, index);</span><br><span class="line">       return null;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="继续看看往存储结构中新增一个key的时候做了什么操作"><a href="#继续看看往存储结构中新增一个key的时候做了什么操作" class="headerlink" title="继续看看往存储结构中新增一个key的时候做了什么操作"></a>继续看看往存储结构中新增一个key的时候做了什么操作</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">private void addEntry(int hash, K key, V value, int index) &#123;</span><br><span class="line">	// 这个字段作为修改的一个version值做后续的版本控制</span><br><span class="line">    modCount++;</span><br><span class="line"></span><br><span class="line">    Entry&lt;?,?&gt; tab[] = table;</span><br><span class="line">	// count是当前数组中已有的Entry的数目</span><br><span class="line">	// 如果比原定的threshold要大，则需要重新进行一次hash重分配</span><br><span class="line">    if (count &gt;= threshold) &#123;</span><br><span class="line">        // Rehash the table if the threshold is exceeded</span><br><span class="line">        rehash();</span><br><span class="line"></span><br><span class="line">        tab = table;</span><br><span class="line">        hash = key.hashCode();</span><br><span class="line">        index = (hash &amp; 0x7FFFFFFF) % tab.length;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // Creates the new entry.</span><br><span class="line">    @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">    // 在Entry数组对应的index的位置创建一个值，并把可能原有的值作为新增节点在链表中的后继结点存储，所以在链表中是新的节点排在链表前面</span><br><span class="line">    Entry&lt;K,V&gt; e = (Entry&lt;K,V&gt;) tab[index];</span><br><span class="line">    tab[index] = new Entry&lt;&gt;(hash, key, value, e);</span><br><span class="line">    count++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="新增部分也容易理解，主要还是数组-链表的格式。可以看到在过程中已经限定了k，v都不能为空。这边留了一个概念没讲，就是这个rehash-的过程。在初始化的时候，我们定义了threshold这个int类型的参数。这个的概念就是，假设我们数组的最大可容纳数目为11个，loadFactor为0-75，那么当数目达到了8个的时候，我们就要进行一次rehash，避免数目过大影响性能。现在具体看看rehash过程。以下过程内容，都按照默认值11，0-75为前提。"><a href="#新增部分也容易理解，主要还是数组-链表的格式。可以看到在过程中已经限定了k，v都不能为空。这边留了一个概念没讲，就是这个rehash-的过程。在初始化的时候，我们定义了threshold这个int类型的参数。这个的概念就是，假设我们数组的最大可容纳数目为11个，loadFactor为0-75，那么当数目达到了8个的时候，我们就要进行一次rehash，避免数目过大影响性能。现在具体看看rehash过程。以下过程内容，都按照默认值11，0-75为前提。" class="headerlink" title="新增部分也容易理解，主要还是数组+链表的格式。可以看到在过程中已经限定了k，v都不能为空。这边留了一个概念没讲，就是这个rehash()的过程。在初始化的时候，我们定义了threshold这个int类型的参数。这个的概念就是，假设我们数组的最大可容纳数目为11个，loadFactor为0.75，那么当数目达到了8个的时候，我们就要进行一次rehash，避免数目过大影响性能。现在具体看看rehash过程。以下过程内容，都按照默认值11，0.75为前提。"></a>新增部分也容易理解，主要还是数组+链表的格式。可以看到在过程中已经限定了k，v都不能为空。这边留了一个概念没讲，就是这个rehash()的过程。在初始化的时候，我们定义了threshold这个int类型的参数。这个的概念就是，假设我们数组的最大可容纳数目为11个，loadFactor为0.75，那么当数目达到了8个的时候，我们就要进行一次rehash，避免数目过大影响性能。现在具体看看rehash过程。以下过程内容，都按照默认值11，0.75为前提。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">protected void rehash() &#123;</span><br><span class="line">	// old容量 默认为11</span><br><span class="line">       int oldCapacity = table.length;</span><br><span class="line">       Entry&lt;?,?&gt;[] oldMap = table;</span><br><span class="line"></span><br><span class="line">       // overflow-conscious code</span><br><span class="line">       // new容量 = (11 &lt;&lt; 1) + 1 = 23 </span><br><span class="line">       int newCapacity = (oldCapacity &lt;&lt; 1) + 1;</span><br><span class="line">       // MAX_ARRAY_SIZE 是Int.max - 8， 如果新的容量比这个数值还要大的话，要进行进一步的考量</span><br><span class="line">       if (newCapacity - MAX_ARRAY_SIZE &gt; 0) &#123;</span><br><span class="line">           if (oldCapacity == MAX_ARRAY_SIZE)</span><br><span class="line">               // Keep running with MAX_ARRAY_SIZE buckets</span><br><span class="line">               return;</span><br><span class="line">           newCapacity = MAX_ARRAY_SIZE;</span><br><span class="line">       &#125;</span><br><span class="line">       // 用新的容量创建一个新的数组</span><br><span class="line">       Entry&lt;?,?&gt;[] newMap = new Entry&lt;?,?&gt;[newCapacity];</span><br><span class="line"></span><br><span class="line">       modCount++;</span><br><span class="line">       // 重新计算threshold</span><br><span class="line">       threshold = (int)Math.min(newCapacity * loadFactor, MAX_ARRAY_SIZE + 1);</span><br><span class="line">       table = newMap;</span><br><span class="line">	// 从原有数组的末尾，从后往前扫描每一个节点，按照新的容量计算新的index。</span><br><span class="line">       for (int i = oldCapacity ; i-- &gt; 0 ;) &#123;</span><br><span class="line">           for (Entry&lt;K,V&gt; old = (Entry&lt;K,V&gt;)oldMap[i] ; old != null ; ) &#123;</span><br><span class="line">               Entry&lt;K,V&gt; e = old;</span><br><span class="line">               old = old.next;</span><br><span class="line"></span><br><span class="line">               int index = (e.hash &amp; 0x7FFFFFFF) % newCapacity;</span><br><span class="line">               e.next = (Entry&lt;K,V&gt;)newMap[index];</span><br><span class="line">               newMap[index] = e;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="好的，现在也大概吧put梳理了一下。整体大概就是用一种数组-链表的方式存储我们的节点，并在必要时刻进行重新整理，接下来我们看看取值的过程"><a href="#好的，现在也大概吧put梳理了一下。整体大概就是用一种数组-链表的方式存储我们的节点，并在必要时刻进行重新整理，接下来我们看看取值的过程" class="headerlink" title="好的，现在也大概吧put梳理了一下。整体大概就是用一种数组+链表的方式存储我们的节点，并在必要时刻进行重新整理，接下来我们看看取值的过程"></a>好的，现在也大概吧put梳理了一下。整体大概就是用一种数组+链表的方式存储我们的节点，并在必要时刻进行重新整理，接下来我们看看取值的过程</h4><h2 id="取值"><a href="#取值" class="headerlink" title="取值"></a>取值</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 同样是一个同步的方法</span><br><span class="line">   public synchronized V get(Object key) &#123;</span><br><span class="line">   	// 整个方法是不是似曾相识？在我们第二步的存储的代码中，已经包含了这一部分代码。当时是为了确定存入的值是否已经存在。所以这边也不赘述了</span><br><span class="line">       Entry&lt;?,?&gt; tab[] = table;</span><br><span class="line">       int hash = key.hashCode();</span><br><span class="line">       int index = (hash &amp; 0x7FFFFFFF) % tab.length;</span><br><span class="line">       for (Entry&lt;?,?&gt; e = tab[index] ; e != null ; e = e.next) &#123;</span><br><span class="line">           if ((e.hash == hash) &amp;&amp; e.key.equals(key)) &#123;</span><br><span class="line">               return (V)e.value;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       return null;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h4 id="大致梳理了一下HashTable的几个关键流程，有一些细节还没有讲到。之后会再写一篇关于HashMap的文章，在那边可以横向对比一下这两者之间的区别。"><a href="#大致梳理了一下HashTable的几个关键流程，有一些细节还没有讲到。之后会再写一篇关于HashMap的文章，在那边可以横向对比一下这两者之间的区别。" class="headerlink" title="大致梳理了一下HashTable的几个关键流程，有一些细节还没有讲到。之后会再写一篇关于HashMap的文章，在那边可以横向对比一下这两者之间的区别。"></a>大致梳理了一下HashTable的几个关键流程，有一些细节还没有讲到。之后会再写一篇关于HashMap的文章，在那边可以横向对比一下这两者之间的区别。</h4>
           
         
       
@@ -1801,6 +1677,168 @@
 <h4 id="再看看公平锁"><a href="#再看看公平锁" class="headerlink" title="再看看公平锁"></a>再看看公平锁</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">static final class FairSync extends Sync &#123;</span><br><span class="line">       private static final long serialVersionUID = -3000897897090466540L;</span><br><span class="line"></span><br><span class="line">       final void lock() &#123;</span><br><span class="line">       	// 直接进行AQS抢占流程</span><br><span class="line">           acquire(1);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       /**</span><br><span class="line">        * Fair version of tryAcquire.  Don&apos;t grant access unless</span><br><span class="line">        * recursive call or no waiters or is first.</span><br><span class="line">        */</span><br><span class="line">        // 抽象方法的实现，可以看到和非公平的方式基本相同</span><br><span class="line">       protected final boolean tryAcquire(int acquires) &#123;</span><br><span class="line">           final Thread current = Thread.currentThread();</span><br><span class="line">           int c = getState();</span><br><span class="line">           if (c == 0) &#123;</span><br><span class="line">           		// 只有多了一个这个判断</span><br><span class="line">           		// 就是判断在AQS的等待队列中，是否已经有其他节点在等待</span><br><span class="line">           		// 如果没有，则直接调用</span><br><span class="line">           		// 也就是公平锁代表不能插队</span><br><span class="line">               if (!hasQueuedPredecessors() &amp;&amp;</span><br><span class="line">                   compareAndSetState(0, acquires)) &#123;</span><br><span class="line">                   setExclusiveOwnerThread(current);</span><br><span class="line">                   return true;</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">           else if (current == getExclusiveOwnerThread()) &#123;</span><br><span class="line">               int nextc = c + acquires;</span><br><span class="line">               if (nextc &lt; 0)</span><br><span class="line">                   throw new Error(&quot;Maximum lock count exceeded&quot;);</span><br><span class="line">               setState(nextc);</span><br><span class="line">               return true;</span><br><span class="line">           &#125;</span><br><span class="line">           return false;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
 
 <h4 id="所以看到公平锁和非公平锁的区别就体现在，在尝试获取资源的时候，是否可以插队获取。"><a href="#所以看到公平锁和非公平锁的区别就体现在，在尝试获取资源的时候，是否可以插队获取。" class="headerlink" title="所以看到公平锁和非公平锁的区别就体现在，在尝试获取资源的时候，是否可以插队获取。"></a>所以看到公平锁和非公平锁的区别就体现在，在尝试获取资源的时候，是否可以插队获取。</h4><h4 id="进一步看到这个tryAcquire方法，也就是公平锁和非公平锁具体差异的地方。假设此时在AQS内部已经有一个等待者队列吗。head节点释放了资源，应该去唤醒后续的节点开始竞争，假设此时非公平锁开始插队竞争，而且成功的话。那么在等待者队列中的节点将没有资源再Park了，就会一直不停的永真循环去尝试获取资源。"><a href="#进一步看到这个tryAcquire方法，也就是公平锁和非公平锁具体差异的地方。假设此时在AQS内部已经有一个等待者队列吗。head节点释放了资源，应该去唤醒后续的节点开始竞争，假设此时非公平锁开始插队竞争，而且成功的话。那么在等待者队列中的节点将没有资源再Park了，就会一直不停的永真循环去尝试获取资源。" class="headerlink" title="进一步看到这个tryAcquire方法，也就是公平锁和非公平锁具体差异的地方。假设此时在AQS内部已经有一个等待者队列吗。head节点释放了资源，应该去唤醒后续的节点开始竞争，假设此时非公平锁开始插队竞争，而且成功的话。那么在等待者队列中的节点将没有资源再Park了，就会一直不停的永真循环去尝试获取资源。"></a>进一步看到这个tryAcquire方法，也就是公平锁和非公平锁具体差异的地方。假设此时在AQS内部已经有一个等待者队列吗。head节点释放了资源，应该去唤醒后续的节点开始竞争，假设此时非公平锁开始插队竞争，而且成功的话。那么在等待者队列中的节点将没有资源再Park了，就会一直不停的永真循环去尝试获取资源。</h4>
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/08/HashTable/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Swaggy Q">
+      <meta itemprop="description" content="拉塞尔FMVP了吗">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dloading...">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/07/08/HashTable/" class="post-title-link" itemprop="url">HashTable源码详解</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+
+          
+          
+          
+
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-08 22:59:25 / Modified: 23:04:30" itemprop="dateCreated datePublished" datetime="2019-07-08T22:59:25+08:00">2019-07-08</time>
+            </span>
+          
+
+          
+            
+
+            
+          
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          <br>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="聊一聊HashTable"><a href="#聊一聊HashTable" class="headerlink" title="聊一聊HashTable"></a>聊一聊HashTable</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h4 id="关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下"><a href="#关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下" class="headerlink" title="关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下"></a>关于HashTable，今天想深入的看一下源码实现，通过其暴露的接口方法，看看他内部实现的原理。并和HashMap简单对比一下</h4><h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h4 id="大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？"><a href="#大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？" class="headerlink" title="大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？"></a>大家都知道HashTable简单来说，就是一个存储kv键值对的一个数据结构。用put方法放进去，用get方法拿出来。那内部到底是做了什么样的操作，可以做到这个方便又快速的存储呢？</h4><h4 id="这边用一个小例子作为入口，我们可以进去一探究竟"><a href="#这边用一个小例子作为入口，我们可以进去一探究竟" class="headerlink" title="这边用一个小例子作为入口，我们可以进去一探究竟"></a>这边用一个小例子作为入口，我们可以进去一探究竟</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">    // 初始化</span><br><span class="line">    Hashtable hb = new Hashtable();</span><br><span class="line">    // 存储</span><br><span class="line">    hb.put(&quot;1&quot;,new Integer(1));</span><br><span class="line">    hb.put(&quot;2&quot;,new Integer(2));</span><br><span class="line">    hb.put(&quot;3&quot;,new Integer(3));</span><br><span class="line">    // 取值</span><br><span class="line">    System.out.println(hb.get(&quot;1&quot;));</span><br><span class="line">    System.out.println(hb.get(&quot;2&quot;));</span><br><span class="line">    System.out.println(hb.get(&quot;3&quot;));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="这边写了一个最简单的例子。例子包括三部分，在注释中也有指出。"><a href="#这边写了一个最简单的例子。例子包括三部分，在注释中也有指出。" class="headerlink" title="这边写了一个最简单的例子。例子包括三部分，在注释中也有指出。"></a>这边写了一个最简单的例子。例子包括三部分，在注释中也有指出。</h4><ul>
+<li>初始化 </li>
+<li>存储</li>
+<li>取值</li>
+</ul>
+<h4 id="这三个步骤也是我们平时用到的流程，本文就会根据这三个小块来探究一下内部的实现"><a href="#这三个步骤也是我们平时用到的流程，本文就会根据这三个小块来探究一下内部的实现" class="headerlink" title="这三个步骤也是我们平时用到的流程，本文就会根据这三个小块来探究一下内部的实现"></a>这三个步骤也是我们平时用到的流程，本文就会根据这三个小块来探究一下内部的实现</h4><h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><h4 id="当我们想要使用一个HashTable的时候，最显而易见的就是我们会先new一个实例化对象出来。这样我们才会有对象可操作，那么就先看看这个构造函数。"><a href="#当我们想要使用一个HashTable的时候，最显而易见的就是我们会先new一个实例化对象出来。这样我们才会有对象可操作，那么就先看看这个构造函数。" class="headerlink" title="当我们想要使用一个HashTable的时候，最显而易见的就是我们会先new一个实例化对象出来。这样我们才会有对象可操作，那么就先看看这个构造函数。"></a>当我们想要使用一个HashTable的时候，最显而易见的就是我们会先new一个实例化对象出来。这样我们才会有对象可操作，那么就先看看这个构造函数。</h4><h1 id="TODO-构造函数截图"><a href="#TODO-构造函数截图" class="headerlink" title="TODO 构造函数截图"></a>TODO 构造函数截图</h1><h4 id="从这个图中也可以看到，总共提供了四种不同的构造函数。其实当我们看过实现之后我们可以发现，其实四个不同的方法最终都是调用了Hashtable-int-float-这个方法，其他构造方法只是提供了一些默认参数而已。所以我们直接先看到这个方法。"><a href="#从这个图中也可以看到，总共提供了四种不同的构造函数。其实当我们看过实现之后我们可以发现，其实四个不同的方法最终都是调用了Hashtable-int-float-这个方法，其他构造方法只是提供了一些默认参数而已。所以我们直接先看到这个方法。" class="headerlink" title="从这个图中也可以看到，总共提供了四种不同的构造函数。其实当我们看过实现之后我们可以发现，其实四个不同的方法最终都是调用了Hashtable(int, float) 这个方法，其他构造方法只是提供了一些默认参数而已。所以我们直接先看到这个方法。"></a>从这个图中也可以看到，总共提供了四种不同的构造函数。其实当我们看过实现之后我们可以发现，其实四个不同的方法最终都是调用了Hashtable(int, float) 这个方法，其他构造方法只是提供了一些默认参数而已。所以我们直接先看到这个方法。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">public Hashtable(int initialCapacity, float loadFactor) &#123;</span><br><span class="line">    if (initialCapacity &lt; 0)</span><br><span class="line">        throw new IllegalArgumentException(&quot;Illegal Capacity: &quot;+</span><br><span class="line">                                           initialCapacity);</span><br><span class="line">    if (loadFactor &lt;= 0 || Float.isNaN(loadFactor))</span><br><span class="line">        throw new IllegalArgumentException(&quot;Illegal Load: &quot;+loadFactor);</span><br><span class="line"></span><br><span class="line">    if (initialCapacity==0)</span><br><span class="line">        initialCapacity = 1;</span><br><span class="line">    this.loadFactor = loadFactor;</span><br><span class="line">    // 上面的代码主要对参数的格式做了一些检验，例如initialCapacity不能为负数，而且最小也必须是1，</span><br><span class="line">    // loadFactor 必须是大于零的浮点数</span><br><span class="line">    </span><br><span class="line">    // 再根据initialCapacity参数创建一个Entry数组</span><br><span class="line">    table = new Entry&lt;?,?&gt;[initialCapacity];</span><br><span class="line">    // 初始化threshold，(两个参数的乘积)和(Int最大值-8)中的较小值</span><br><span class="line">    threshold = (int)Math.min(initialCapacity * loadFactor, MAX_ARRAY_SIZE + 1);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="这样我们就完成了HashTable的部分参数初始化的工作。可以看到主要是创建了一个Entry的数组。另外如果我们使用的是无参数的构造函数，那么这两个的参数的默认值为11-0-75f。"><a href="#这样我们就完成了HashTable的部分参数初始化的工作。可以看到主要是创建了一个Entry的数组。另外如果我们使用的是无参数的构造函数，那么这两个的参数的默认值为11-0-75f。" class="headerlink" title="这样我们就完成了HashTable的部分参数初始化的工作。可以看到主要是创建了一个Entry的数组。另外如果我们使用的是无参数的构造函数，那么这两个的参数的默认值为11, 0.75f。"></a>这样我们就完成了HashTable的部分参数初始化的工作。可以看到主要是创建了一个Entry的数组。另外如果我们使用的是无参数的构造函数，那么这两个的参数的默认值为11, 0.75f。</h4><h2 id="存储"><a href="#存储" class="headerlink" title="存储"></a>存储</h2><h4 id="现在我们看一下当我们put的时候，内部发生了什么"><a href="#现在我们看一下当我们put的时候，内部发生了什么" class="headerlink" title="现在我们看一下当我们put的时候，内部发生了什么"></a>现在我们看一下当我们put的时候，内部发生了什么</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">// 可以看到这个方法名上加了synchronized，这和在HashMap上是有不一样的地方</span><br><span class="line">   public synchronized V put(K key, V value) &#123;</span><br><span class="line">       // Make sure the value is not null</span><br><span class="line">       if (value == null) &#123;</span><br><span class="line">           throw new NullPointerException();</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       // Makes sure the key is not already in the hashtable.</span><br><span class="line">       Entry&lt;?,?&gt; tab[] = table;</span><br><span class="line">       // 会取传入的键的Hashcode，所以每个字符串的Hashcode都是一样的</span><br><span class="line">       int hash = key.hashCode();</span><br><span class="line">       // 通过计算得到当前键在Entry数组中的下标</span><br><span class="line">       int index = (hash &amp; 0x7FFFFFFF) % tab.length;</span><br><span class="line">       @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">       // 取出在数组中指定下标已存在的值，指定下标取出来可能是一个链表，在Entry中存有链表后继结点的引用</span><br><span class="line">       Entry&lt;K,V&gt; entry = (Entry&lt;K,V&gt;)tab[index];</span><br><span class="line">       for(; entry != null ; entry = entry.next) &#123;</span><br><span class="line">       	// 必须双重判断hash值一样，而且键值内容一样，才能说明传入的key已存在</span><br><span class="line">           if ((entry.hash == hash) &amp;&amp; entry.key.equals(key)) &#123;</span><br><span class="line">           	// 若已存在，则替换新传入的值，并返回旧值</span><br><span class="line">               V old = entry.value;</span><br><span class="line">               entry.value = value;</span><br><span class="line">               return old;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">	// 若key在原结构中不存在，则需要新增</span><br><span class="line">       addEntry(hash, key, value, index);</span><br><span class="line">       return null;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="继续看看往存储结构中新增一个key的时候做了什么操作"><a href="#继续看看往存储结构中新增一个key的时候做了什么操作" class="headerlink" title="继续看看往存储结构中新增一个key的时候做了什么操作"></a>继续看看往存储结构中新增一个key的时候做了什么操作</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">private void addEntry(int hash, K key, V value, int index) &#123;</span><br><span class="line">	// 这个字段作为修改的一个version值做后续的版本控制</span><br><span class="line">    modCount++;</span><br><span class="line"></span><br><span class="line">    Entry&lt;?,?&gt; tab[] = table;</span><br><span class="line">	// count是当前数组中已有的Entry的数目</span><br><span class="line">	// 如果比原定的threshold要大，则需要重新进行一次hash重分配</span><br><span class="line">    if (count &gt;= threshold) &#123;</span><br><span class="line">        // Rehash the table if the threshold is exceeded</span><br><span class="line">        rehash();</span><br><span class="line"></span><br><span class="line">        tab = table;</span><br><span class="line">        hash = key.hashCode();</span><br><span class="line">        index = (hash &amp; 0x7FFFFFFF) % tab.length;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // Creates the new entry.</span><br><span class="line">    @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">    // 在Entry数组对应的index的位置创建一个值，并把可能原有的值作为新增节点在链表中的后继结点存储，所以在链表中是新的节点排在链表前面</span><br><span class="line">    Entry&lt;K,V&gt; e = (Entry&lt;K,V&gt;) tab[index];</span><br><span class="line">    tab[index] = new Entry&lt;&gt;(hash, key, value, e);</span><br><span class="line">    count++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="新增部分也容易理解，主要还是数组-链表的格式。可以看到在过程中已经限定了k，v都不能为空。这边留了一个概念没讲，就是这个rehash-的过程。在初始化的时候，我们定义了threshold这个int类型的参数。这个的概念就是，假设我们数组的最大可容纳数目为11个，loadFactor为0-75，那么当数目达到了8个的时候，我们就要进行一次rehash，避免数目过大影响性能。现在具体看看rehash过程。以下过程内容，都按照默认值11，0-75为前提。"><a href="#新增部分也容易理解，主要还是数组-链表的格式。可以看到在过程中已经限定了k，v都不能为空。这边留了一个概念没讲，就是这个rehash-的过程。在初始化的时候，我们定义了threshold这个int类型的参数。这个的概念就是，假设我们数组的最大可容纳数目为11个，loadFactor为0-75，那么当数目达到了8个的时候，我们就要进行一次rehash，避免数目过大影响性能。现在具体看看rehash过程。以下过程内容，都按照默认值11，0-75为前提。" class="headerlink" title="新增部分也容易理解，主要还是数组+链表的格式。可以看到在过程中已经限定了k，v都不能为空。这边留了一个概念没讲，就是这个rehash()的过程。在初始化的时候，我们定义了threshold这个int类型的参数。这个的概念就是，假设我们数组的最大可容纳数目为11个，loadFactor为0.75，那么当数目达到了8个的时候，我们就要进行一次rehash，避免数目过大影响性能。现在具体看看rehash过程。以下过程内容，都按照默认值11，0.75为前提。"></a>新增部分也容易理解，主要还是数组+链表的格式。可以看到在过程中已经限定了k，v都不能为空。这边留了一个概念没讲，就是这个rehash()的过程。在初始化的时候，我们定义了threshold这个int类型的参数。这个的概念就是，假设我们数组的最大可容纳数目为11个，loadFactor为0.75，那么当数目达到了8个的时候，我们就要进行一次rehash，避免数目过大影响性能。现在具体看看rehash过程。以下过程内容，都按照默认值11，0.75为前提。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">protected void rehash() &#123;</span><br><span class="line">	// old容量 默认为11</span><br><span class="line">       int oldCapacity = table.length;</span><br><span class="line">       Entry&lt;?,?&gt;[] oldMap = table;</span><br><span class="line"></span><br><span class="line">       // overflow-conscious code</span><br><span class="line">       // new容量 = (11 &lt;&lt; 1) + 1 = 23 </span><br><span class="line">       int newCapacity = (oldCapacity &lt;&lt; 1) + 1;</span><br><span class="line">       // MAX_ARRAY_SIZE 是Int.max - 8， 如果新的容量比这个数值还要大的话，要进行进一步的考量</span><br><span class="line">       if (newCapacity - MAX_ARRAY_SIZE &gt; 0) &#123;</span><br><span class="line">           if (oldCapacity == MAX_ARRAY_SIZE)</span><br><span class="line">               // Keep running with MAX_ARRAY_SIZE buckets</span><br><span class="line">               return;</span><br><span class="line">           newCapacity = MAX_ARRAY_SIZE;</span><br><span class="line">       &#125;</span><br><span class="line">       // 用新的容量创建一个新的数组</span><br><span class="line">       Entry&lt;?,?&gt;[] newMap = new Entry&lt;?,?&gt;[newCapacity];</span><br><span class="line"></span><br><span class="line">       modCount++;</span><br><span class="line">       // 重新计算threshold</span><br><span class="line">       threshold = (int)Math.min(newCapacity * loadFactor, MAX_ARRAY_SIZE + 1);</span><br><span class="line">       table = newMap;</span><br><span class="line">	// 从原有数组的末尾，从后往前扫描每一个节点，按照新的容量计算新的index。</span><br><span class="line">       for (int i = oldCapacity ; i-- &gt; 0 ;) &#123;</span><br><span class="line">           for (Entry&lt;K,V&gt; old = (Entry&lt;K,V&gt;)oldMap[i] ; old != null ; ) &#123;</span><br><span class="line">               Entry&lt;K,V&gt; e = old;</span><br><span class="line">               old = old.next;</span><br><span class="line"></span><br><span class="line">               int index = (e.hash &amp; 0x7FFFFFFF) % newCapacity;</span><br><span class="line">               e.next = (Entry&lt;K,V&gt;)newMap[index];</span><br><span class="line">               newMap[index] = e;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="好的，现在也大概吧put梳理了一下。整体大概就是用一种数组-链表的方式存储我们的节点，并在必要时刻进行重新整理，接下来我们看看取值的过程"><a href="#好的，现在也大概吧put梳理了一下。整体大概就是用一种数组-链表的方式存储我们的节点，并在必要时刻进行重新整理，接下来我们看看取值的过程" class="headerlink" title="好的，现在也大概吧put梳理了一下。整体大概就是用一种数组+链表的方式存储我们的节点，并在必要时刻进行重新整理，接下来我们看看取值的过程"></a>好的，现在也大概吧put梳理了一下。整体大概就是用一种数组+链表的方式存储我们的节点，并在必要时刻进行重新整理，接下来我们看看取值的过程</h4><h2 id="取值"><a href="#取值" class="headerlink" title="取值"></a>取值</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 同样是一个同步的方法</span><br><span class="line">   public synchronized V get(Object key) &#123;</span><br><span class="line">   	// 整个方法是不是似曾相识？在我们第二步的存储的代码中，已经包含了这一部分代码。当时是为了确定存入的值是否已经存在。所以这边也不赘述了</span><br><span class="line">       Entry&lt;?,?&gt; tab[] = table;</span><br><span class="line">       int hash = key.hashCode();</span><br><span class="line">       int index = (hash &amp; 0x7FFFFFFF) % tab.length;</span><br><span class="line">       for (Entry&lt;?,?&gt; e = tab[index] ; e != null ; e = e.next) &#123;</span><br><span class="line">           if ((e.hash == hash) &amp;&amp; e.key.equals(key)) &#123;</span><br><span class="line">               return (V)e.value;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       return null;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h4 id="大致梳理了一下HashTable的几个关键流程，有一些细节还没有讲到。之后会再写一篇关于HashMap的文章，在那边可以横向对比一下这两者之间的区别。"><a href="#大致梳理了一下HashTable的几个关键流程，有一些细节还没有讲到。之后会再写一篇关于HashMap的文章，在那边可以横向对比一下这两者之间的区别。" class="headerlink" title="大致梳理了一下HashTable的几个关键流程，有一些细节还没有讲到。之后会再写一篇关于HashMap的文章，在那边可以横向对比一下这两者之间的区别。"></a>大致梳理了一下HashTable的几个关键流程，有一些细节还没有讲到。之后会再写一篇关于HashMap的文章，在那边可以横向对比一下这两者之间的区别。</h4>
           
         
       
